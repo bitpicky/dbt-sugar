@@ -137,7 +137,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# vscode local settings folders
+# vscode local settings folder
 .vscode/**
 
 # dbt-sugar specific

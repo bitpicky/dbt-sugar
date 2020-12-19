@@ -21,6 +21,9 @@ keywords = ["data engineering", "dbt"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
+luddite = "^1.0.1"
+packaging = "^20.8"
+pretty-errors = "^1.2.19"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"

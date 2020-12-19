@@ -140,6 +140,6 @@ cython_debug/
 # vscode local settings folder
 .vscode/**
 
-# dbt-sugar specific
+# dbt-sugar specifics
 .coverage
 dbt_sugar_logs/**

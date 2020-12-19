@@ -31,6 +31,7 @@ tox = "^3.20.1"
 pytest-cov = "^2.10.1"
 mypy = "^0.790"
 towncrier = "^19.2.0"
+pytest-mock = "^3.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

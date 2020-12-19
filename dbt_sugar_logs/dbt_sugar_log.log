@@ -1,0 +1,45 @@
+2020-12-19 16:50:47,398 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of Sheetwork v1.0.3 is available.
+2020-12-19 16:50:47,402 - dbt_sugar Logger - INFO - run - Would run documentatio task
+2020-12-19 16:51:31,547 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of Sheetwork v1.0.3 is available.
+2020-12-19 16:51:31,551 - dbt_sugar Logger - INFO - run - Would run documentatio task
+2020-12-19 16:52:21,263 - dbt_sugar Logger - INFO - run - Would run documentatio task
+2020-12-19 16:58:38,787 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 16:59:32,036 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:07:42,727 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:12:43,017 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:12:43,020 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:21:50,944 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:21:50,947 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:22:37,857 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:22:37,859 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:23:27,088 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:23:27,090 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:24:39,178 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:24:39,180 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:31:19,212 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:31:19,215 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:31:36,583 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:31:36,585 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:35:35,392 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:35:35,395 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:37:32,626 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:37:32,629 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:37:32,634 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:40:50,402 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:40:50,405 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:40:50,409 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:43:19,034 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:43:19,037 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:43:19,041 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:46:33,711 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:46:33,714 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:46:33,718 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:47:31,214 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:47:31,217 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:47:31,222 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:48:15,872 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:48:15,876 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:48:15,880 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.
+2020-12-19 17:49:25,036 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:49:25,038 - dbt_sugar Logger - INFO - run - Would run documentation task
+2020-12-19 17:49:25,043 - dbt_sugar Logger - WARNING - check_and_compare_version - Looks like you're a bit behind. A newer version of dbt-sugar v1.0.0 is available.

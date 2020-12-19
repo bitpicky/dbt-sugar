@@ -1,8 +1,7 @@
 """Flags module containing the FlagParser "Factory"."""
-
+import sys
 from argparse import ArgumentParser
-
-from dbt_sugar.core.exceptions import InvalidOrMissingCommandError
+from typing import List
 
 
 class FlagParser:
@@ -25,8 +24,13 @@ class FlagParser:
         self.log_level: str = "debug"
         self.traceback_stack_depth: int = 4
 
-    def consume_cli_arguments(self) -> None:
-        self.args = self.cli_parser.parse_args()
+    def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
+        if test_cli_args:
+            _cli_args = test_cli_args
+        else:
+            _cli_args = sys.argv[1:]
+        self.args = self.cli_parser.parse_args(_cli_args)
+
         self.task = self.args.command
 
         # base flags that need to be set no matter what
@@ -37,8 +41,3 @@ class FlagParser:
         # task specific args consumption
         if self.task == "doc":
             self.model = self.args.model
-        else:
-            raise InvalidOrMissingCommandError(
-                "Invalid or missing command. Run `dbt-sugar --help` for a list of available "
-                "commands."
-            )

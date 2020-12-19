@@ -1,5 +1,6 @@
 """Main module for dbt-sugar. Sets up CLI arguments and sets up task handlers."""
 import argparse
+from typing import List
 
 from dbt_sugar.core._version import __version__
 from dbt_sugar.core.flags import FlagParser
@@ -58,7 +59,7 @@ document_sub_parser.add_argument(
 
 
 # task handler
-def handle(parser: argparse.ArgumentParser) -> int:
+def handle(parser: argparse.ArgumentParser, test_cli_args: List[str] = list()) -> int:
     """Task handler factory.
 
     Args:
@@ -68,7 +69,7 @@ def handle(parser: argparse.ArgumentParser) -> int:
         Union[DocumentTask, InitTask]: Task object to be run.
     """
     flag_parser = FlagParser(parser)
-    flag_parser.consume_cli_arguments()
+    flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
 
     if flag_parser.log_level == "debug":
         log_manager.set_debug()

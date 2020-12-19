@@ -12,4 +12,6 @@ class DbtSugarConfig:
         Args:
             flags (FlagParser): consumed flags from FlagParser object.
         """
-        ...
+        self._flags = flags
+        self._model_name: str = self._flags.model
+        self._task = self._flags.task

@@ -14,5 +14,5 @@ class DocumentationTask(BaseTask):
         ...
 
     def run(self) -> int:
-        logger.info("Would run documentatio task")
+        logger.info("Would run documentation task")
         return 0

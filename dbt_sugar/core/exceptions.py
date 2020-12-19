@@ -9,7 +9,3 @@ class DbtSugarException(Exception):
         # ! depending what colouring scheme we use we'll have to set this up
         # super().__init__(f"{Fore.RED}{message}"  # example using colorama.
         super().__init__(f"{message}")
-
-
-class InvalidOrMissingCommandError(DbtSugarException):
-    """when a non-implemented or missing command is asked for."""

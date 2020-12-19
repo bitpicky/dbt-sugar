@@ -12,7 +12,7 @@
 
 ## What is dbt-sugar?
 
-dbt-sugar is a CLI tool that allows users of dbt to have fun and ease performing actions around dbt models such as:
+dbt-sugar is a CLI tool that allows users of [dbt](https://www.getdbt.com/) to have fun and ease performing actions around dbt models such as:
 
 - documentation
 - test enforcement

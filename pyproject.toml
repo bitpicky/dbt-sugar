@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "dbt-sugar"
+version = "0.0.0"
+description = "A sweet CLI tool to help dbt users enfoce documentation and testing onn their dbt projects."
+authors = ["Bastien Boutonnet <bastien.b1@gmail.com>"]
+license = "GPLv3+"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+]
+keywords = ["data engineering", "dbt"]
+# documentation =
+# repository =
+# homepage =
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.1"
+tox = "^3.20.1"
+pytest-cov = "^2.10.1"
+mypy = "^0.790"
+towncrier = "^19.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

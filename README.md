@@ -6,7 +6,7 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bitpicky/dbt-sugar/main.svg)](https://results.pre-commit.ci/latest/github/bitpicky/dbt-sugar/main)
 [![codecov](https://codecov.io/gh/bitpicky/dbt-sugar/branch/main/graph/badge.svg?token=JB0E0LZDW1)](https://codecov.io/gh/bitpicky/dbt-sugar)
 
-[![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bJXHWSHZ)
+[![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
 
 # dbt-sugar :candy:
 

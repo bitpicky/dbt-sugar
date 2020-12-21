@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking into making `dbt-sugar` better! We have some loosely defined rules and preferences to make the contribution a bit smoother. Don't let those deter you from contributing though, most of them can absolutely be fixed in the PR process, and if anything seems obscure feel free to reach out on the discord channel [Discord](https://discord.gg/5GnNNb)
+Thanks for looking into making `dbt-sugar` better! We have some loosely defined rules and preferences to make the contribution a bit smoother. Don't let those deter you from contributing though, most of them can absolutely be fixed in the PR process, and if anything seems obscure feel free to reach out on the discord channel [Discord](https://discord.gg/bUk4MVTcqW)
 
 ## How can you contribute?
 
@@ -56,7 +56,7 @@ We'll squash your PR at merge time.
 
 #### Fork it, let's go! 🥁
 
-Fork the repo and get going. If you're not too experienced with forks, feel free to shoot us a DM on [Discord](https://discord.gg/5GnNNb). For example the `#dev-help` channel is a good place to do that. Here's a quick guide though:
+Fork the repo and get going. If you're not too experienced with forks, feel free to shoot us a DM on [Discord](https://discord.gg/bUk4MVTcqW). For example the `#dev-help` channel is a good place to do that. Here's a quick guide though:
 
 **Shit how do we do this fork thing?**
 
@@ -114,7 +114,7 @@ If you don't want to bother, that's also OK because we also have [pre-commit.ci]
 
 ### Development
 
-The whole package is managed using [Poetry](https://python-poetry.org/). It's really really good and ensures reproducibility. \*\*If this is holding you up from contributing feel free to shoot us a DM on [Discord](https://discord.gg/5GnNNb) and we can see what are other ways. It's likely that `pip` would understand the `pyproject.toml` file and then you'll be free to set up a virtual environment of your choice and get going.
+The whole package is managed using [Poetry](https://python-poetry.org/). It's really really good and ensures reproducibility. \*\*If this is holding you up from contributing feel free to shoot us a DM on [Discord](https://discord.gg/bUk4MVTcqW) and we can see what are other ways. It's likely that `pip` would understand the `pyproject.toml` file and then you'll be free to set up a virtual environment of your choice and get going.
 
 #### Installing Poetry
 
@@ -134,4 +134,4 @@ pytests tests/
 
 ## Wow you're still reading!? Thanks a lot for taking the time to make dbt-sugar better! ✨
 
-Thanks for your interest in contributing. We really appreciate it and hope those guidelines don't sound too much. If you have any questions feel free to shoot us a message on our discord server [Discord](https://discord.gg/5GnNNb).
+Thanks for your interest in contributing. We really appreciate it and hope those guidelines don't sound too much. If you have any questions feel free to shoot us a message on our discord server [Discord](https://discord.gg/bUk4MVTcqW).

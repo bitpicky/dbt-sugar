@@ -1,0 +1,12 @@
+version: "2"
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "dbt_sugar"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_setup.sql:/docker-entrypoint-initdb.d/db_setup.sql

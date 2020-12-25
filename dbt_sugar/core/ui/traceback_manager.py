@@ -5,7 +5,7 @@ from dbt_sugar.core.flags import FlagParser
 
 
 class DbtSugarTracebackManager:
-    """Consumes CLI flags (from FlagParser consumer) and sets up traceback formatting."""
+    """Consumes CLI flags (from FlagParser consumer) and sets up traceback pretty formatting."""
 
     def __init__(self, flags: FlagParser) -> None:
         """Traceback manager constructor.

@@ -3,6 +3,11 @@ from pathlib import Path
 
 TEST_DIR = Path(__file__).resolve().parent
 
+EXPECTATION = [
+    {"id": 1, "answer": 11, "question": "hello hello world"},
+    {"id": 2, "answer": 42, "question": "what is the meaning of life?"},
+]
+
 
 def test_select(postgresql_db):
     # this populates the db with stuff from the sql file.
@@ -14,3 +19,21 @@ def test_select(postgresql_db):
         for row in r:
             results.append(dict(row))
         print(results)
+
+    assert results == EXPECTATION
+
+
+def test_select_from_real_db():
+    from sqlalchemy import create_engine
+
+    con = c.create_engine("postgresql://root:password@localhost/dbt_sugar")
+    result = con.execute("SELECT * FROM test;")
+
+    # to see the results we can construct a list of dicts easily --or whatever we need.
+    query_results = list()
+
+    for row in result:
+        query_results.append(dict(row))
+
+    print(query_results)
+    assert query_results == EXPECTATION

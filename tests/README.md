@@ -24,7 +24,7 @@ result = con.execute("SELECT * FROM test;")
 # to see the results we can construct a list of dicts easily --or whatever we need.
 query_results = list()
 
-for row in results:
+for row in result:
     query_results.append(dict(row))
 ```
 

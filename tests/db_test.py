@@ -9,6 +9,7 @@ EXPECTATION = [
 ]
 
 
+# this test uses the pytest fixture to simulate a db just for the test
 def test_select(postgresql_db):
     # this populates the db with stuff from the sql file.
     # We could also just run a conn.execute if we wanted to.
@@ -23,6 +24,8 @@ def test_select(postgresql_db):
     assert results == EXPECTATION
 
 
+# this test actually connects to a db that is reachable from a docker container that is spun up
+#  before the test suite is called
 def test_select_from_real_db():
     from sqlalchemy import create_engine
 

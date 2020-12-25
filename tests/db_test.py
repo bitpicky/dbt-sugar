@@ -26,7 +26,7 @@ def test_select(postgresql_db):
 def test_select_from_real_db():
     from sqlalchemy import create_engine
 
-    con = c.create_engine("postgresql://root:password@localhost/dbt_sugar")
+    con = create_engine("postgresql://root:password@localhost/dbt_sugar")
     result = con.execute("SELECT * FROM test;")
 
     # to see the results we can construct a list of dicts easily --or whatever we need.

@@ -18,7 +18,7 @@ Once the db is up and the container is running it's as easy as creating a connec
 ```python
 from sqlalchemy import create_engine
 
-con = c.create_engine("postgresql://root:password@localhost/dbt_sugar")
+con = create_engine("postgresql://root:password@localhost/dbt_sugar")
 result = con.execute("SELECT * FROM test;")
 
 # to see the results we can construct a list of dicts easily --or whatever we need.

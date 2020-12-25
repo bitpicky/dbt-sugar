@@ -1,0 +1,2 @@
+psycopg2-binary==2.8.6
+snowflake-connector-python==2.2.8

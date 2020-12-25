@@ -29,10 +29,10 @@ jobs:
       - name: Deploy PG docker
         run: docker-compose -f ./tests/docker_postgres/docker-compose.yml up -d
 
-      - name: Wait for Container
-        uses: jakejarvis/wait-action@master
-        with:
-          time: "60s"
+      # - name: Wait for Container
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: "60s"
 
       - name: Check for Container
         run: docker ps

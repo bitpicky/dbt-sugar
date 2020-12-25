@@ -3,8 +3,8 @@ name: Build, Test, Report Coverage
 on: "push"
 
 jobs:
-  test:
-    name: Test Python App
+  build:
+    name: Main CI
     runs-on: ubuntu-latest
 
     steps:

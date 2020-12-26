@@ -19,7 +19,6 @@ def test_select(postgresql_db):
         results = list()
         for row in r:
             results.append(dict(row))
-        print(results)
 
     assert results == EXPECTATION
 

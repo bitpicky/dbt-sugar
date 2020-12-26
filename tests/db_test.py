@@ -38,5 +38,4 @@ def test_select_from_real_db():
     for row in result:
         query_results.append(dict(row))
 
-    print(query_results)
     assert query_results == EXPECTATION

@@ -1,14 +1,21 @@
 name: Build, Test, Report Coverage
 
-on: "push"
+on: ["push", "pull_request_target"]
 
 jobs:
   build:
+    name: Main CI
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
+
+      - name: Deploy PG docker
+        run: docker-compose -f ./tests/docker_postgres/docker-compose.yml up -d
+
+      - name: Check for Container
+        run: docker ps
 
       - name: Set up Python 3.7
         uses: actions/setup-python@v2

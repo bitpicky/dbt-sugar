@@ -3,10 +3,11 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
-from typing import List
+from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
 from base import BaseConnector
+from snowflake.sqlalchemy import URL
 
 
 class SnowflakeConnector(BaseConnector):
@@ -16,17 +17,28 @@ class SnowflakeConnector(BaseConnector):
     Child class of base connector.
     """
 
-    def __init__(self, user: str, password: str, database: str, account: str) -> None:
+    def __init__(
+        self,
+        user: str,
+        password: str,
+        account: str,
+        database: str,
+    ) -> None:
         """
         Init method to instanciatee the credentials.
 
         Args:
             user (str): user name.
             password (str): password.
-            database (str): database name.
             account (str): account name.
+            database (str): database name.
         """
-        self.connection_details = f"snowflake://{user}:{password}@{account}/{database}"
+        self.connection_url = URL(
+            account=account,
+            user=user,
+            password=password,
+            database=database,
+        )
 
     def generate_connection(self) -> sqlalchemy.engine:
         """
@@ -35,22 +47,22 @@ class SnowflakeConnector(BaseConnector):
         Returns:
             sqlalchemy.engine: Engine to connect to the database.
         """
-        return sqlalchemy.create_engine(self.connection_details)
+        return sqlalchemy.create_engine(self.connection_url)
 
-    def get_columns_from_table(self, table: str, database: str) -> List[str]:
+    def get_columns_from_table(
+        self,
+        target_table: str,
+        target_schema: str,
+    ) -> Optional[List[Tuple[Any]]]:
         """
-        Method to get the columns from a table.
+        Method that creates cursor to run a query.
 
         Args:
-            table (str): table name.
-            database (str): database where the table is.
+            target_table (str): table to get the columns from.
+            target_schema (str): schema to get the table from.
 
         Returns:
-            Optiona[List[str]]: with the list of columns in the table.
+            Optional[List[Tuple[Any]]]: With the results of the query.
         """
-        rows = self.run_query(
-            connection=self.generate_connection(),
-            query=f" SELECT * FROM {database}.information_schema.columns WHERE table_name = '{table.upper()}'",
-        )
-        columns_names = [row[3] for row in rows]
-        return columns_names
+        engine = self.generate_connection()
+        return super().get_columns_from_table(engine, target_table, target_schema)

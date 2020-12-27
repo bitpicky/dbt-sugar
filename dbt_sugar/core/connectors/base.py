@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
+from sqlalchemy.engine.reflection import Inspector
 
 
 class BaseConnector(ABC):
@@ -27,34 +28,24 @@ class BaseConnector(ABC):
         """
         logging.info("Genetating connection")
 
-    def run_query(
+    def get_columns_from_table(
         self,
         connection: sqlalchemy.engine,
-        query: str,
+        target_table: str,
+        target_schema: str,
     ) -> Optional[List[Tuple[Any]]]:
         """
         Method that creates cursor to run a query.
 
         Args:
-            connection (sqlalchemy.engine): Engine connection.
-            query (str): sql query.
+            connection (sqlalchemy.engine): engine to make the connection to the db.
+            target_table (str): table to get the columns from.
+            target_schema (str): schema to get the table from.
 
         Returns:
             Optional[List[Tuple[Any]]]: With the results of the query.
         """
-        with connection.connect() as con:
-            rows = con.execute(query)
-            return rows
-
-    @abstractmethod
-    def get_columns_from_table(self, table: str) -> Optional[List[str]]:
-        """
-        Method to get the columns names from a table.
-
-        Args:
-            table (str): table name.
-
-        Returns:
-            Optiona[List[str]]: with the list of columns in the table.
-        """
-        logging.info(f"Getting the columns from table {table}")
+        inspector = Inspector.from_engine(connection)
+        columns = inspector.get_columns(target_table, target_schema)
+        columns_names = [column["name"] for column in columns]
+        return columns_names

@@ -3,7 +3,7 @@ Module Postgres connector.
 
 Module dependent of the base connector.
 """
-from typing import List
+from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
 from base import BaseConnector
@@ -26,7 +26,13 @@ class PostgresConnector(BaseConnector):
             database (str): database name.
             host (str): host name.
         """
-        self.connection_string = f"postgresql://{user}:{password}@{host}/{database}"
+        self.connection_url = sqlalchemy.engine.url.URL(
+            drivername="postgresql+psycopg2",
+            host=host,
+            username=user,
+            password=password,
+            database=database,
+        )
 
     def generate_connection(self) -> sqlalchemy.engine:
         """
@@ -35,21 +41,22 @@ class PostgresConnector(BaseConnector):
         Returns:
             sqlalchemy.engine: Engine to connect to the database.
         """
-        return sqlalchemy.create_engine(self.connection_string)
+        return sqlalchemy.create_engine(self.connection_url)
 
-    def get_columns_from_table(self, table: str) -> List[str]:
+    def get_columns_from_table(
+        self,
+        target_table: str,
+        target_schema: str,
+    ) -> Optional[List[Tuple[Any]]]:
         """
-        Method to get the columns from a table.
+        Method that creates cursor to run a query.
 
         Args:
-            table (str): table name.
+            target_table (str): table to get the columns from.
+            target_schema (str): schema to get the table from.
 
         Returns:
-            Optiona[List[str]]: with the list of columns in the table.
+            Optional[List[Tuple[Any]]]: With the results of the query.
         """
-        rows = self.run_query(
-            connection=self.generate_connection(),
-            query=f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}';",
-        )
-        columns_names = [row[0] for row in rows]
-        return columns_names
+        engine = self.generate_connection()
+        return super().get_columns_from_table(engine, target_table, target_schema)

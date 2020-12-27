@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
-from sqlalchemy.engine.reflection import Inspector
 
 
 class BaseConnector(ABC):
@@ -45,7 +44,7 @@ class BaseConnector(ABC):
         Returns:
             Optional[List[Tuple[Any]]]: With the results of the query.
         """
-        inspector = Inspector.from_engine(connection)
+        inspector = sqlalchemy.engine.reflection.Inspector.from_engine(connection)
         columns = inspector.get_columns(target_table, target_schema)
         columns_names = [column["name"] for column in columns]
         return columns_names

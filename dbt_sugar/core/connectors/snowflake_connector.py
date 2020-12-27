@@ -6,8 +6,9 @@ Module dependent of the base connector.
 from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
-from base import BaseConnector
 from snowflake.sqlalchemy import URL
+
+from dbt_sugar.core.connectors.base import BaseConnector
 
 
 class SnowflakeConnector(BaseConnector):

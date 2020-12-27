@@ -24,8 +24,8 @@ python = ">=3.6.1,<4.0"
 luddite = "^1.0.1"
 packaging = "^20.8"
 pretty-errors = "^1.2.19"
-psycopg2-binary = "2.8.6"
-snowflake-sqlalchemy = "1.2.4"
+psycopg2-binary = ">=2.8.6"
+snowflake-sqlalchemy = ">=1.2.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"

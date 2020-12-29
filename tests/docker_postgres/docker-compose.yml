@@ -3,8 +3,8 @@ services:
   database:
     image: postgres
     environment:
-      POSTGRES_USER: "root"
-      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "dbt_sugar_test_user"
+      POSTGRES_PASSWORD: "magical_password"
       POSTGRES_DB: "dbt_sugar"
     ports:
       - "5432:5432"

@@ -1,0 +1,1 @@
+Adds ability for ``dbt-sugar`` to connect and query column information from Snowflake and Postgres databases.

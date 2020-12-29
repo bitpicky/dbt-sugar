@@ -35,8 +35,32 @@ mypy = "^0.790"
 towncrier = "^19.2.0"
 pytest-mock = "^3.4.0"
 psycopg2 = "^2.8.6"
-pytest-pgsql = "^1.1.2"
+pytest-sugar = "^0.9.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.towncrier]
+package = "dbt-sugar"
+package_dir = "dbt_sugar/"
+directory = "changelog/"
+filename = "changelog/CHANGELOG.rst"
+title_format = "dbt-sugar {version} ({project_date})"
+template = "changelog/_template.rst"
+
+    [[tool.towncrier.type]]
+    directory = "fix"
+    name = "Bug Fixes"
+    showcontent = true
+
+
+    [[tool.towncrier.type]]
+    directory = "feature"
+    name = "Features"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "misc"
+    name = "Under The Hood/Misc"
+    showcontent = true

@@ -1,40 +1,22 @@
-# from pathlib import Path
+import sqlalchemy
 
 
-# TEST_DIR = Path(__file__).resolve().parent
-
-# EXPECTATION = [
-#     {"id": 1, "answer": 11, "question": "hello hello world"},
-#     {"id": 2, "answer": 42, "question": "what is the meaning of life?"},
-# ]
+CREDENTIALS = dict(user="dbt_sugar_test_user", password="magical_password", database="dbt_sugar")
 
 
-# # this test uses the pytest fixture to simulate a db just for the test
-# def test_select(postgresql_db):
-#     # this populates the db with stuff from the sql file.
-#     # We could also just run a conn.execute if we wanted to.
-#     postgresql_db.run_sql_file(str(TEST_DIR.joinpath("docker_postgres", "db_setup.sql")))
-#     with postgresql_db.engine.connect() as conn:
-#         r = conn.execute("SELECT * FROM test")
-#         results = list()
-#         for row in r:
-#             results.append(dict(row))
+def test_generate_connection():
+    from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 
-#     assert results == EXPECTATION
+    conn = PostgresConnector(**CREDENTIALS).generate_connection()
+    assert isinstance(conn.engine, sqlalchemy.engine.Engine)
 
 
-# # this test actually connects to a db that is reachable from a docker container that is spun up
-# #  before the test suite is called
-# def test_select_from_real_db():
-#     from sqlalchemy import create_engine
+def test_get_columns_from_table():
+    from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 
-#     con = create_engine("postgresql://root:password@localhost/dbt_sugar")
-#     result = con.execute("SELECT * FROM test;")
+    expectation = ["id", "answer", "question"]
 
-#     # to see the results we can construct a list of dicts easily --or whatever we need.
-#     query_results = list()
-
-#     for row in result:
-#         query_results.append(dict(row))
-
-#     assert query_results == EXPECTATION
+    columns = PostgresConnector(**CREDENTIALS).get_columns_from_table(
+        target_schema="public", target_table="test"
+    )
+    assert columns == expectation

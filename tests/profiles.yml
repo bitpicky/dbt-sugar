@@ -1,0 +1,34 @@
+dbt_sugar_test_project:
+  outputs:
+    snowflake:
+      type: snowflake
+      threads: 4
+      account: dummy_account
+      user: dummy_user
+      password: dummy_password
+      role: dummy_role
+      database: dummy_database
+      warehouse: dummy_warehouse
+      schema: dummy_target_schema
+
+    postgres:
+      type: postgres
+      user: dbt_sugar_test_user
+      password: magical_password
+      database: dbt_sugar
+      schema: public
+
+    bad_snowflake:
+      type: snowflake
+      threads: 4
+      user: dummy_user
+      role: dummy_role
+      database: dummy_database
+      warehouse: dummy_warehouse
+      schema: dummy_target_schema
+
+    bad_postgres:
+      type: postgres
+      user: dbt_sugar_test_user
+      database: dbt_sugar
+      schema: public

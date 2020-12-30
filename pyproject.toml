@@ -39,6 +39,7 @@ pytest-mock = "^3.4.0"
 psycopg2 = "^2.8.6"
 pytest-sugar = "^0.9.4"
 pytest-datafiles = "^2.0"
+tox-poetry-installer = "^0.6.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -5,10 +5,24 @@ from pathlib import Path
 FIXTURE_DIR = Path(__file__).resolve().parent
 
 
-@pytest.mark.parametrize("target_name", ["snowflake", "postgres", "bad_snowflake", "bad_postgres"])
+@pytest.mark.parametrize(
+    "target_name, is_missing_profile, is_invalid_target, is_bad_project",
+    [
+        ("snowflake", False, False, False),
+        ("postgres", False, False, False),
+        ("bad_snowflake", False, False, False),
+        ("bad_postgres", False, False, False),
+        ("_postgres", False, True, False),
+        ("missing_profile", True, False, False),
+        ("_postgres", False, True, True),
+    ],
+)
 @pytest.mark.datafiles(FIXTURE_DIR)
-def test_read_profile(datafiles, target_name):
+def test_read_profile(
+    datafiles, target_name, is_missing_profile, is_invalid_target, is_bad_project
+):
     from dbt_sugar.core.clients.dbt import DbtProfile
+    from dbt_sugar.core.exceptions import DbtProfileFileMissing, ProfileParsingError
 
     expectations = {
         "snowflake": {
@@ -51,6 +65,30 @@ def test_read_profile(datafiles, target_name):
         with pytest.raises(ValidationError):
             profile = DbtProfile(
                 project_name="dbt_sugar_test_project",
+                target_name=target_name,
+                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+            )
+            profile.read_profile()
+    elif is_invalid_target:
+        with pytest.raises(ProfileParsingError):
+            profile = DbtProfile(
+                project_name="dbt_sugar_test_project",
+                target_name=target_name,
+                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+            )
+            profile.read_profile()
+    elif is_missing_profile:
+        with pytest.raises(DbtProfileFileMissing):
+            profile = DbtProfile(
+                project_name="dbt_sugar_test_project",
+                target_name=target_name,
+                profiles_dir=Path(datafiles).joinpath("missing_profiles.yml"),
+            )
+            profile.read_profile()
+    elif is_bad_project:
+        with pytest.raises(ProfileParsingError):
+            profile = DbtProfile(
+                project_name="bad_project",
                 target_name=target_name,
                 profiles_dir=Path(datafiles).joinpath("profiles.yml"),
             )

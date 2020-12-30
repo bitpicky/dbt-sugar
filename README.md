@@ -5,6 +5,7 @@
 ![python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bitpicky/dbt-sugar/main.svg)](https://results.pre-commit.ci/latest/github/bitpicky/dbt-sugar/main)
 [![codecov](https://codecov.io/gh/bitpicky/dbt-sugar/branch/main/graph/badge.svg?token=JB0E0LZDW1)](https://codecov.io/gh/bitpicky/dbt-sugar)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1e6a887de605ef8e0eca/maintainability)](https://codeclimate.com/github/bitpicky/dbt-sugar/maintainability)
 
 [![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
 

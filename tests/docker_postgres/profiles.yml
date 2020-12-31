@@ -1,0 +1,12 @@
+dbt_sugar_test:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: dbt_sugar_test_user
+      pass: magical_password
+      port: 5432
+      dbname: dbt_sugar
+      schema: public
+      threads: 4

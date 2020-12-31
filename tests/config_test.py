@@ -38,18 +38,29 @@ def test_Config(cli_args, test_desc):
 
 
 @pytest.mark.parametrize(
-    "has_no_default_cane, is_missing_cane", [(False, False), (True, False), (False, True)]
+    "has_no_default_cane, is_missing_cane, is_missing_dbt_project",
+    [(False, False, False), (True, False, False), (False, True, False), (False, False, True)],
 )
 @pytest.mark.datafiles(FIXTURE_DIR)
-def test_load_config(datafiles, has_no_default_cane, is_missing_cane):
+def test_load_config(datafiles, has_no_default_cane, is_missing_cane, is_missing_dbt_project):
     from dbt_sugar.core.main import parser
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.config.config import DbtSugarConfig
-    from dbt_sugar.core.exceptions import SugarCaneNotFoundError, NoSugarCaneProvided
+    from dbt_sugar.core.exceptions import (
+        SugarCaneNotFoundError,
+        NoSugarCaneProvided,
+        MissingDbtProjects,
+    )
 
     expectation = {
         "name": "cane_1",
-        "dbt_projects": [{"name": "dwh", "path": "path", "excluded_tables": ["table_a"]}],
+        "dbt_projects": [
+            {
+                "name": "dbt_sugar_test",
+                "path": "./tests/test_dbt_project/dbt_sugar_test",
+                "excluded_tables": ["table_a"],
+            }
+        ],
     }
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
@@ -60,6 +71,8 @@ def test_load_config(datafiles, has_no_default_cane, is_missing_cane):
         cli_args = ["doc", "--config-path", str(config_filepath), "--sugar-cane", "non_existant"]
     elif has_no_default_cane:
         cli_args = ["doc", "--config-path", str(config_filepath)]
+    elif is_missing_dbt_project:
+        cli_args = ["doc", "--config-path", str(config_filepath), "--sugar-cane", "cane_2"]
     else:
         cli_args = ["doc", "--config-path", str(config_filepath)]
 
@@ -72,6 +85,9 @@ def test_load_config(datafiles, has_no_default_cane, is_missing_cane):
             config.load_config()
     elif has_no_default_cane:
         with pytest.raises(NoSugarCaneProvided):
+            config.load_config()
+    elif is_missing_dbt_project:
+        with pytest.raises(MissingDbtProjects):
             config.load_config()
     else:
         config.load_config()

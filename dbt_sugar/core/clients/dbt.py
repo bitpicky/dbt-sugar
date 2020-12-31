@@ -5,9 +5,9 @@ from typing import Optional
 
 from pydantic import BaseModel, root_validator
 
+from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.exceptions import DbtProfileFileMissing, ProfileParsingError
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
-from dbt_sugar.core.yaml.yaml_helpers import open_yaml
 
 DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt", "profiles").with_suffix(".yml")
 

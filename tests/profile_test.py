@@ -1,6 +1,7 @@
-from pydantic.error_wrappers import ValidationError
-import pytest
 from pathlib import Path
+
+import pytest
+from pydantic.error_wrappers import ValidationError
 
 FIXTURE_DIR = Path(__file__).resolve().parent
 

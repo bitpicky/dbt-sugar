@@ -9,3 +9,15 @@ class DbtSugarException(Exception):
         # ! depending what colouring scheme we use we'll have to set this up
         # super().__init__(f"{Fore.RED}{message}"  # example using colorama.
         super().__init__(f"{message}")
+
+
+class DbtProfileFileMissing(DbtSugarException):
+    """Thrown when the `profiles.yml` cannot be found in its expected or provided location."""
+
+
+class YAMLFileEmptyError(DbtSugarException):
+    """Thrown when a yamlfile existed but had nothing in it."""
+
+
+class ProfileParsingError(DbtSugarException):
+    """Thrown when no target entry could be found."""

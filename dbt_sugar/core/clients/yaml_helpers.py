@@ -25,3 +25,14 @@ def open_yaml(path: Path) -> Dict[str, Any]:
                 return yaml_dict
             raise YAMLFileEmptyError(f"The following file {path.resolve()} seems empty.")
     raise FileNotFoundError(f"File {path.resolve()} was not found.")
+
+
+def save_yaml(path: Path, data: Dict[str, Any]) -> None:
+    """Saves a YAML content.
+
+    Args:
+        path (Path): Full filename path pointing to the yaml file we want to save.
+        data (dict[str, Any]): Data to save in the file.
+    """
+    with open(path, "w") as outfile:
+        yaml.dump(data, outfile, width=100)

@@ -1,0 +1,18 @@
+defaults:
+  sugar_cane: cane_1
+  target: dev
+sugar_canes:
+  - name: cane_1
+    dbt_projects:
+      - name: dwh
+        path: path
+        excluded_tables:
+          - table_a
+  - name: cane_2
+    dbt_projects:
+      - name: dwh
+        path: path
+        excluded_tables:
+          - table_a
+      - name: prediction
+        path: path

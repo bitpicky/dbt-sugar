@@ -21,3 +21,11 @@ class YAMLFileEmptyError(DbtSugarException):
 
 class ProfileParsingError(DbtSugarException):
     """Thrown when no target entry could be found."""
+
+
+class SugarCaneNotFoundError(DbtSugarException):
+    """Thrown when a sugar cane config could not be extracted from the config.yaml."""
+
+
+class NoSugarCaneProvided(DbtSugarException):
+    """Thrown when neither a default sugar_cane nor a cli-passed sugar cane can be found."""

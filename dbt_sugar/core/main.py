@@ -44,6 +44,16 @@ base_subparser.add_argument(
     action="store_true",
     default=False,
 )
+base_subparser.add_argument(
+    "-c",
+    "--sugar-cane",
+    help="Name of the sugar cane confi you wish to use. If left empty dbt-sugar will attempt to read your defaults.",
+    type=str,
+    default=str(),
+)
+base_subparser.add_argument(
+    "--config-path", help="Full path to config.yml file if not using default."
+)
 
 # Task-specific argument sub parsers
 sub_parsers = parser.add_subparsers(title="Available dbt-sugar commands", dest="command")

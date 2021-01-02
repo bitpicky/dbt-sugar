@@ -1,6 +1,7 @@
 """Flags module containing the FlagParser "Factory"."""
 import sys
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import List
 
 
@@ -23,6 +24,8 @@ class FlagParser:
         self.model: str = "test_model"
         self.log_level: str = "debug"
         self.traceback_stack_depth: int = 4
+        self.sugar_cane: str = str()
+        self.config_path: Path = Path(str())
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
         if test_cli_args:
@@ -37,6 +40,11 @@ class FlagParser:
         if self.args:
             self.log_level = self.args.log_level
             self.full_tracebacks = self.args.full_tracebacks
+            self.sugar_cane = self.args.sugar_cane
+            if self.args.config_path:
+                self.config_path = Path(self.args.config_path).expanduser()
+            else:
+                self.config_path = Path()
 
         # task specific args consumption
         if self.task == "doc":

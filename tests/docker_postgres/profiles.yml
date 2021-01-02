@@ -1,3 +1,19 @@
+default:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: dbt_sugar_test_user
+      # TODO: Refactor `DbtProfile` to expect different field keys.
+      # ! somehow their profiles aren't consistently keyed...
+      # https://docs.getdbt.com/reference/warehouse-profiles/postgres-profile/
+      password: magical_password
+      port: 5432
+      database: dbt_sugar
+      schema: public
+      threads: 4
+
 dbt_sugar_test:
   target: dev
   outputs:

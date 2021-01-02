@@ -20,13 +20,12 @@ class DocumentationTask(BaseTask):
 
     def __init__(self, flags: FlagParser) -> None:
         super().__init__()
-        self.flags = flags
+        self._flags = flags
 
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
         dbt_profile = DbtProfile(
-            project_name="default",
-            target_name="dev",
+            project_name="default", target_name="dev", profiles_dir=self._flags.profiles_dir
         )
         dbt_profile.read_profile()
         dbt_credentials = dbt_profile.profile
@@ -35,12 +34,12 @@ class DocumentationTask(BaseTask):
             exit(1)
         return dbt_credentials
 
-    def run(self) -> None:
+    def run(self) -> int:
         """Main script to run the command doc"""
         columns_sql = []
 
-        model = self.flags.model
-        schema = self.flags.schema
+        model = self._flags.model
+        schema = self._flags.schema
 
         dbt_credentials = self.load_dbt_credentials()
         type_of_connection = dbt_credentials.get("type", "")
@@ -61,6 +60,7 @@ class DocumentationTask(BaseTask):
             ).get_columns_from_table(model, schema)
 
         self.process_model(model, columns_sql)
+        return 0
 
     def update_model(
         self, content: Dict[str, Any], model_name: str, columns_sql: List[str]

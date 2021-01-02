@@ -49,8 +49,6 @@ class FlagParser:
                 self.profiles_dir = Path(self.args.profiles_dir).expanduser()
             if self.args.config_path:
                 self.config_path = Path(self.args.config_path).expanduser()
-            # else:
-            # self.config_path = Path()
 
         # task specific args consumption
         if self.task == "doc":

@@ -94,7 +94,8 @@ class DbtProfile:
                 self.profile = _target_profile.dict()
             else:
                 raise ProfileParsingError(
-                    f"Could not find an entry for target: {self.target_name}, under the {self.project_name} config."
+                    f"Could not find an entry for target: {self.target_name}, "
+                    f"under the {self.project_name} config."
                 )
 
         else:

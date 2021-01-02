@@ -29,3 +29,7 @@ class SugarCaneNotFoundError(DbtSugarException):
 
 class NoSugarCaneProvided(DbtSugarException):
     """Thrown when neither a default sugar_cane nor a cli-passed sugar cane can be found."""
+
+
+class MissingDbtProjects(DbtSugarException):
+    """Thrown when one or more in-scope dbt projects could not be found."""

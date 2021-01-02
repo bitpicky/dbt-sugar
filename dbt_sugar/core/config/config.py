@@ -1,11 +1,16 @@
 """Holds config for dbt-sugar."""
 
+from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
-from dbt_sugar.core.exceptions import NoSugarCaneProvided, SugarCaneNotFoundError
+from dbt_sugar.core.exceptions import (
+    MissingDbtProjects,
+    NoSugarCaneProvided,
+    SugarCaneNotFoundError,
+)
 from dbt_sugar.core.flags import FlagParser
 
 
@@ -90,7 +95,29 @@ class DbtSugarConfig:
                 "Run `dbt-sugar --help` for more information."
             )
 
+    def assert_dbt_projects_exist(self) -> bool:
+        dbt_projects = self.config["dbt_projects"]
+
+        project_existance = {}
+        for project in dbt_projects:
+            project_existance[project["name"]] = (
+                True if Path(project["path"]).resolve().exists() else False
+            )
+
+        bogus_projects = dict()
+        for project, exists in project_existance.items():
+            if exists is False:
+                bogus_projects[project] = exists
+
+        # TODO: Maybe we want to revisit this and not have a raise but rather a logger warning and says we'll ignore
+        if bogus_projects:
+            raise MissingDbtProjects(
+                f"The following dbt projects are missing: \n{list(bogus_projects.keys())}"
+            )
+        return True
+
     def load_config(self) -> None:
         self.load_and_validate_config_yaml()
         self.parse_defaults()
         self.retain_cane()
+        _ = self.assert_dbt_projects_exist()

@@ -4,8 +4,8 @@ defaults:
 sugar_canes:
   - name: cane_1
     dbt_projects:
-      - name: dwh
-        path: path
+      - name: dbt_sugar_test
+        path: "./tests/test_dbt_project/dbt_sugar_test"
         excluded_tables:
           - table_a
   - name: cane_2

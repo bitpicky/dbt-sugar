@@ -24,7 +24,7 @@ def open_yaml(path: Path) -> Dict[str, Any]:
             if yaml_dict:
                 return yaml_dict
             raise YAMLFileEmptyError(f"The following file {path.resolve()} seems empty.")
-    return {}
+    raise FileNotFoundError(f"File {path.resolve()} was not found.")
 
 
 def save_yaml(path: Path, data: Dict[str, Any]) -> None:

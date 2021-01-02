@@ -1,7 +1,7 @@
 """Document Task module."""
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
@@ -20,37 +20,47 @@ class DocumentationTask(BaseTask):
 
     def __init__(self, flags: FlagParser) -> None:
         super().__init__()
-        self.model = flags.model
-        self.schema = flags.schema
-        self.dbt_profile = DbtProfile(
+        self.flags = flags
+
+    def load_dbt_credentials(self) -> Dict[str, str]:
+        """Method to load the DBT profile credentials."""
+        dbt_profile = DbtProfile(
             project_name="default",
             target_name="dev",
         )
-        self.dbt_profile.read_profile()
+        dbt_profile.read_profile()
+        dbt_credentials = dbt_profile.profile
+        if not dbt_credentials:
+            logger.info("Not able to locate DBT profile.")
+            exit(1)
+        return dbt_credentials
 
     def run(self) -> None:
+        """Main script to run the command doc"""
         columns_sql = []
-        dbt_profile = self.dbt_profile.profile
-        if not dbt_profile:
-            logger.info("Not able to locate DBT profile.")
-            return
-        type_of_connection = dbt_profile.get("type", "")
+
+        model = self.flags.model
+        schema = self.flags.schema
+
+        dbt_credentials = self.load_dbt_credentials()
+        type_of_connection = dbt_credentials.get("type", "")
 
         if type_of_connection == "postgres":
             columns_sql = PostgresConnector(
-                user=dbt_profile.get("user", ""),
-                password=dbt_profile.get("password", ""),
-                host=dbt_profile.get("host", "localhost"),
-                database=dbt_profile.get("database", "dwh"),
-            ).get_columns_from_table(self.model, self.schema)
+                user=dbt_credentials.get("user", ""),
+                password=dbt_credentials.get("password", ""),
+                host=dbt_credentials.get("host", "localhost"),
+                database=dbt_credentials.get("database", "dwh"),
+            ).get_columns_from_table(model, schema)
         elif type_of_connection == "snowflake":
             columns_sql = SnowflakeConnector(
-                user=dbt_profile.get("user", ""),
-                password=dbt_profile.get("password", ""),
-                account=dbt_profile.get("account", ""),
-                database=dbt_profile.get("database", "dwh"),
-            ).get_columns_from_table(self.model, self.schema)
-        self.process_model(self.model, columns_sql)
+                user=dbt_credentials.get("user", ""),
+                password=dbt_credentials.get("password", ""),
+                account=dbt_credentials.get("account", ""),
+                database=dbt_credentials.get("database", "dwh"),
+            ).get_columns_from_table(model, schema)
+
+        self.process_model(model, columns_sql)
 
     def update_model(
         self, content: Dict[str, Any], model_name: str, columns_sql: List[str]
@@ -77,7 +87,7 @@ class DocumentationTask(BaseTask):
         return content
 
     def create_new_model(
-        self, content: Dict[str, Any], model_name: str, columns_sql: List[str]
+        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
     ) -> Dict[str, Any]:
         """Method to create a new model in a schema.yaml content.
 
@@ -117,8 +127,11 @@ class DocumentationTask(BaseTask):
                 # TODO: Check how to avoid using target to discriminate compiled files in DBT.
                 if file == f"{model_name}.sql" and "target" not in root:
                     path_file = Path(os.path.join(root, "schema.yml"))
-                    content = open_yaml(path_file)
-                    if self.is_model_in_schema_content(content, model_name):
+                    content = None
+                    if path_file.is_file():
+                        content = open_yaml(path_file)
+
+                    if self.is_model_in_schema_content(content, model_name) and content:
                         content = self.update_model(content, model_name, columns_sql)
                     else:
                         content = self.create_new_model(content, model_name, columns_sql)

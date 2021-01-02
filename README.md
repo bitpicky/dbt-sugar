@@ -22,5 +22,5 @@ dbt-sugar is a CLI tool that allows users of [dbt](https://www.getdbt.com/) to h
 - documentation
 - test enforcement
   and probably more in a not too distant future.
-  
+
   We keep track of our progress in the [projects](https://github.com/bitpicky/dbt-sugar/projects) section.

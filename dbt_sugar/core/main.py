@@ -1,5 +1,6 @@
 """Main module for dbt-sugar. Sets up CLI arguments and sets up task handlers."""
 import argparse
+import sys
 from typing import List
 
 from dbt_sugar.core._version import __version__
@@ -65,17 +66,17 @@ document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
 document_sub_parser.add_argument(
     "-m", "--model", help="dbt model name to document", type=str, default=None
 )
+document_sub_parser.add_argument(
+    "-s", "--schema", help="database schema where the model is.", type=str, default=None
+)
 
 
 # task handler
-def handle(parser: argparse.ArgumentParser, test_cli_args: List[str] = list()) -> int:
+def handle(parser: argparse.ArgumentParser, test_cli_args: List[str] = list()) -> None:
     """Task handler factory.
 
     Args:
         parser (argparse.ArgumentParser): CLI argument parser object.
-
-    Returns:
-        Union[DocumentTask, InitTask]: Task object to be run.
     """
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
@@ -88,3 +89,19 @@ def handle(parser: argparse.ArgumentParser, test_cli_args: List[str] = list()) -
         return task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
+
+
+def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = list()) -> int:
+    """Just your boring main."""
+    _cli_args = list()
+    if test_cli_args:
+        _cli_args = test_cli_args
+
+    # print version on every run unless doing `--version` which is better handled by argparse
+    if "--version" not in sys.argv[1:]:
+        version_message = check_and_print_version()
+        print(version_message)
+        print("\n")
+
+        handle(parser, _cli_args)
+    return 0

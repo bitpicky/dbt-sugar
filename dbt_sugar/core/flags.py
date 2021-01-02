@@ -22,7 +22,8 @@ class FlagParser:
         """
         self.cli_parser = cli_parser
         self.model: str = "test_model"
-        self.log_level: str = "debug"
+        self.schema: str = "data_warehouse"
+        self.log_level: str = "info"
         self.traceback_stack_depth: int = 4
         self.syrup: str = str()
         self.config_path: Path = Path(str())
@@ -49,3 +50,4 @@ class FlagParser:
         # task specific args consumption
         if self.task == "doc":
             self.model = self.args.model
+            self.schema = self.args.schema

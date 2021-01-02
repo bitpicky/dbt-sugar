@@ -9,7 +9,7 @@
 
 [![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
 
-:warning: **We're actively working on this tool and aim to have an MVP by January 1st** If you want to help out and join the party feel free to [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun :sparkles: join us on [Discord](https://discord.gg/bUk4MVTcqW)
+:warning: **We're actively working on this tool and aim to have an MVP arond the end of the winter holiday** If you want to help out and join the party feel free to [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun :sparkles: join us on [Discord](https://discord.gg/bUk4MVTcqW)
 
 # dbt-sugar :candy:
 
@@ -20,3 +20,5 @@ dbt-sugar is a CLI tool that allows users of [dbt](https://www.getdbt.com/) to h
 - documentation
 - test enforcement
   and probably more in a not too distant future.
+  
+  We keep track of our progress in the [projects](https://github.com/bitpicky/dbt-sugar/projects) section.

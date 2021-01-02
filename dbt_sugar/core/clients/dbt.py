@@ -1,7 +1,7 @@
 """Holds methods to interact with dbt API and objects."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel, root_validator
 
@@ -63,7 +63,7 @@ class DbtProfile:
         self._profiles_dir = profiles_dir
 
         # attrs populated by class methods
-        self.profile: Optional[DbtProfilesModel] = None
+        self.profile: Optional[Dict[str, str]] = None
 
     @property
     def profiles_dir(self):

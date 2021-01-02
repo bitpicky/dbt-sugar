@@ -45,9 +45,8 @@ base_subparser.add_argument(
     default=False,
 )
 base_subparser.add_argument(
-    "-c",
-    "--sugar-cane",
-    help="Name of the sugar cane confi you wish to use. If left empty dbt-sugar will attempt to read your defaults.",
+    "--syrup",
+    help="Name of the syrup confi you wish to use. If left empty dbt-sugar will attempt to read your defaults.",
     type=str,
     default=str(),
 )

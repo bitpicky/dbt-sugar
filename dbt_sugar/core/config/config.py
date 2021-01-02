@@ -6,11 +6,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
-from dbt_sugar.core.exceptions import (
-    MissingDbtProjects,
-    NoSugarCaneProvided,
-    SugarCaneNotFoundError,
-)
+from dbt_sugar.core.exceptions import MissingDbtProjects, NoSyrupProvided, SyrupNotFoundError
 from dbt_sugar.core.flags import FlagParser
 
 
@@ -22,8 +18,8 @@ class DbtProjectsModel(BaseModel):
     excluded_tables: Optional[Union[List[str], str]]
 
 
-class SugarCanesModel(BaseModel):
-    """Pydantic validation model for sugar_canes dict."""
+class SyrupModel(BaseModel):
+    """Pydantic validation model for syrups dict."""
 
     name: str
     dbt_projects: List[DbtProjectsModel]
@@ -32,7 +28,7 @@ class SugarCanesModel(BaseModel):
 class DefaultsModel(BaseModel):
     """Pydantic validation model for defaults dict."""
 
-    sugar_cane: Optional[str]
+    syrup: Optional[str]
     target: Optional[str]
 
 
@@ -40,7 +36,7 @@ class SugarConfigModel(BaseModel):
     """Pydantic validation model for sugar_config dict."""
 
     defaults: DefaultsModel
-    sugar_canes: List[SugarCanesModel]
+    syrups: List[SyrupModel]
 
 
 class DbtSugarConfig:
@@ -56,10 +52,10 @@ class DbtSugarConfig:
         self._model_name: str = self._flags.model
         self._task = self._flags.task
         self._config_path = self._flags.config_path
-        self._cane_to_load = flags.sugar_cane
+        self._syrup_to_load = flags.syrup
 
         # "externally offered objects"
-        self.config_model: SugarCanesModel
+        self.config_model: SyrupModel
 
     @property
     def config(self):
@@ -74,24 +70,24 @@ class DbtSugarConfig:
         self._config = SugarConfigModel(**yaml_dict)
 
     def parse_defaults(self) -> None:
-        if self._config.defaults and not self._cane_to_load:
-            self._cane_to_load = self._config.defaults.dict().get("sugar_cane", str())
+        if self._config.defaults and not self._syrup_to_load:
+            self._syrup_to_load = self._config.defaults.dict().get("syrup", str())
 
-    def retain_cane(self) -> None:
-        if self._cane_to_load:
-            for cane in self._config.sugar_canes:
-                cane_dict = cane.dict()
-                if cane_dict["name"] == self._cane_to_load:
-                    self.config_model = cane
+    def retain_syrup(self) -> None:
+        if self._syrup_to_load:
+            for syrup in self._config.syrups:
+                syrup_dict = syrup.dict()
+                if syrup_dict["name"] == self._syrup_to_load:
+                    self.config_model = syrup
 
             if not hasattr(self, "config_model"):
-                raise SugarCaneNotFoundError(
-                    f"Could not find a sugar cane named {self._cane_to_load} in {self._config_path}."
+                raise SyrupNotFoundError(
+                    f"Could not find a syrup named {self._syrup_to_load} in {self._config_path}."
                 )
 
         else:
-            raise NoSugarCaneProvided(
-                "A sugar cane must be provided either in your config.yml or passed to the CLI. "
+            raise NoSyrupProvided(
+                "A syrup must be provided either in your config.yml or passed to the CLI. "
                 "Run `dbt-sugar --help` for more information."
             )
 
@@ -119,5 +115,5 @@ class DbtSugarConfig:
     def load_config(self) -> None:
         self.load_and_validate_config_yaml()
         self.parse_defaults()
-        self.retain_cane()
+        self.retain_syrup()
         _ = self.assert_dbt_projects_exist()

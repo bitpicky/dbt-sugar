@@ -38,22 +38,22 @@ def test_Config(cli_args, test_desc):
 
 
 @pytest.mark.parametrize(
-    "has_no_default_cane, is_missing_cane, is_missing_dbt_project",
+    "has_no_default_syrup, is_missing_syrup, is_missing_dbt_project",
     [(False, False, False), (True, False, False), (False, True, False), (False, False, True)],
 )
 @pytest.mark.datafiles(FIXTURE_DIR)
-def test_load_config(datafiles, has_no_default_cane, is_missing_cane, is_missing_dbt_project):
+def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missing_dbt_project):
     from dbt_sugar.core.main import parser
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.config.config import DbtSugarConfig
     from dbt_sugar.core.exceptions import (
-        SugarCaneNotFoundError,
-        NoSugarCaneProvided,
+        SyrupNotFoundError,
+        NoSyrupProvided,
         MissingDbtProjects,
     )
 
     expectation = {
-        "name": "cane_1",
+        "name": "syrup_1",
         "dbt_projects": [
             {
                 "name": "dbt_sugar_test",
@@ -64,15 +64,15 @@ def test_load_config(datafiles, has_no_default_cane, is_missing_cane, is_missing
     }
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
-    if has_no_default_cane:
+    if has_no_default_syrup:
         config_filepath = Path(datafiles).joinpath("sugar_config_missing_default.yml")
 
-    if is_missing_cane:
-        cli_args = ["doc", "--config-path", str(config_filepath), "--sugar-cane", "non_existant"]
-    elif has_no_default_cane:
+    if is_missing_syrup:
+        cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "non_existant"]
+    elif has_no_default_syrup:
         cli_args = ["doc", "--config-path", str(config_filepath)]
     elif is_missing_dbt_project:
-        cli_args = ["doc", "--config-path", str(config_filepath), "--sugar-cane", "cane_2"]
+        cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "syrup_2"]
     else:
         cli_args = ["doc", "--config-path", str(config_filepath)]
 
@@ -80,11 +80,11 @@ def test_load_config(datafiles, has_no_default_cane, is_missing_cane, is_missing
     flags.consume_cli_arguments(cli_args)
 
     config = DbtSugarConfig(flags)
-    if is_missing_cane:
-        with pytest.raises(SugarCaneNotFoundError):
+    if is_missing_syrup:
+        with pytest.raises(SyrupNotFoundError):
             config.load_config()
-    elif has_no_default_cane:
-        with pytest.raises(NoSugarCaneProvided):
+    elif has_no_default_syrup:
+        with pytest.raises(NoSyrupProvided):
             config.load_config()
     elif is_missing_dbt_project:
         with pytest.raises(MissingDbtProjects):

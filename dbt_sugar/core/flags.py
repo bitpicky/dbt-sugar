@@ -24,7 +24,7 @@ class FlagParser:
         self.model: str = "test_model"
         self.log_level: str = "debug"
         self.traceback_stack_depth: int = 4
-        self.sugar_cane: str = str()
+        self.syrup: str = str()
         self.config_path: Path = Path(str())
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
@@ -40,7 +40,7 @@ class FlagParser:
         if self.args:
             self.log_level = self.args.log_level
             self.full_tracebacks = self.args.full_tracebacks
-            self.sugar_cane = self.args.sugar_cane
+            self.syrup = self.args.syrup
             if self.args.config_path:
                 self.config_path = Path(self.args.config_path).expanduser()
             else:

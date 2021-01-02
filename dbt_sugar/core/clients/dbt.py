@@ -1,4 +1,4 @@
-"""Holds methods to interact with dbt API and objects."""
+"""Holds methods to interact with dbt API (we mostly don't for now because not stable) and objects."""
 
 from pathlib import Path
 from typing import Optional

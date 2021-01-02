@@ -5,9 +5,9 @@ from dbt_sugar.core.task.doc import DocumentationTask
 
 
 def __init_descriptions():
-    base_task = DocumentationTask(None)
-    base_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
-    return base_task
+    doc_task = DocumentationTask(None)
+    doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
+    return doc_task
 
 
 @pytest.mark.parametrize(
@@ -24,8 +24,8 @@ def __init_descriptions():
     ],
 )
 def test_get_column_description_from_dbt_definitions(column, result):
-    base_task = __init_descriptions()
-    assert base_task.get_column_description_from_dbt_definitions(column) == result
+    doc_task = __init_descriptions()
+    assert doc_task.get_column_description_from_dbt_definitions(column) == result
 
 
 @pytest.mark.parametrize(
@@ -44,9 +44,9 @@ def test_get_column_description_from_dbt_definitions(column, result):
     ],
 )
 def test_update_description_in_dbt_descriptions(column, description, result):
-    base_task = __init_descriptions()
-    base_task.update_description_in_dbt_descriptions(column, description)
-    assert base_task.dbt_definitions[column] == result
+    doc_task = __init_descriptions()
+    doc_task.update_description_in_dbt_descriptions(column, description)
+    assert doc_task.dbt_definitions[column] == result
 
 
 @pytest.mark.parametrize(
@@ -85,9 +85,9 @@ def test_update_description_in_dbt_descriptions(column, description, result):
     ],
 )
 def test_save_descriptions_from_schema(content, column, description):
-    base_task = __init_descriptions()
-    base_task.save_descriptions_from_schema(content)
-    assert base_task.dbt_definitions[column] == description
+    doc_task = __init_descriptions()
+    doc_task.save_descriptions_from_schema(content)
+    assert doc_task.dbt_definitions[column] == description
 
 
 @pytest.mark.parametrize(
@@ -136,10 +136,10 @@ def test_save_descriptions_from_schema(content, column, description):
     ],
 )
 def test_is_model_in_schema_content(content, model_name, result):
-    base_task = __init_descriptions()
-    assert base_task.is_model_in_schema_content(content, model_name) == result
-    assert base_task.is_model_in_schema_content(content, model_name) == result
-    assert base_task.is_model_in_schema_content(content, model_name) == result
+    doc_task = __init_descriptions()
+    assert doc_task.is_model_in_schema_content(content, model_name) == result
+    assert doc_task.is_model_in_schema_content(content, model_name) == result
+    assert doc_task.is_model_in_schema_content(content, model_name) == result
 
 
 @pytest.mark.parametrize(
@@ -172,8 +172,8 @@ def test_is_model_in_schema_content(content, model_name, result):
     ],
 )
 def test_update_model(content, model_name, columns_sql, result):
-    base_task = __init_descriptions()
-    assert base_task.update_model(content, model_name, columns_sql) == result
+    doc_task = __init_descriptions()
+    assert doc_task.update_model(content, model_name, columns_sql) == result
 
 
 @pytest.mark.parametrize(
@@ -219,5 +219,5 @@ def test_update_model(content, model_name, columns_sql, result):
     ],
 )
 def test_create_new_model(content, model_name, columns_sql, result):
-    base_task = __init_descriptions()
-    assert base_task.create_new_model(content, model_name, columns_sql) == result
+    doc_task = __init_descriptions()
+    assert doc_task.create_new_model(content, model_name, columns_sql) == result

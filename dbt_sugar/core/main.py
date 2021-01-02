@@ -102,7 +102,7 @@ def handle(
     if flag_parser.task == "doc":
         task: DocumentationTask = DocumentationTask(flag_parser)
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
-        # dry run but for not this allows testing without side effects.
+        # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.
         if flag_parser.is_dry_run:
             logger.warning("Running in --dry-run mode no files will be modified")

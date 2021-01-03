@@ -27,6 +27,8 @@ class FlagParser:
         self.traceback_stack_depth: int = 4
         self.syrup: str = str()
         self.config_path: Path = Path(str())
+        self.profiles_dir: Path = Path(str())
+        self.is_dry_run: bool = False
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
         if test_cli_args:
@@ -44,8 +46,6 @@ class FlagParser:
             self.syrup = self.args.syrup
             if self.args.config_path:
                 self.config_path = Path(self.args.config_path).expanduser()
-            else:
-                self.config_path = Path()
 
         # task specific args consumption
         if self.task == "doc":

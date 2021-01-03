@@ -85,6 +85,6 @@ class BaseTask(abc.ABC):
         return False
 
     @abc.abstractmethod
-    def run(self) -> None:
+    def run(self) -> int:
         """Orchestrator method that calls all the needed stuff to run a documentation task."""
         ...

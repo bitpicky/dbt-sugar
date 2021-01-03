@@ -26,7 +26,6 @@ TEST_PROFILES_DIR = Path(__file__).resolve().parent.joinpath("docker_postgres")
 def test_handle(cli_args):
     from dbt_sugar.core.main import handle, parser
 
-    print(str(TEST_PROFILES_DIR))
     handle_result = handle(parser, test_cli_args=cli_args)
 
     assert isinstance(handle_result, DocumentationTask)

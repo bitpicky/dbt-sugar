@@ -1,3 +1,4 @@
+from typing import Pattern
 from tests.profile_test import FIXTURE_DIR
 import pytest
 from pathlib import Path
@@ -74,12 +75,16 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
     elif is_missing_dbt_project:
         cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "syrup_2"]
     else:
-        cli_args = ["doc", "--config-path", str(config_filepath)]
+        cli_args = ["doc"]
 
     flags = FlagParser(parser)
     flags.consume_cli_arguments(cli_args)
 
     config = DbtSugarConfig(flags)
+
+    # patch the current folder to be the one set by pytest datafile fixture
+    config._current_folder = Path(datafiles)
+
     if is_missing_syrup:
         with pytest.raises(SyrupNotFoundError):
             config.load_config()
@@ -92,3 +97,4 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
     else:
         config.load_config()
         assert config.config == expectation
+        assert config._config_file_found_nearby is True

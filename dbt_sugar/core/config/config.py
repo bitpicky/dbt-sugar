@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.exceptions import MissingDbtProjects, NoSyrupProvided, SyrupNotFoundError
 from dbt_sugar.core.flags import FlagParser
+from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 
 class DbtProjectsModel(BaseModel):
@@ -42,7 +43,9 @@ class SugarConfigModel(BaseModel):
 class DbtSugarConfig:
     """dbt-sugar configuration class."""
 
-    def __init__(self, flags: FlagParser) -> None:
+    SUGAR_CONFIG_FILENAME = "sugar_config.yml"
+
+    def __init__(self, flags: FlagParser, max_dir_upwards_iterations: int = 4) -> None:
         """Constructor for DbtSugarConfig.
 
         Args:
@@ -53,6 +56,9 @@ class DbtSugarConfig:
         self._task = self._flags.task
         self._config_path = self._flags.config_path
         self._syrup_to_load = flags.syrup
+        self._config_file_found_nearby = False
+        self._max_folder_iterations = max_dir_upwards_iterations
+        self._current_folder = Path.cwd()
 
         # "externally offered objects"
         self.config_model: SyrupModel
@@ -112,7 +118,34 @@ class DbtSugarConfig:
             )
         return True
 
+    def locate_config(self) -> None:
+        folder_iteration = 0
+        logger.debug(f"Starting config file finding from {self._current_folder}")
+        current = self._current_folder
+        filename = Path(current).joinpath(self.SUGAR_CONFIG_FILENAME)
+
+        if self._config_path == Path(str()):
+            logger.debug("Trying to find sygar_config.yml in current and parent folders")
+
+            while folder_iteration < self._max_folder_iterations:
+                if filename.exists():
+                    sugar_config_dir = filename
+                    logger.debug(f"{filename} exists and was retreived.")
+                    self._config_path = sugar_config_dir
+                    self._config_file_found_nearby = True
+                    break
+                current = current.parent
+                filename = Path(current, self.SUGAR_CONFIG_FILENAME)
+                folder_iteration += 1
+
+            else:
+                raise FileNotFoundError(
+                    f"Unable to find {self.SUGAR_CONFIG_FILENAME} in any nearby"
+                    f"directories after {self._max_folder_iterations} iterations upwards."
+                )
+
     def load_config(self) -> None:
+        self.locate_config()
         self.load_and_validate_config_yaml()
         self.parse_defaults()
         self.retain_syrup()

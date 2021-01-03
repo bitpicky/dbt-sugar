@@ -73,6 +73,7 @@ class DbtProfile:
 
     def _assert_file_exists(self) -> bool:
         # TODO: We'll want to allow users to override this path.
+        logger.debug(self.profiles_dir.resolve())
         if self.profiles_dir.is_file():
             return True
         else:

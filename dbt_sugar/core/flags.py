@@ -44,6 +44,9 @@ class FlagParser:
             self.log_level = self.args.log_level
             self.full_tracebacks = self.args.full_tracebacks
             self.syrup = self.args.syrup
+            self.is_dry_run = self.args.dry_run
+            if self.args.profiles_dir:
+                self.profiles_dir = Path(self.args.profiles_dir).expanduser()
             if self.args.config_path:
                 self.config_path = Path(self.args.config_path).expanduser()
 

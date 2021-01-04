@@ -4,6 +4,7 @@ import sys
 from typing import List, Union
 
 from dbt_sugar.core._version import __version__
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
@@ -95,11 +96,16 @@ def handle(
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
 
+    # TODO: Feed project_name dynamically at run time from CLI or config.
+    dbt_profile = DbtProfile(
+        project_name="default", target_name="dev", profiles_dir=flag_parser.profiles_dir
+    )
+
     if flag_parser.log_level == "debug":
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser)
+        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile)
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.

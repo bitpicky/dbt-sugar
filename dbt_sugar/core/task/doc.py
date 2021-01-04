@@ -18,18 +18,15 @@ class DocumentationTask(BaseTask):
     Holds methods and attrs necessary to orchestrate a model documentation task.
     """
 
-    def __init__(self, flags: FlagParser) -> None:
+    def __init__(self, flags: FlagParser, dbt_profile: DbtProfile) -> None:
         super().__init__()
         self._flags = flags
+        self._dbt_profile = dbt_profile
 
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
-        # TODO: Feed project_name dynamically at run time from CLI or config.
-        dbt_profile = DbtProfile(
-            project_name="default", target_name="dev", profiles_dir=self._flags.profiles_dir
-        )
-        dbt_profile.read_profile()
-        dbt_credentials = dbt_profile.profile
+        self._dbt_profile.read_profile()
+        dbt_credentials = self._dbt_profile.profile
         if not dbt_credentials:
             logger.info("Not able to locate DBT profile.")
             exit(1)

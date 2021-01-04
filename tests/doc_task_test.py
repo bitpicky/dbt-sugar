@@ -5,7 +5,7 @@ from dbt_sugar.core.task.doc import DocumentationTask
 
 
 def __init_descriptions():
-    doc_task = DocumentationTask(None)
+    doc_task = DocumentationTask(None, None)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     return doc_task
 

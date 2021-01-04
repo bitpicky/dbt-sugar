@@ -24,6 +24,7 @@ class DocumentationTask(BaseTask):
 
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
+        # TODO: Feed project_name dynamically at run time from CLI or config.
         dbt_profile = DbtProfile(
             project_name="default", target_name="dev", profiles_dir=self._flags.profiles_dir
         )

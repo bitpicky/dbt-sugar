@@ -1,13 +1,37 @@
 import pytest
+from pathlib import Path
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 from dbt_sugar.core.task.doc import DocumentationTask
 
+FIXTURE_DIR = Path(__file__).resolve().parent
 
-def __init_descriptions():
-    doc_task = DocumentationTask(None, None)
+
+def __init_descriptions(params=None, dbt_profile=None):
+    doc_task = DocumentationTask(params, dbt_profile)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     return doc_task
+
+
+def test_load_dbt_credentials():
+    profile = DbtProfile(
+        project_name="dbt_sugar_test_project",
+        target_name="snowflake",
+        profiles_dir=Path(FIXTURE_DIR).joinpath("profiles.yml"),
+    )
+    doc_task = __init_descriptions(None, profile)
+    credentials = doc_task.load_dbt_credentials()
+    assert credentials == {
+        "type": "snowflake",
+        "account": "dummy_account",
+        "user": "dummy_user",
+        "password": "dummy_password",
+        "database": "dummy_database",
+        "target_schema": "dummy_target_schema",
+        "role": "dummy_role",
+        "warehouse": "dummy_warehouse",
+    }
 
 
 @pytest.mark.parametrize(

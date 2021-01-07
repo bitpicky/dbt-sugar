@@ -1,7 +1,7 @@
 """Holds methods to interact with dbt API (we mostly don't for now because not stable) and objects."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel, root_validator
 
@@ -63,7 +63,7 @@ class DbtProfile:
         self._profiles_dir = profiles_dir
 
         # attrs populated by class methods
-        self.profile: Optional[DbtProfilesModel] = None
+        self.profile: Optional[Dict[str, str]] = None
 
     @property
     def profiles_dir(self):
@@ -73,6 +73,7 @@ class DbtProfile:
 
     def _assert_file_exists(self) -> bool:
         # TODO: We'll want to allow users to override this path.
+        logger.debug(self.profiles_dir.resolve())
         if self.profiles_dir.is_file():
             return True
         else:

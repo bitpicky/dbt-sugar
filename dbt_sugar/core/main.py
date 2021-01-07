@@ -1,10 +1,14 @@
 """Main module for dbt-sugar. Sets up CLI arguments and sets up task handlers."""
 import argparse
-from typing import List
+import sys
+from typing import List, Union
 
 from dbt_sugar.core._version import __version__
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.flags import FlagParser
+from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
+from dbt_sugar.core.task.base import BaseTask
 from dbt_sugar.core.task.doc import DocumentationTask
 from dbt_sugar.core.utils import check_and_compare_version
 
@@ -53,6 +57,9 @@ base_subparser.add_argument(
 base_subparser.add_argument(
     "--config-path", help="Full path to config.yml file if not using default."
 )
+base_subparser.add_argument(
+    "--profiles-dir", help="Alternative path to the dbt profiles.yml file.", type=str, default=str()
+)
 
 # Task-specific argument sub parsers
 sub_parsers = parser.add_subparsers(title="Available dbt-sugar commands", dest="command")
@@ -65,26 +72,64 @@ document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
 document_sub_parser.add_argument(
     "-m", "--model", help="dbt model name to document", type=str, default=None
 )
+document_sub_parser.add_argument(
+    "-s", "--schema", help="database schema where the model is.", type=str, default=None
+)
+document_sub_parser.add_argument(
+    "--dry-run",
+    help="When provided the documentation task will not modify your files",
+    action="store_true",
+    default=False,
+)
 
 
 # task handler
-def handle(parser: argparse.ArgumentParser, test_cli_args: List[str] = list()) -> int:
+def handle(
+    parser: argparse.ArgumentParser,
+    test_cli_args: List[str] = list(),
+) -> Union[int, BaseTask]:
     """Task handler factory.
 
     Args:
         parser (argparse.ArgumentParser): CLI argument parser object.
-
-    Returns:
-        Union[DocumentTask, InitTask]: Task object to be run.
     """
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
+
+    # TODO: Feed project_name dynamically at run time from CLI or config.
+    dbt_profile = DbtProfile(
+        project_name="default", target_name="dev", profiles_dir=flag_parser.profiles_dir
+    )
 
     if flag_parser.log_level == "debug":
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser)
+        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile)
+        # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
+        # dry run but for now this allows testing without side effects.
+        # the current implementation upsets mypy also.
+        if flag_parser.is_dry_run:
+            logger.warning("Running in --dry-run mode no files will be modified")
+            return task
         return task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
+
+
+def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = list()) -> int:
+    """Just your boring main."""
+    exit_code = 0
+    _cli_args = list()
+    if test_cli_args:
+        _cli_args = test_cli_args
+
+    # print version on every run unless doing `--version` which is better handled by argparse
+    if "--version" not in sys.argv[1:]:
+        version_message = check_and_print_version()
+        print(version_message)
+        print("\n")
+        # TODO: Update this when a proper dry-run exists.
+        exit_code = handle(parser, _cli_args)  # type: ignore
+
+    exit(exit_code)

@@ -1,5 +1,3 @@
-from typing import Pattern
-from tests.profile_test import FIXTURE_DIR
 import pytest
 from pathlib import Path
 

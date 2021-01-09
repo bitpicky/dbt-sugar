@@ -50,7 +50,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-sugar="dbt_sugar.core.main:main"
+dbt-sugar="dbt_sugar.core.main:main"
 
 
 [tool.towncrier]

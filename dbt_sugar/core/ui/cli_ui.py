@@ -197,7 +197,11 @@ class UserInputCollector:
         if self._question_type == "model":
             for i, payload_element in enumerate(self._question_payload):
                 results.update(questionary.prompt(payload_element))
+<<<<<<< HEAD
                 if i < 1 and results.get("wants_to_document_model") is False:
+=======
+                if i == 0 and results.get("wants_to_document_model") is False:
+>>>>>>> 9a3be2a... Implement UserInputCollector UI API
                     break
             return results
 
@@ -219,6 +223,10 @@ class UserInputCollector:
             else:
                 # reduce the list of columns
                 columns_to_document = questionary.prompt(self._question_payload)
+<<<<<<< HEAD
+=======
+                print(columns_to_document)
+>>>>>>> 9a3be2a... Implement UserInputCollector UI API
                 # iterate through reduced list
                 results = self._iterate_through_columns(
                     cols=columns_to_document["cols_to_document"]

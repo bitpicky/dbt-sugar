@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED

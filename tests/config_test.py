@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 FIXTURE_DIR = Path(__file__).resolve().parent
 
@@ -18,8 +19,8 @@ FIXTURE_DIR = Path(__file__).resolve().parent
 def test_Config(cli_args, test_desc):
     from dbt_sugar.core.config.config import DbtSugarConfig
     from dbt_sugar.core.flags import FlagParser
-    from dbt_sugar.core.main import parser
     from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
+    from dbt_sugar.core.main import parser
 
     flag_parser = FlagParser(parser)
     if test_desc == "non_allowed_command":
@@ -42,14 +43,10 @@ def test_Config(cli_args, test_desc):
 )
 @pytest.mark.datafiles(FIXTURE_DIR)
 def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missing_dbt_project):
-    from dbt_sugar.core.main import parser
-    from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.config.config import DbtSugarConfig
-    from dbt_sugar.core.exceptions import (
-        SyrupNotFoundError,
-        NoSyrupProvided,
-        MissingDbtProjects,
-    )
+    from dbt_sugar.core.exceptions import MissingDbtProjects, NoSyrupProvided, SyrupNotFoundError
+    from dbt_sugar.core.flags import FlagParser
+    from dbt_sugar.core.main import parser
 
     expectation = {
         "name": "syrup_1",

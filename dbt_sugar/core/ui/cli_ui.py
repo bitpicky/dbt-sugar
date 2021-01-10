@@ -1,6 +1,6 @@
 """User Input Collector API."""
 
-from typing import Any, Dict, List, Mapping, Union
+from typing import Any, Dict, List, Mapping, Sequence, Union
 
 import questionary
 from pydantic import BaseModel, validator
@@ -95,7 +95,7 @@ class UserInputCollector:
     started in the right direction.
     """
 
-    def __init__(self, question_type: str, question_payload: List[Mapping[str, Any]]) -> None:
+    def __init__(self, question_type: str, question_payload: Sequence[Mapping[str, Any]]) -> None:
         """Constructor for UserInpurCollector.
 
         Expects a question type and a question payload. The payload must be a list of dictionaries,
@@ -168,6 +168,44 @@ class UserInputCollector:
 
         return results
 
+    @staticmethod
+    def _document_model(
+        question_payload: Sequence[Mapping[str, Any]]
+    ) -> Dict[str, Union[bool, str]]:
+        results = dict()
+        for i, payload_element in enumerate(question_payload):
+            results.update(questionary.prompt(payload_element))
+            collect_model_description = i < 1 and results.get("wants_to_document_model") is False
+            if collect_model_description is False:
+                # if the user doesnt want to document the model we exit early even if the payload
+                # has a second entry which would trigger the description collection
+                break
+        return results
+
+    @classmethod
+    def _document_undocumented_cols(cls, question_payload: Sequence[Mapping[str, Any]]):
+        results = dict()
+        columns_to_document = question_payload[0].get("choices", list())
+        # check if user wants to document all columns
+        document_all_cols = questionary.confirm(
+            message=(
+                f"There are {len(columns_to_document)} undocumented columns. "
+                "Do you want to document them all?"
+            ),
+            auto_enter=True,
+        ).ask()
+
+        if document_all_cols:
+            results = cls._iterate_through_columns(cols=columns_to_document)
+        else:
+            # get the list of columns from user
+            columns_to_document = questionary.prompt(question_payload)
+            results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+        return results
+
+    def document_already_documented_cols(self):
+        ...
+
     def collect(self) -> Mapping[str, Union[bool, str]]:
         """Question orchestractor function.
 
@@ -190,39 +228,14 @@ class UserInputCollector:
             Mapping[str, Union[bool, str]]: Response object for the backend documentation task.
                 See above for examples.
         """
-        results = dict()
         self._validate_question_payload()
 
         # Model Documentation Flow
         if self._question_type == "model":
-            for i, payload_element in enumerate(self._question_payload):
-                results.update(questionary.prompt(payload_element))
-                if i < 1 and results.get("wants_to_document_model") is False:
-                    break
-            return results
+            return self._document_model(self._question_payload)
 
         # Undocumented Columns Documentation Flow
         if self._question_type == "undocumented_columns":
-            # first ask if all columns should be documented,
-            columns_to_document = self._question_payload[0].get("choices", list())
-            document_all_cols = questionary.confirm(
-                message=(
-                    f"There are {len(columns_to_document)} undocumented columns. "
-                    "Do you want to document them all?"
-                ),
-                auto_enter=True,
-            ).ask()
-
-            # iterate through all cols one by one
-            if document_all_cols:
-                results = self._iterate_through_columns(cols=columns_to_document)
-            else:
-                # reduce the list of columns
-                columns_to_document = questionary.prompt(self._question_payload)
-                # iterate through reduced list
-                results = self._iterate_through_columns(
-                    cols=columns_to_document["cols_to_document"]
-                )
-            return results
+            return self._document_undocumented_cols(self._question_payload)
 
         raise NotImplementedError(f"{self._question_type} is not implemented.")

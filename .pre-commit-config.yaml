@@ -32,7 +32,7 @@ repos:
       - id: isort
         name: Sort import with isort
         args: ["-m3", "-w 100", "--tc"]
-        exclude: ^tests/
+        # exclude: ^tests/
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: "v2.2.1"
     hooks:

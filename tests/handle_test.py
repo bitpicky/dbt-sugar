@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from dbt_sugar.core.task.doc import DocumentationTask
 

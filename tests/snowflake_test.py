@@ -1,6 +1,5 @@
 import sqlalchemy
 
-
 CREDENTIALS = dict(
     user="dbt_sugar_test_user",
     password="magical_password",

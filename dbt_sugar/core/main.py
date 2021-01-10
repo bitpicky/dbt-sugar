@@ -70,10 +70,14 @@ document_sub_parser = sub_parsers.add_parser(
 )
 document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
 document_sub_parser.add_argument(
-    "-m", "--model", help="dbt model name to document", type=str, default=None
+    "-m", "--model", help="Name of the dbt model to document", type=str, default=None
 )
 document_sub_parser.add_argument(
-    "-s", "--schema", help="database schema where the model is.", type=str, default=None
+    "-s",
+    "--schema",
+    help="Name of the database schema in which the model resides",
+    type=str,
+    default=None,
 )
 document_sub_parser.add_argument(
     "--dry-run",
@@ -129,7 +133,7 @@ def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = li
         version_message = check_and_print_version()
         print(version_message)
         print("\n")
-        # TODO: Update this when a proper dry-run exists.
-        exit_code = handle(parser, _cli_args)  # type: ignore
+    # TODO: Update this when a proper dry-run exists.
+    exit_code = handle(parser, _cli_args)  # type: ignore
 
     exit(exit_code)

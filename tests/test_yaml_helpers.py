@@ -1,7 +1,8 @@
 import os
-from pathlib import Path
-import pytest
 import tempfile
+from pathlib import Path
+
+import pytest
 import yaml
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml

@@ -42,10 +42,7 @@ pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.1"
 dbt = "^0.18.1"
 pre-commit = "^2.9.3"
-<<<<<<< HEAD
 tox = "3.20.0"
-=======
->>>>>>> 86fd118... add pre-commit to dev requirements
 
 
 [build-system]

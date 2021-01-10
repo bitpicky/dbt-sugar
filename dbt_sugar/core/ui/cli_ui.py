@@ -203,7 +203,18 @@ class UserInputCollector:
             results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
         return results
 
-    def document_already_documented_cols(self):
+    @staticmethod
+    def document_already_documented_cols(question_payload: Sequence[Mapping[str, Any]]):
+        # ask user if they want to see any of the documented columns?
+        # ask if user has a particular column in mind that they want to re-document
+        # if so ask them to type it.
+        # collect input
+        # if no particular columns user will be asked if they want to see the documented columns.
+        # if yes, render a table of 10 cols per "page"
+        # for each page ask if user wants to document any of the columns?
+        # if so, we pop the checkbox dialogue
+        # if not we ask if user wants to go to next page?
+
         ...
 
     def collect(self) -> Mapping[str, Union[bool, str]]:

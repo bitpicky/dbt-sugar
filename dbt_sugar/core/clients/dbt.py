@@ -6,6 +6,7 @@ from typing import Dict, Optional
 from pydantic import BaseModel, root_validator
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
+from dbt_sugar.core.config.config import DbtProjectsModel
 from dbt_sugar.core.exceptions import DbtProfileFileMissing, ProfileParsingError
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
@@ -42,11 +43,79 @@ class DbtProfilesModel(BaseModel):
         fields = {"target_schema": "schema"}
 
 
-class DbtProfile:
+class DbtProfileModel(BaseModel):
+    """Defines pydandic validation schema for a dbt_project.yml file."""
+
+    profile: str
+
+
+class BaseYamlConfig:
+    """Base class object which gets extended by objects which will generally read from yaml configs."""
+
+    def _assert_file_exists(self, dir: Path) -> bool:
+        # TODO: We'll want to allow users to override this path.
+        logger.debug(dir.resolve())
+        if dir.is_file():
+            return True
+        else:
+            raise DbtProfileFileMissing(f"Could not locate `profiles.yml` in {dir.resolve()}.")
+
+
+class DbtProject(BaseYamlConfig):
+    """Holds parsed dbt project information needed for dbt-sugar such as which db profile to target."""
+
+    DBT_PROJECT_FILENAME: str = "dbt_project.yml"
+
+    def __init__(self, project_name: str, project_dir: Path) -> None:
+        """Constructor for DbtProject.
+
+        Given a project name and a project dir it will parse the relevant dbt_project.yml and
+        parse information such as `profile` so dbt-sugar knows which database profile entry from
+        /.dbt/profiles.yml to use.
+
+        Args:
+            project_name (str): Name of the dbt project to read profile from.
+            project_dir (Path): Path object the dbt_project.yml to read from.
+        """
+        self._project_name = project_name
+        self._project_dir = project_dir
+
+        # class "outputs"
+        self.project: DbtProjectsModel
+        self.profile_name: str
+
+    @property
+    def _dbt_project_filename(self) -> Path:
+        return Path(self._project_dir).joinpath(type(self).DBT_PROJECT_FILENAME)
+
+    def read_project(self) -> None:
+        _ = self._assert_file_exists(self._dbt_project_filename)
+        _project_dict = open_yaml(self._dbt_project_filename)
+
+        # pass the dict through pydantic for validation and only getting what we need
+        # if the profile is invalid app will crash so no further tests required below.
+        _project = DbtProjectsModel(**_project_dict)
+        logger.debug(_project)
+        self.project = _project
+        self.profile_name = self.project.get("profile")
+
+        if not self.profile_name:
+            logger.warning(
+                f"There was no `profile:` entry in {self._dbt_project_filename}. "
+                "dbt-sugar will try to find a 'default' profile. This might lead to unexpected"
+                "behaviour or an error when no defaulf profile can be found in your dbt profiles.yml"
+            )
+
+
+class DbtProfile(BaseYamlConfig):
     """Holds parsed profile dict from dbt profiles."""
 
     def __init__(
-        self, project_name: str, target_name: str, profiles_dir: Optional[Path] = None
+        self,
+        profile_name: str,
+        project_name: str,
+        target_name: str,  # TODO:Maybe make this optional?
+        profiles_dir: Optional[Path] = None,
     ) -> None:
         """Reads, validates and holds dbt profile info required by dbt-sugar (mainly db creds).
 
@@ -71,18 +140,10 @@ class DbtProfile:
             return self._profiles_dir
         return DEFAULT_DBT_PROFILE_PATH
 
-    def _assert_file_exists(self) -> bool:
-        # TODO: We'll want to allow users to override this path.
-        logger.debug(self.profiles_dir.resolve())
-        if self.profiles_dir.is_file():
-            return True
-        else:
-            raise DbtProfileFileMissing(
-                f"Could not locate `profiles.yml` in {self.profiles_dir.resolve()}."
-            )
-
     def read_profile(self):
-        _ = self._assert_file_exists()  # this will raise so no need to check exists further
+        _ = self._assert_file_exists(
+            self.profiles_dir
+        )  # this will raise so no need to check exists further
         _profile_dict = open_yaml(self.profiles_dir)
         _profile_dict = _profile_dict.get(self.project_name, _profile_dict.get("default"))
         if _profile_dict:

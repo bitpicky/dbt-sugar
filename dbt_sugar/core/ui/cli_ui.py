@@ -1,6 +1,7 @@
 """User Input Collector API."""
 
-from typing import Any, Dict, List, Mapping, Sequence, Union
+import copy
+from typing import Any, Dict, List, Mapping, Sequence, Union, cast
 
 import questionary
 from pydantic import BaseModel, validator
@@ -84,6 +85,12 @@ class MultipleChoiceInput(BaseModel):
         return value
 
 
+class MultipleChoiceInputWithDict(MultipleChoiceInput):
+    """Validation model for a multiple choice question type where the choices list is a dict."""
+
+    choices: Dict[str, str]  # type: ignore # because mypy doesn't like this but I'm ok with it.
+
+
 class UserInputCollector:
     """User input collector class.
 
@@ -153,6 +160,9 @@ class UserInputCollector:
         elif self._question_type == "undocumented_columns":
             MultipleChoiceInput(**self._question_payload[0])
 
+        elif self._question_type == "documented_columns":
+            MultipleChoiceInputWithDict(**self._question_payload[0])
+
         else:
             raise NotImplementedError(f"{self._question_type} is not implemented.")
 
@@ -162,9 +172,9 @@ class UserInputCollector:
     def _iterate_through_columns(cols: List[str]) -> Dict[str, str]:
         results = dict()
         for column in cols:
-            results.update(
-                {column: questionary.text(message=f"{column}: {DESCRIPTION_PROMPT_MESSAGE}").ask()}
-            )
+            description = questionary.text(message=f"{column}: {DESCRIPTION_PROMPT_MESSAGE}").ask()
+            if description:
+                results.update({column: description})
 
         return results
 
@@ -183,7 +193,9 @@ class UserInputCollector:
         return results
 
     @classmethod
-    def _document_undocumented_cols(cls, question_payload: Sequence[Mapping[str, Any]]):
+    def _document_undocumented_cols(
+        cls, question_payload: Sequence[Mapping[str, Any]]
+    ) -> Dict[str, str]:
         results = dict()
         columns_to_document = question_payload[0].get("choices", list())
         # check if user wants to document all columns
@@ -203,19 +215,37 @@ class UserInputCollector:
             results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
         return results
 
-    @staticmethod
-    def document_already_documented_cols(question_payload: Sequence[Mapping[str, Any]]):
-        # ask user if they want to see any of the documented columns?
-        # ask if user has a particular column in mind that they want to re-document
-        # if so ask them to type it.
-        # collect input
-        # if no particular columns user will be asked if they want to see the documented columns.
-        # if yes, render a table of 10 cols per "page"
-        # for each page ask if user wants to document any of the columns?
-        # if so, we pop the checkbox dialogue
-        # if not we ask if user wants to go to next page?
+    @classmethod
+    def _document_already_documented_cols(
+        cls, question_payload: Sequence[Mapping[str, Any]]
+    ) -> Dict[str, str]:
+        mutable_payload = copy.deepcopy(question_payload)
+        mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
 
-        ...
+        # massage the question payload
+        choices = []
+        for col, desc in mutable_payload[0].get("choices", dict()).items():
+            choices.append(f"{col} | {desc}")
+        mutable_payload[0].update({"choices": choices})
+
+        # ask user if they want to see any of the documented columns?
+        results = dict()
+        document_any_columns = questionary.confirm(
+            message="Do you want to document any of the already documented columns in this model?",
+            auto_enter=True,
+        ).ask()
+
+        if document_any_columns:
+            columns_to_document = questionary.prompt(mutable_payload)
+            _results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+
+            # remove description from col key
+            for col, desc in _results.items():
+                stripped_col_name = col.split("|")[0].strip()
+                results.update({stripped_col_name: desc})
+            return results
+
+        return results
 
     def collect(self) -> Mapping[str, Union[bool, str]]:
         """Question orchestractor function.
@@ -248,5 +278,8 @@ class UserInputCollector:
         # Undocumented Columns Documentation Flow
         if self._question_type == "undocumented_columns":
             return self._document_undocumented_cols(self._question_payload)
+
+        if self._question_type == "documented_columns":
+            return self._document_already_documented_cols(self._question_payload)
 
         raise NotImplementedError(f"{self._question_type} is not implemented.")

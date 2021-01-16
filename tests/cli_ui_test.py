@@ -72,6 +72,48 @@ import pytest
             },
         ),
         (
+            "documented_columns",
+            [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    # "choices": ["col_a", "col_b"],
+                    "choices": {
+                        "col_a": "Column a description",
+                        "column_b": "Column b description",
+                    },
+                    "message": "Select the columns you want to document.",
+                }
+            ],
+            {
+                "confirm_ret": True,
+                "prompt_ret": {"col_a": "Custom desc"},
+                "non_full_cols": {"cols_to_document": ["col_a"]},
+                "text_ret": "Custom desc",
+            },
+        ),
+        (
+            "documented_columns",
+            [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    # "choices": ["col_a", "col_b"],
+                    "choices": {
+                        "col_a": "Column a description",
+                        "column_b": "Column b description",
+                    },
+                    "message": "Select the columns you want to document.",
+                }
+            ],
+            {
+                "confirm_ret": False,
+                "prompt_ret": {},
+                "non_full_cols": {"cols_to_document": ["col_a"]},
+                "text_ret": "Custom desc",
+            },
+        ),
+        (
             "non_implemented",
             [],
             {},

@@ -251,7 +251,7 @@ class UserInputCollector:
 
         return results
 
-    def collect(self) -> Mapping[str, Union[bool, str]]:
+    def collect(self) -> Dict[str, Any]:
         """Question orchestractor function.
 
         Depending on the question type provided on the class will call payload validation and

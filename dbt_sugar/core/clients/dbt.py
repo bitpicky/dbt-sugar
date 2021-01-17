@@ -113,7 +113,7 @@ class DbtProfile(BaseYamlConfig):
     def __init__(
         self,
         profile_name: str,
-        project_name: str,
+        # project_name: str,
         target_name: str,  # TODO:Maybe make this optional?
         profiles_dir: Optional[Path] = None,
     ) -> None:
@@ -125,7 +125,7 @@ class DbtProfile(BaseYamlConfig):
                 "outputs" in the dbt's profile.yml (https://docs.getdbt.com/dbt-cli/configure-your-profile/)
         """
         # attrs parsed from constructor
-        self.project_name = project_name
+        self._profile_name = profile_name
         # TODO: dbt profile allows for a default target to be specified. We might want to allow
         # for this to be null and parse the target from "target:" key.
         self.target_name = target_name
@@ -145,7 +145,7 @@ class DbtProfile(BaseYamlConfig):
             self.profiles_dir
         )  # this will raise so no need to check exists further
         _profile_dict = open_yaml(self.profiles_dir)
-        _profile_dict = _profile_dict.get(self.project_name, _profile_dict.get("default"))
+        _profile_dict = _profile_dict.get(self._profile_name, _profile_dict.get("default"))
         if _profile_dict:
             _target_profile = _profile_dict["outputs"].get(self.target_name)
 
@@ -157,11 +157,11 @@ class DbtProfile(BaseYamlConfig):
             else:
                 raise ProfileParsingError(
                     f"Could not find an entry for target: {self.target_name}, "
-                    f"under the {self.project_name} config."
+                    f"under the {self._profile_name} config."
                 )
 
         else:
             raise ProfileParsingError(
-                f"Could not find an entry for {self.project_name} in your profiles.yml "
+                f"Could not find an entry for {self._profile_name} in your profiles.yml "
                 f"located in {self.profiles_dir}."
             )

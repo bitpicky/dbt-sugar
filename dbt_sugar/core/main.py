@@ -4,7 +4,7 @@ import sys
 from typing import List, Union
 
 from dbt_sugar.core._version import __version__
-from dbt_sugar.core.clients.dbt import DbtProfile
+from dbt_sugar.core.clients.dbt import DbtProfile, DbtProject
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
@@ -103,13 +103,18 @@ def handle(
 
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
+    dbt_project = DbtProject(
+        sugar_config.config.get("name", str()), sugar_config.config.get("path", str())
+    )
+
     # TODO: Feed project_name dynamically at run time from CLI or config.
     dbt_profile = DbtProfile(
-        profile_name="default",
-        project_name="default",
+        profile_name=dbt_project.profile_name,
+        # project_name="default",
         target_name="dev",
         profiles_dir=flag_parser.profiles_dir,
     )
+    dbt_profile.read_profile()
 
     if flag_parser.log_level == "debug":
         log_manager.set_debug()

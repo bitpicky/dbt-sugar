@@ -59,6 +59,8 @@ class DbtSugarConfig:
         self._config_file_found_nearby = False
         self._max_folder_iterations = max_dir_upwards_iterations
         self._current_folder = Path.cwd()
+        if self._flags.profiles_dir:
+            self._current_folder = Path(self._flags.profiles_dir)
 
         # "externally offered objects"
         self.config_model: SyrupModel
@@ -66,6 +68,7 @@ class DbtSugarConfig:
     @property
     def config(self):
         if self.config_model:
+            logger.debug(f"Config model dict: {self.config_model.dict()}")
             return self.config_model.dict()
         raise AttributeError(f"{type(self).__name__} does not have a parsed config.")
 
@@ -125,7 +128,7 @@ class DbtSugarConfig:
         filename = Path(current).joinpath(self.SUGAR_CONFIG_FILENAME)
 
         if self._config_path == Path(str()):
-            logger.debug("Trying to find sygar_config.yml in current and parent folders")
+            logger.debug("Trying to find sugar_config.yml in current and parent folders")
 
             while folder_iteration < self._max_folder_iterations:
                 if filename.exists():
@@ -140,7 +143,7 @@ class DbtSugarConfig:
 
             else:
                 raise FileNotFoundError(
-                    f"Unable to find {self.SUGAR_CONFIG_FILENAME} in any nearby"
+                    f"Unable to find {self.SUGAR_CONFIG_FILENAME} in any nearby "
                     f"directories after {self._max_folder_iterations} iterations upwards."
                 )
 

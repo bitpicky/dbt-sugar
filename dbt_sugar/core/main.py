@@ -103,14 +103,16 @@ def handle(
 
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
-    dbt_project = DbtProject(
-        sugar_config.config.get("name", str()), sugar_config.config.get("path", str())
-    )
 
+    # TODO: Revise the index access here when we can support multiple dbt projects properly.
+    dbt_project = DbtProject(
+        sugar_config.config.get("dbt_projects", list())[0].get("name", str()),
+        sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
+    )
+    dbt_project.read_project()
     # TODO: Feed project_name dynamically at run time from CLI or config.
     dbt_profile = DbtProfile(
         profile_name=dbt_project.profile_name,
-        # project_name="default",
         target_name="dev",
         profiles_dir=flag_parser.profiles_dir,
     )

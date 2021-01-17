@@ -65,7 +65,7 @@ def test_read_profile(
     if target_name.startswith("bad_"):
         with pytest.raises(ValidationError):
             profile = DbtProfile(
-                project_name="dbt_sugar_test_project",
+                profile_name="dbt_sugar_test",
                 target_name=target_name,
                 profiles_dir=Path(datafiles).joinpath("profiles.yml"),
             )
@@ -73,7 +73,7 @@ def test_read_profile(
     elif is_invalid_target:
         with pytest.raises(ProfileParsingError):
             profile = DbtProfile(
-                project_name="dbt_sugar_test_project",
+                profile_name="dbt_sugar_test",
                 target_name=target_name,
                 profiles_dir=Path(datafiles).joinpath("profiles.yml"),
             )
@@ -81,7 +81,7 @@ def test_read_profile(
     elif is_missing_profile:
         with pytest.raises(DbtProfileFileMissing):
             profile = DbtProfile(
-                project_name="dbt_sugar_test_project",
+                profile_name="dbt_sugar_test",
                 target_name=target_name,
                 profiles_dir=Path(datafiles).joinpath("missing_profiles.yml"),
             )
@@ -89,14 +89,14 @@ def test_read_profile(
     elif is_bad_project:
         with pytest.raises(ProfileParsingError):
             profile = DbtProfile(
-                project_name="bad_project",
+                profile_name="bad_project",
                 target_name=target_name,
                 profiles_dir=Path(datafiles).joinpath("profiles.yml"),
             )
             profile.read_profile()
     else:
         profile = DbtProfile(
-            project_name="dbt_sugar_test_project",
+            profile_name="dbt_sugar_test",
             target_name=target_name,
             profiles_dir=Path(datafiles).joinpath("profiles.yml"),
         )

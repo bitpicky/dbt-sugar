@@ -6,7 +6,6 @@ from typing import Dict, Optional
 from pydantic import BaseModel, root_validator
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
-from dbt_sugar.core.config.config import DbtProjectsModel
 from dbt_sugar.core.exceptions import DbtProfileFileMissing, ProfileParsingError
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
@@ -43,7 +42,7 @@ class DbtProfilesModel(BaseModel):
         fields = {"target_schema": "schema"}
 
 
-class DbtProfileModel(BaseModel):
+class DbtProjectModel(BaseModel):
     """Defines pydandic validation schema for a dbt_project.yml file."""
 
     profile: str
@@ -52,13 +51,13 @@ class DbtProfileModel(BaseModel):
 class BaseYamlConfig:
     """Base class object which gets extended by objects which will generally read from yaml configs."""
 
-    def _assert_file_exists(self, dir: Path) -> bool:
+    def _assert_file_exists(self, dir: Path, filename: str = "profiles.yml") -> bool:
         # TODO: We'll want to allow users to override this path.
         logger.debug(dir.resolve())
         if dir.is_file():
             return True
         else:
-            raise DbtProfileFileMissing(f"Could not locate `profiles.yml` in {dir.resolve()}.")
+            raise DbtProfileFileMissing(f"Could not locate `{filename}` in {dir.resolve()}.")
 
 
 class DbtProject(BaseYamlConfig):
@@ -81,23 +80,25 @@ class DbtProject(BaseYamlConfig):
         self._project_dir = project_dir
 
         # class "outputs"
-        self.project: DbtProjectsModel
+        self.project: DbtProjectModel
         self.profile_name: str
 
     @property
     def _dbt_project_filename(self) -> Path:
+        logger.debug(f"project_dir: {self._project_dir}")
         return Path(self._project_dir).joinpath(type(self).DBT_PROJECT_FILENAME)
 
     def read_project(self) -> None:
-        _ = self._assert_file_exists(self._dbt_project_filename)
+        _ = self._assert_file_exists(self._dbt_project_filename, filename=self.DBT_PROJECT_FILENAME)
         _project_dict = open_yaml(self._dbt_project_filename)
 
         # pass the dict through pydantic for validation and only getting what we need
         # if the profile is invalid app will crash so no further tests required below.
-        _project = DbtProjectsModel(**_project_dict)
+        logger.debug(f"the project {_project_dict}")
+        _project = DbtProjectModel(**_project_dict)
         logger.debug(_project)
         self.project = _project
-        self.profile_name = self.project.get("profile")
+        self.profile_name = self.project.dict().get("profile", str())
 
         if not self.profile_name:
             logger.warning(

@@ -185,7 +185,11 @@ class UserInputCollector:
         results = dict()
         for i, payload_element in enumerate(question_payload):
             results.update(questionary.prompt(payload_element))
-            collect_model_description = i < 1 and results.get("wants_to_document_model") is False
+            collect_model_description = i < 1 and results.get("wants_to_document_model") is True
+
+            if not results.get("model_description"):
+                # we return an empty dict if user decided to not enter a description in the end.
+                results = dict()
             if collect_model_description is False:
                 # if the user doesnt want to document the model we exit early even if the payload
                 # has a second entry which would trigger the description collection

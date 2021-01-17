@@ -44,7 +44,7 @@ def test_save_yaml(content, result):
     try:
         save_yaml(temp_file.name, content)
         yaml_content = open_yaml(Path(temp_file.name))
-        assert yaml_content == yaml.load(result)
+        assert yaml_content == yaml.safe_load(result)
     finally:
         os.unlink(temp_file.name)
         temp_file.close()

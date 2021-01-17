@@ -94,7 +94,6 @@ import pytest
                 {
                     "type": "checkbox",
                     "name": "cols_to_document",
-                    # "choices": ["col_a", "col_b"],
                     "choices": {
                         "col_a": "Column a description",
                         "column_b": "Column b description",
@@ -115,7 +114,6 @@ import pytest
                 {
                     "type": "checkbox",
                     "name": "cols_to_document",
-                    # "choices": ["col_a", "col_b"],
                     "choices": {
                         "col_a": "Column a description",
                         "column_b": "Column b description",

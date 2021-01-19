@@ -32,7 +32,7 @@ questionary = "^1.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"
-pytest-cov = "^2.10.1"
+pytest-cov = "^2.11.0"
 mypy = "^0.790"
 towncrier = "^19.2.0"
 pytest-mock = "^3.5.1"

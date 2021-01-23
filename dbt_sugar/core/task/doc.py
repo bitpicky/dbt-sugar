@@ -178,7 +178,6 @@ class DocumentationTask(BaseTask):
             user_input = UserInputCollector(
                 "undocumented_columns", undocumented_columns_payload
             ).collect()
-            # user_input_dict = cast(Dict[str, str], user_finput)
             self.columns_to_update.update(user_input)
 
     def update_model(

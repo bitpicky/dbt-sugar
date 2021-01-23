@@ -56,7 +56,6 @@ class BaseYamlConfig:
     """Base class object which gets extended by objects which will generally read from yaml configs."""
 
     def _assert_file_exists(self, dir: Path, filename: str = "profiles.yml") -> bool:
-        # TODO: We'll want to allow users to override this path.
         logger.debug(dir.resolve())
         if dir.is_file():
             return True

@@ -164,7 +164,6 @@ def test_collect(mocker, question_type, question_payload, expected_results):
         and expected_results.get("prompt_ret").get("model_description") == ""
         or expected_results.get("prompt_ret").get("wants_to_document_model") is False
     ):
-        print(expected_results)
         results = input_collector.collect()
         assert results == dict()
     else:

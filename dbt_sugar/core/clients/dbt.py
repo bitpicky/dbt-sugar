@@ -1,12 +1,16 @@
 """Holds methods to interact with dbt API (we mostly don't for now because not stable) and objects."""
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseModel, root_validator
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
-from dbt_sugar.core.exceptions import DbtProfileFileMissing, ProfileParsingError
+from dbt_sugar.core.exceptions import (
+    DbtProfileFileMissing,
+    ProfileParsingError,
+    TargetNameNotProvided,
+)
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt", "profiles").with_suffix(".yml")
@@ -114,8 +118,7 @@ class DbtProfile(BaseYamlConfig):
     def __init__(
         self,
         profile_name: str,
-        # project_name: str,
-        target_name: str,  # TODO:Maybe make this optional?
+        target_name: str,
         profiles_dir: Optional[Path] = None,
     ) -> None:
         """Reads, validates and holds dbt profile info required by dbt-sugar (mainly db creds).
@@ -129,7 +132,7 @@ class DbtProfile(BaseYamlConfig):
         self._profile_name = profile_name
         # TODO: dbt profile allows for a default target to be specified. We might want to allow
         # for this to be null and parse the target from "target:" key.
-        self.target_name = target_name
+        self._target_name = target_name
         self._profiles_dir = profiles_dir
 
         # attrs populated by class methods
@@ -141,14 +144,29 @@ class DbtProfile(BaseYamlConfig):
             return self._profiles_dir
         return DEFAULT_DBT_PROFILE_PATH
 
+    def _get_target_profile(self, profile_dict: Dict[str, Any]) -> Dict[str, Union[str, int]]:
+        if self._target_name:
+            return profile_dict["outputs"].get(self._target_name)
+        else:
+            self._target_name = profile_dict.get("target", str())
+            if self._target_name:
+                return profile_dict["outputs"].get(self._target_name)
+            else:
+                raise TargetNameNotProvided(
+                    f"No target name provied in {self._profiles_dir} and none provided via "
+                    "--target in CLI. Cannot figure out appropriate profile information to load."
+                )
+
     def read_profile(self):
         _ = self._assert_file_exists(
             self.profiles_dir
         )  # this will raise so no need to check exists further
         _profile_dict = open_yaml(self.profiles_dir)
-        _profile_dict = _profile_dict.get(self._profile_name, _profile_dict.get("default"))
+        _profile_dict = _profile_dict.get(self._profile_name, _profile_dict.get(self._profile_name))
         if _profile_dict:
-            _target_profile = _profile_dict["outputs"].get(self.target_name)
+
+            # read target name from args or try to get it from the dbt_profile `target:` field.
+            _target_profile = self._get_target_profile(profile_dict=_profile_dict)
 
             if _target_profile:
                 # uses pydantic to validate profile. It will raise and break app if invalid.
@@ -157,7 +175,7 @@ class DbtProfile(BaseYamlConfig):
                 self.profile = _target_profile.dict()
             else:
                 raise ProfileParsingError(
-                    f"Could not find an entry for target: {self.target_name}, "
+                    f"Could not find an entry for target: {self._target_name}, "
                     f"under the {self._profile_name} config."
                 )
 

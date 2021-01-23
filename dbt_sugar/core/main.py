@@ -70,8 +70,9 @@ document_sub_parser = sub_parsers.add_parser(
     "doc", parents=[base_subparser], help="Runs documentation and test enforement task."
 )
 document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
+# TODO: We shouldn't be requiring this if we have a `--model` format as it's considered bad practice
 document_sub_parser.add_argument(
-    "-m", "--model", help="Name of the dbt model to document", type=str, default=None
+    "-m", "--model", help="Name of the dbt model to document", type=str, default=None, required=True
 )
 document_sub_parser.add_argument(
     "-s",
@@ -85,6 +86,13 @@ document_sub_parser.add_argument(
     help="When provided the documentation task will not modify your files",
     action="store_true",
     default=False,
+)
+document_sub_parser.add_argument(
+    "-t",
+    "--target",
+    help="Which target from the dbt profile to load.",
+    type=str,
+    default=str(),
 )
 
 
@@ -110,10 +118,9 @@ def handle(
         sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
     )
     dbt_project.read_project()
-    # TODO: Feed project_name dynamically at run time from CLI or config.
     dbt_profile = DbtProfile(
         profile_name=dbt_project.profile_name,
-        target_name="dev",
+        target_name=flag_parser.target,
         profiles_dir=flag_parser.profiles_dir,
     )
     dbt_profile.read_profile()

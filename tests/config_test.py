@@ -64,13 +64,29 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
         config_filepath = Path(datafiles).joinpath("sugar_config_missing_default.yml")
 
     if is_missing_syrup:
-        cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "non_existant"]
+        cli_args = [
+            "doc",
+            "--config-path",
+            str(config_filepath),
+            "--syrup",
+            "non_existant",
+            "-m",
+            "test_model",
+        ]
     elif has_no_default_syrup:
-        cli_args = ["doc", "--config-path", str(config_filepath)]
+        cli_args = ["doc", "--config-path", str(config_filepath), "-m", "test_model"]
     elif is_missing_dbt_project:
-        cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "syrup_2"]
+        cli_args = [
+            "doc",
+            "--config-path",
+            str(config_filepath),
+            "--syrup",
+            "syrup_2",
+            "-m",
+            "test_model",
+        ]
     else:
-        cli_args = ["doc"]
+        cli_args = ["doc", "-m", "test_model"]
 
     flags = FlagParser(parser)
     flags.consume_cli_arguments(cli_args)

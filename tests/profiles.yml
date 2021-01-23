@@ -39,3 +39,4 @@ dbt_sugar_test:
       database: dbt_sugar
       password: magical_password
       schema: public
+  target: postgres

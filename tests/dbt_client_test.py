@@ -13,7 +13,15 @@ def test_read_project(datafiles):
     from dbt_sugar.core.main import parser
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
-    cli_args = ["doc", "--config-path", str(config_filepath), "--syrup", "syrup_1"]
+    cli_args = [
+        "doc",
+        "--config-path",
+        str(config_filepath),
+        "--syrup",
+        "syrup_1",
+        "-m",
+        "test_project",
+    ]
 
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=cli_args)

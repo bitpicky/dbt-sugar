@@ -3,6 +3,8 @@ import argparse
 import sys
 from typing import List, Union
 
+import pyfiglet
+
 from dbt_sugar.core._version import __version__
 from dbt_sugar.core.clients.dbt import DbtProfile, DbtProject
 from dbt_sugar.core.config.config import DbtSugarConfig
@@ -153,6 +155,12 @@ def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = li
         version_message = check_and_print_version()
         print(version_message)
         print("\n")
+
+        # print app logo with pyfiglet
+        print(
+            f"{pyfiglet.figlet_format('dbt-sugar', font='slant')}"
+            "Getting sweetness out of the cupboard 🍬! \n"
+        )
     # TODO: Update this when a proper dry-run exists.
     exit_code = handle(parser, _cli_args)  # type: ignore
 

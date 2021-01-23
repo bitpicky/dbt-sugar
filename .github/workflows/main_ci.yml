@@ -38,6 +38,10 @@ jobs:
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - name: Run Tests and Coverage Report
+        run: |
+          PYTHONPATH=src/ poetry run python -m pytest --cov-report=xml:coverage-reports/coverage.xml --cov-report term-missing  --cov=dbt_sugar tests/
+
       - name: Upload coverage report to CodeCov
         uses: codecov/codecov-action@v1
         with:

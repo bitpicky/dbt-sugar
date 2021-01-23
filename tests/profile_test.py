@@ -114,6 +114,20 @@ def test_read_profile(
             assert profile.profile == expectations[target_name]
 
 
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_read_profile_missing(datafiles):
+    from dbt_sugar.core.clients.dbt import DbtProfile
+    from dbt_sugar.core.exceptions import ProfileParsingError
+
+    with pytest.raises(ProfileParsingError):
+        profile = DbtProfile(
+            profile_name="tough shit it does not exist",
+            target_name=str(),
+            profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+        )
+        profile.read_profile()
+
+
 @pytest.mark.parametrize(
     "profile_dict",
     [

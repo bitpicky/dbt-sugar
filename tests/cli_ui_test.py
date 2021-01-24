@@ -39,6 +39,23 @@ import pytest
             {"prompt_ret": {"wants_to_document_model": False}},
         ),
         (
+            "model",
+            [
+                {
+                    "type": "confirm",
+                    "name": "wants_to_document_model",
+                    "message": "Model Description: This is my previously documented model. Document?",
+                    "default": True,
+                },
+                {
+                    "type": "text",
+                    "name": "model_description",
+                    "message": "Please write down your description:",
+                },
+            ],
+            {"prompt_ret": {"wants_to_document_model": True, "model_description": ""}},
+        ),
+        (
             "undocumented_columns",
             [
                 {
@@ -67,6 +84,46 @@ import pytest
             {
                 "confirm_ret": False,
                 "prompt_ret": {"col_a": "Custom desc"},
+                "non_full_cols": {"cols_to_document": ["col_a"]},
+                "text_ret": "Custom desc",
+            },
+        ),
+        (
+            "documented_columns",
+            [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    "choices": {
+                        "col_a": "Column a description",
+                        "column_b": "Column b description",
+                    },
+                    "message": "Select the columns you want to document.",
+                }
+            ],
+            {
+                "confirm_ret": True,
+                "prompt_ret": {"col_a": "Custom desc"},
+                "non_full_cols": {"cols_to_document": ["col_a"]},
+                "text_ret": "Custom desc",
+            },
+        ),
+        (
+            "documented_columns",
+            [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    "choices": {
+                        "col_a": "Column a description",
+                        "column_b": "Column b description",
+                    },
+                    "message": "Select the columns you want to document.",
+                }
+            ],
+            {
+                "confirm_ret": False,
+                "prompt_ret": {},
                 "non_full_cols": {"cols_to_document": ["col_a"]},
                 "text_ret": "Custom desc",
             },
@@ -102,6 +159,13 @@ def test_collect(mocker, question_type, question_payload, expected_results):
     if question_type == "non_implemented":
         with pytest.raises(NotImplementedError):
             results = input_collector.collect()
+    elif (
+        question_type == "model"
+        and expected_results.get("prompt_ret").get("model_description") == ""
+        or expected_results.get("prompt_ret").get("wants_to_document_model") is False
+    ):
+        results = input_collector.collect()
+        assert results == dict()
     else:
         results = input_collector.collect()
         assert results == expected_results.get("prompt_ret")

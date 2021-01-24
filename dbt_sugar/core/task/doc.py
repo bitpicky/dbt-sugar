@@ -138,11 +138,11 @@ class DocumentationTask(BaseTask):
             int: with the status of the execution. 1 for fail, and 0 for ok!
         """
         content = None
-        path, exists = self.find_model_in_dbt(model_name)
+        path, schema_exists = self.find_model_in_dbt(model_name)
         if not path:
-            logger.info("Not able to find the model in the repository.")
+            logger.info(f"Not able to find the model with name {model_name} in the project.")
             return 1
-        if exists:
+        if schema_exists:
             content = open_yaml(path)
         content = self.process_model(content, model_name, columns_sql)
         content = self.change_model_description(content, model_name)

@@ -1,10 +1,11 @@
 """Contains yaml related utils which might get used in places."""
 
-
+import collections
 from pathlib import Path
 from typing import Any, Dict
 
 import yaml
+import yamlloader
 
 from dbt_sugar.core.exceptions import YAMLFileEmptyError
 
@@ -20,7 +21,7 @@ def open_yaml(path: Path) -> Dict[str, Any]:
     """
     if path.is_file():
         with open(path, "r") as stream:
-            yaml_dict = yaml.safe_load(stream)
+            yaml_dict = yaml.load(stream, Loader=yamlloader.ordereddict.CSafeLoader)
             if yaml_dict:
                 return yaml_dict
             raise YAMLFileEmptyError(f"The following file {path.resolve()} seems empty.")
@@ -35,4 +36,5 @@ def save_yaml(path: Path, data: Dict[str, Any]) -> None:
         data (dict[str, Any]): Data to save in the file.
     """
     with open(path, "w") as outfile:
-        yaml.dump(data, outfile, width=100)
+        data_order_dict = collections.OrderedDict(data)
+        yaml.dump(data_order_dict, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)

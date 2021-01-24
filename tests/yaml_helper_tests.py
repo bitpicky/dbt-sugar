@@ -21,6 +21,14 @@ def create_temp_schema_yaml(tmp_path):
     return file_name
 
 
+@pytest.fixture
+def create_tmp_empty_schema_yaml(tmp_path):
+    file_name = tmp_path / "schema.yml"
+    schema_content = ""
+    file_name.write_text(schema_content)
+    return file_name
+
+
 def test_open_yaml(create_temp_schema_yaml):
     result = open_yaml(create_temp_schema_yaml)
     assert result == {
@@ -28,6 +36,18 @@ def test_open_yaml(create_temp_schema_yaml):
             {"name": "model1", "columns": [{"name": "column1", "description": "description1"}]}
         ]
     }
+
+
+def test_open_yaml_empty_file(create_tmp_empty_schema_yaml):
+    from dbt_sugar.core.exceptions import YAMLFileEmptyError
+
+    with pytest.raises(YAMLFileEmptyError):
+        _ = open_yaml(create_tmp_empty_schema_yaml)
+
+
+def test_open_yaml_no_file():
+    with pytest.raises(FileNotFoundError):
+        _ = open_yaml(Path("no_file"))
 
 
 @pytest.mark.parametrize(

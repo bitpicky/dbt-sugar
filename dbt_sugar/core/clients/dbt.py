@@ -129,8 +129,6 @@ class DbtProfile(BaseYamlConfig):
         """
         # attrs parsed from constructor
         self._profile_name = profile_name
-        # TODO: dbt profile allows for a default target to be specified. We might want to allow
-        # for this to be null and parse the target from "target:" key.
         self._target_name = target_name
         self._profiles_dir = profiles_dir
 

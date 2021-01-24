@@ -1,7 +1,8 @@
 """Document Task module."""
 import os
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
@@ -9,7 +10,10 @@ from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
-from dbt_sugar.core.task.base import MODEL_NOT_DOCUMENTED, BaseTask
+from dbt_sugar.core.task.base import EXCLUDE_TARGET_FILES_PATTERN, MODEL_NOT_DOCUMENTED, BaseTask
+from dbt_sugar.core.ui.cli_ui import UserInputCollector
+
+NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 
 
 class DocumentationTask(BaseTask):
@@ -20,6 +24,7 @@ class DocumentationTask(BaseTask):
 
     def __init__(self, flags: FlagParser, dbt_profile: DbtProfile) -> None:
         super().__init__()
+        self.columns_to_update: Dict[str, str] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
 
@@ -56,9 +61,124 @@ class DocumentationTask(BaseTask):
                 account=dbt_credentials.get("account", ""),
                 database=dbt_credentials.get("database", "dwh"),
             ).get_columns_from_table(model, schema)
+        if columns_sql:
+            return self.orchestrate_model_documentation(model, columns_sql)
+        return 1
 
-        self.process_model(model, columns_sql)
+    def change_model_description(self, content: Dict[str, Any], model_name: str) -> Dict[str, Any]:
+        """Updates the model description from a schema.yaml.
+
+        Args:
+            content (Dict[str, Any]): Schema.yml Content.
+            model_name (str): Name of the model for which the description will be changed.
+
+        Returns:
+            Dict[str, Any]: Schema.yml content updated.
+        """
+        model_doc_payload: List[Mapping[str, Any]] = [
+            {
+                "type": "confirm",
+                "name": "wants_to_document_model",
+                "message": f"Do you want to change the {model_name} model description?",
+                "default": True,
+            },
+            {
+                "type": "text",
+                "name": "model_description",
+                "message": "Please write down your description:",
+            },
+        ]
+        user_input = UserInputCollector("model", model_doc_payload).collect()
+        if user_input.get("model_description", None):
+            for model in content.get("models", []):
+                if model["name"] == model_name:
+                    model["description"] = user_input["model_description"]
+        return content
+
+    def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
+        """
+        Method to find a model name in the dbt project.
+
+            - If we find the sql of the model but there is no schema we return the Path
+            and False (to create the schema).
+            - If we find the sql of the model and there is schema we return the Path and True.
+
+        Args:
+            model_name (str): model name to find in the dbt project.
+
+        Returns:
+            Tuple[Optional[Path], bool]: Optional path of the sql model if found
+            and boolean indicating whether the schema.yml exists.
+        """
+        for root, _, files in os.walk(self.repository_path):
+            files = [f for f in files if not re.match(EXCLUDE_TARGET_FILES_PATTERN, f)]
+            for file in files:
+                if file == f"{model_name}.sql":
+                    path_file = Path(os.path.join(root, "schema.yml"))
+                    if path_file.is_file():
+                        return path_file, True
+                    else:
+                        return path_file, False
+        return None, False
+
+    def orchestrate_model_documentation(self, model_name: str, columns_sql: List[str]) -> int:
+        """
+        Orchestrator to fully document a model will:
+
+            - Create or update the columns found the database table into the schema.yml.
+            - Gives the user the posibility to change the model description.
+            - Gives the user the posibility to document the undocumented columns.
+            - Updates all the new columns definitions in all dbt.
+
+        Args:
+            model_name (str): Name of the model to document.
+            columns_sql (List[str]): Columns names that the model have in the database.
+
+        Returns:
+            int: with the status of the execution. 1 for fail, and 0 for ok!
+        """
+        content = None
+        path, schema_exists = self.find_model_in_dbt(model_name)
+        if not path:
+            logger.info(f"Not able to find the model with name {model_name} in the project.")
+            return 1
+        if schema_exists:
+            content = open_yaml(path)
+        content = self.process_model(content, model_name, columns_sql)
+        content = self.change_model_description(content, model_name)
+        save_yaml(path, content)
+
+        not_documented_columns = self.get_not_documented_columns(content, model_name)
+        self.document_columns(not_documented_columns)
+
+        self.update_column_descriptions(self.columns_to_update)
         return 0
+
+    def document_columns(self, columns: Dict[str, str]) -> None:
+        """
+        Method to document the columns from a model.
+
+        Will ask the user which columns they want to document and collect the new definition.
+
+        Args:
+            columns (Dict[str, str]): Dict of columns with the column name as the key
+            and the column description to populate schema.yml as the value.
+        """
+        columns_names = list(columns.keys())
+        for i in range(0, len(columns_names), NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
+            final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+            undocumented_columns_payload: List[Mapping[str, Any]] = [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    "choices": columns_names[i:final_index],
+                    "message": "Select the columns you want to document.",
+                }
+            ]
+            user_input = UserInputCollector(
+                "undocumented_columns", undocumented_columns_payload
+            ).collect()
+            self.columns_to_update.update(user_input)
 
     def update_model(
         self, content: Dict[str, Any], model_name: str, columns_sql: List[str]
@@ -91,7 +211,7 @@ class DocumentationTask(BaseTask):
 
         Args:
             content (Dict[str, Any]): content of the schema.yaml.
-            model_name (str): model name to create.
+            model_name (str): Name of the model for which to create entry in schema.yml.
             columns_sql (List[str]): List of columns that the model have in the database.
 
         Returns:
@@ -113,24 +233,17 @@ class DocumentationTask(BaseTask):
             content["models"].append(model)
         return content
 
-    def process_model(self, model_name: str, columns_sql: List[str]) -> None:
-        """Method to update/create a model in the schema.yaml.
+    def process_model(
+        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
+    ) -> Dict[str, Any]:
+        """Method to update/create a model entry in the schema.yml.
 
         Args:
-            model_name (str): model name to create.
-            columns_sql (List[str]): List of columns that the model have in the database.
+            model_name (str): Name of the model for which to create or update entry in schema.yml.
+            columns_sql (List[str]): List of columns names found in the database for this model.
         """
-        for root, _, files in os.walk(self.repository_path):
-            for file in files:
-                # TODO: Check how to avoid using target to discriminate compiled files in DBT.
-                if file == f"{model_name}.sql" and "target" not in root:
-                    path_file = Path(os.path.join(root, "schema.yml"))
-                    content = None
-                    if path_file.is_file():
-                        content = open_yaml(path_file)
-
-                    if self.is_model_in_schema_content(content, model_name) and content:
-                        content = self.update_model(content, model_name, columns_sql)
-                    else:
-                        content = self.create_new_model(content, model_name, columns_sql)
-                    save_yaml(path_file, content)
+        if self.is_model_in_schema_content(content, model_name) and content:
+            content = self.update_model(content, model_name, columns_sql)
+        else:
+            content = self.create_new_model(content, model_name, columns_sql)
+        return content

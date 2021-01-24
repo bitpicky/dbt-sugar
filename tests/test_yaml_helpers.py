@@ -34,8 +34,8 @@ def test_open_yaml(create_temp_schema_yaml):
     "content, result",
     (
         (
+            {"models": [{"columns": [], "name": "model1"}]},
             """{"models": [{"columns": [], "name": "model1"}]}""",
-            """'{"models": [{"columns": [], "name": "model1"}]}'""",
         ),
     ),
 )

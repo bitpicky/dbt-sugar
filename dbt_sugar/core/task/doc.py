@@ -49,17 +49,17 @@ class DocumentationTask(BaseTask):
 
         if type_of_connection == "postgres":
             columns_sql = PostgresConnector(
-                user=dbt_credentials.get("user", ""),
-                password=dbt_credentials.get("password", ""),
-                host=dbt_credentials.get("host", "localhost"),
-                database=dbt_credentials.get("database", "dwh"),
+                user=dbt_credentials.get("user", str()),
+                password=dbt_credentials.get("password", str()),
+                host=dbt_credentials.get("host", str()),
+                database=dbt_credentials.get("database", str()),
             ).get_columns_from_table(model, schema)
         elif type_of_connection == "snowflake":
             columns_sql = SnowflakeConnector(
-                user=dbt_credentials.get("user", ""),
-                password=dbt_credentials.get("password", ""),
-                account=dbt_credentials.get("account", ""),
-                database=dbt_credentials.get("database", "dwh"),
+                user=dbt_credentials.get("user", str()),
+                password=dbt_credentials.get("password", str()),
+                account=dbt_credentials.get("account", str()),
+                database=dbt_credentials.get("database", str()),
             ).get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(model, columns_sql)

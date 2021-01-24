@@ -1453,6 +1453,17 @@ termcolor = ["termcolor"]
 watchdog = ["watchdog"]
 
 [[package]]
+name = "yamlloader"
+version = "0.5.5"
+description = "Ordered YAML loader and dumper for PyYAML."
+category = "main"
+optional = false
+python-versions = ">=2.7"
+
+[package.dependencies]
+pyyaml = "*"
+
+[[package]]
 name = "zipp"
 version = "3.4.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -2319,6 +2330,10 @@ wcwidth = [
 werkzeug = [
     {file = "Werkzeug-0.16.1-py2.py3-none-any.whl", hash = "sha256:1e0dedc2acb1f46827daa2e399c1485c8fa17c0d8e70b6b875b4e7f54bf408d2"},
     {file = "Werkzeug-0.16.1.tar.gz", hash = "sha256:b353856d37dec59d6511359f97f6a4b2468442e454bd1c98298ddce53cac1f04"},
+]
+yamlloader = [
+    {file = "yamlloader-0.5.5-py3-none-any.whl", hash = "sha256:814c39f5f5c4e2d201e8421f4869221dcba0561fc30857d4437395b5e50b3162"},
+    {file = "yamlloader-0.5.5.tar.gz", hash = "sha256:dcab5f16b39bb03d10dda4cd4f30c943675ec4c7771807fc67e7f1bb319bf4c8"},
 ]
 zipp = [
     {file = "zipp-3.4.0-py3-none-any.whl", hash = "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108"},

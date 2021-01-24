@@ -246,3 +246,172 @@ def test_update_model(content, model_name, columns_sql, result):
 def test_create_new_model(content, model_name, columns_sql, result):
     doc_task = __init_descriptions()
     assert doc_task.create_new_model(content, model_name, columns_sql) == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, result",
+    [
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": "descriptionB"},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnA": "descriptionA", "columnB": "descriptionB"},
+        ),
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": "descriptionB"},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel1",
+            {},
+        ),
+    ],
+)
+def test_get_documented_columns(content, model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_documented_columns(content, model_name) == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, result",
+    [
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": COLUMN_NOT_DOCUMENTED},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
+        ),
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": "descriptionB"},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel1",
+            {},
+        ),
+    ],
+)
+def test_get_documented_columns(content, model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_not_documented_columns(content, model_name) == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, result",
+    [
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [],
+                    }
+                ]
+            },
+            "testmodel",
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "New description for the model.",
+                        "columns": [],
+                    }
+                ]
+            },
+        ),
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "columns": [],
+                    }
+                ]
+            },
+            "testmodel",
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "New description for the model.",
+                        "columns": [],
+                    }
+                ]
+            },
+        ),
+    ],
+)
+def test_change_model_description(mocker, content, model_name, result):
+    doc_task = __init_descriptions()
+    mocker.patch(
+        "questionary.prompt",
+        return_value={
+            "wants_to_document_model": True,
+            "model_description": "New description for the model.",
+        },
+    )
+    assert doc_task.change_model_description(content, model_name) == result
+
+
+def test_document_columns(mocker):
+    class Question:
+        def __init__(self, return_value):
+            self._return_value = return_value
+
+        def ask(self):
+            return self._return_value
+
+    doc_task = __init_descriptions()
+    mocker.patch("questionary.prompt", return_value={"cols_to_document": ["columnA"]})
+    mocker.patch("questionary.confirm", return_value=Question(False))
+    mocker.patch(
+        "questionary.text",
+        return_value=Question(
+            {
+                "columnA": "newDescriptionA",
+            }
+        ),
+    )
+    doc_task.document_columns(doc_task.dbt_definitions)
+    doc_task.dbt_definitions = {"columnA": "newDescriptionA", "columnB": "descriptionB"}

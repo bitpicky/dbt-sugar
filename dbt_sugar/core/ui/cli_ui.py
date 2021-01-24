@@ -174,7 +174,7 @@ class UserInputCollector:
 
     @staticmethod
     def _iterate_through_columns(
-        cols: List[str], ask_for_tests: bool = False
+        cols: List[str], ask_for_tests: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         """Iterates through a provided list of columns and asks for:
         - a column documentation
@@ -205,6 +205,10 @@ class UserInputCollector:
 
             if description:
                 results.update({column: {"description": description}})
+            else:
+                # we still want to make the column end up in the dict but we don't put a desc if
+                # empty... not sure about this
+                results.update({column: {}})
 
             # kick in the test flows
             if ask_for_tests:

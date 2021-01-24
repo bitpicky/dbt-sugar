@@ -4,8 +4,7 @@ import pytest
 
 from dbt_sugar.core.task.doc import DocumentationTask
 
-TEST_PROFILES_DIR = Path(__file__).resolve().parent.joinpath("docker_postgres")
-# , "profiles.yml")
+TEST_PROFILES_DIR = Path(__file__).resolve().parent.joinpath("profiles.yml")
 
 
 @pytest.mark.parametrize(

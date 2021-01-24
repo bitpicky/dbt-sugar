@@ -33,3 +33,7 @@ class NoSyrupProvided(DbtSugarException):
 
 class MissingDbtProjects(DbtSugarException):
     """Thrown when one or more in-scope dbt projects could not be found."""
+
+
+class TargetNameNotProvided(DbtSugarException):
+    """Thrown when no `target:` entry is provided in the profiles.yml and not passed on CLI."""

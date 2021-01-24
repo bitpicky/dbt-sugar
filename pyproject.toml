@@ -78,3 +78,6 @@ template = "changelog/_template.rst"
     directory = "misc"
     name = "Under The Hood/Misc"
     showcontent = true
+
+[tool.pytest.ini_options]
+markers = ["datafiles"]

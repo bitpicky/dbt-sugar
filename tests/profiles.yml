@@ -1,4 +1,4 @@
-dbt_sugar_test_project:
+dbt_sugar_test:
   outputs:
     snowflake:
       type: snowflake
@@ -32,3 +32,11 @@ dbt_sugar_test_project:
       user: dbt_sugar_test_user
       database: dbt_sugar
       schema: public
+
+    dev:
+      type: postgres
+      user: dbt_sugar_test_user
+      database: dbt_sugar
+      password: magical_password
+      schema: public
+  target: postgres

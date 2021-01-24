@@ -6,7 +6,8 @@ from typing import List, Union
 import pyfiglet
 
 from dbt_sugar.core._version import __version__
-from dbt_sugar.core.clients.dbt import DbtProfile
+from dbt_sugar.core.clients.dbt import DbtProfile, DbtProject
+from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
@@ -71,8 +72,9 @@ document_sub_parser = sub_parsers.add_parser(
     "doc", parents=[base_subparser], help="Runs documentation and test enforement task."
 )
 document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
+# TODO: We shouldn't be requiring this if we have a `--model` format as it's considered bad practice
 document_sub_parser.add_argument(
-    "-m", "--model", help="Name of the dbt model to document", type=str, default=None
+    "-m", "--model", help="Name of the dbt model to document", type=str, default=None, required=True
 )
 document_sub_parser.add_argument(
     "-s",
@@ -86,6 +88,13 @@ document_sub_parser.add_argument(
     help="When provided the documentation task will not modify your files",
     action="store_true",
     default=False,
+)
+document_sub_parser.add_argument(
+    "-t",
+    "--target",
+    help="Which target from the dbt profile to load.",
+    type=str,
+    default=str(),
 )
 
 
@@ -102,10 +111,21 @@ def handle(
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
 
-    # TODO: Feed project_name dynamically at run time from CLI or config.
-    dbt_profile = DbtProfile(
-        project_name="default", target_name="dev", profiles_dir=flag_parser.profiles_dir
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    # TODO: Revise the index access here when we can support multiple dbt projects properly.
+    dbt_project = DbtProject(
+        sugar_config.config.get("dbt_projects", list())[0].get("name", str()),
+        sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
     )
+    dbt_project.read_project()
+    dbt_profile = DbtProfile(
+        profile_name=dbt_project.profile_name,
+        target_name=flag_parser.target,
+        profiles_dir=flag_parser.profiles_dir,
+    )
+    dbt_profile.read_profile()
 
     if flag_parser.log_level == "debug":
         log_manager.set_debug()

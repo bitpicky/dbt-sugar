@@ -29,6 +29,7 @@ class FlagParser:
         self.config_path: Path = Path(str())
         self.profiles_dir: Path = Path(str())
         self.is_dry_run: bool = False
+        self.target: str = str()
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
         if test_cli_args:
@@ -54,3 +55,4 @@ class FlagParser:
         if self.task == "doc":
             self.model = self.args.model
             self.schema = self.args.schema
+            self.target = self.args.target

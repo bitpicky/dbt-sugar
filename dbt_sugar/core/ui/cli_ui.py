@@ -176,7 +176,9 @@ class UserInputCollector:
     def _iterate_through_columns(
         cols: List[str], ask_for_tests: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
-        """Iterates through a provided list of columns and asks for:
+        """Iterates through a provided list of columns collects documentation info.
+
+        More specifically it asks for the following
         - a column documentation
         - whether user wants to add tests
             - and if so which tests to add from a list of pre-defined/aggreed tests.

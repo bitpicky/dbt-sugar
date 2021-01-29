@@ -57,10 +57,11 @@ class BaseYamlConfig:
 
     def _assert_file_exists(self, dir: Path, filename: str = "profiles.yml") -> bool:
         logger.debug(dir.resolve())
-        if dir.is_file():
+        full_path_to_file = dir / filename
+        if full_path_to_file.is_file():
             return True
         else:
-            raise DbtProfileFileMissing(f"Could not locate `{filename}` in {dir.resolve()}.")
+            raise DbtProfileFileMissing(f"Could not locate `{filename}` in {dir.resolve()}")
 
 
 class DbtProject(BaseYamlConfig):
@@ -92,7 +93,7 @@ class DbtProject(BaseYamlConfig):
         return Path(self._project_dir).joinpath(type(self).DBT_PROJECT_FILENAME)
 
     def read_project(self) -> None:
-        _ = self._assert_file_exists(self._dbt_project_filename, filename=self.DBT_PROJECT_FILENAME)
+        _ = self._assert_file_exists(Path(self._project_dir), filename=self.DBT_PROJECT_FILENAME)
         _project_dict = open_yaml(self._dbt_project_filename)
 
         # pass the dict through pydantic for validation and only getting what we need
@@ -158,7 +159,7 @@ class DbtProfile(BaseYamlConfig):
         _ = self._assert_file_exists(
             self.profiles_dir
         )  # this will raise so no need to check exists further
-        _profile_dict = open_yaml(self.profiles_dir)
+        _profile_dict = open_yaml(self.profiles_dir / "profiles.yml")
         _profile_dict = _profile_dict.get(self._profile_name, _profile_dict.get(self._profile_name))
         if _profile_dict:
 

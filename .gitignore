@@ -143,6 +143,7 @@ cython_debug/
 # dbt-sugar specifics
 .coverage
 dbt_sugar_logs/**
+**/dbt_sugar_logs/**
 
 #pyenv
 .python-version

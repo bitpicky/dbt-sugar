@@ -144,8 +144,5 @@ cython_debug/
 .coverage
 dbt_sugar_logs/**
 
-# poetry lock file shouldn't be committed
-poetry.lock
-
 #pyenv
 .python-version

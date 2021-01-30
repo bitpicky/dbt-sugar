@@ -37,14 +37,13 @@ def test_read_profile(
             "warehouse": "dummy_warehouse",
         },
         "postgres": {
-            "account": None,
             "database": "dbt_sugar",
             "password": "magical_password",
-            "role": None,
             "target_schema": "public",
             "type": "postgres",
             "user": "dbt_sugar_test_user",
-            "warehouse": None,
+            "host": "localhost",
+            "port": 5432,
         },
         "bad_snowflake": {
             "type": "snowflake",
@@ -65,19 +64,17 @@ def test_read_profile(
     if target_name.startswith("bad_"):
         with pytest.raises(ValidationError):
             profile = DbtProfile(
-                profile_name="dbt_sugar_test",
-                target_name=target_name,
-                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+                profile_name="dbt_sugar_test", target_name=target_name, profiles_dir=Path(datafiles)
             )
             profile.read_profile()
+
     elif is_invalid_target:
         with pytest.raises(ProfileParsingError):
             profile = DbtProfile(
-                profile_name="dbt_sugar_test",
-                target_name=target_name,
-                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+                profile_name="dbt_sugar_test", target_name=target_name, profiles_dir=Path(datafiles)
             )
             profile.read_profile()
+
     elif is_missing_profile:
         with pytest.raises(DbtProfileFileMissing):
             profile = DbtProfile(
@@ -86,19 +83,17 @@ def test_read_profile(
                 profiles_dir=Path(datafiles).joinpath("missing_profiles.yml"),
             )
             profile.read_profile()
+
     elif is_bad_project:
         with pytest.raises(ProfileParsingError):
             profile = DbtProfile(
-                profile_name="bad_project",
-                target_name=target_name,
-                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+                profile_name="bad_project", target_name=target_name, profiles_dir=Path(datafiles)
             )
             profile.read_profile()
+
     else:
         profile = DbtProfile(
-            profile_name="dbt_sugar_test",
-            target_name=target_name,
-            profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+            profile_name="dbt_sugar_test", target_name=target_name, profiles_dir=Path(datafiles)
         )
         profile.read_profile()
         assert profile.profile == expectations[target_name]
@@ -106,9 +101,7 @@ def test_read_profile(
         # this one tests the auto parsing of the "target:" field in profiles.yml
         if target_name == "postgres":
             profile = DbtProfile(
-                profile_name="dbt_sugar_test",
-                target_name=str(),
-                profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+                profile_name="dbt_sugar_test", target_name=str(), profiles_dir=Path(datafiles)
             )
             profile.read_profile()
             assert profile.profile == expectations[target_name]
@@ -123,7 +116,8 @@ def test_read_profile_missing(datafiles):
         profile = DbtProfile(
             profile_name="tough shit it does not exist",
             target_name=str(),
-            profiles_dir=Path(datafiles).joinpath("profiles.yml"),
+            profiles_dir=Path(datafiles)
+            # .joinpath("profiles.yml"),
         )
         profile.read_profile()
 

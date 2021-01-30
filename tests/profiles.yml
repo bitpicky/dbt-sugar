@@ -18,6 +18,7 @@ dbt_sugar_test:
       dbname: dbt_sugar
       schema: public
       host: localhost
+      port: 5432
 
     bad_snowflake:
       type: snowflake

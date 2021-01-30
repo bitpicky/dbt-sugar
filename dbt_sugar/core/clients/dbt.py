@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, Field
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.exceptions import (
@@ -16,36 +16,29 @@ from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt", "profiles").with_suffix(".yml")
 
 
-class DbtProfilesModel(BaseModel):
-    """Dbt credentials validation model."""
+class PostgresDbtProfilesModel(BaseModel):
+    """Postgres Dbt credentials validation model."""
 
     type: str
-    account: Optional[str]
+    user: str
+    password: str = Field(..., alias="pass")
+    database: str = Field(..., alias="dbname")
+    target_schema: str = Field(..., alias="schema")
+    host: str
+    port: int
+
+
+class SnowflakeDbtProfilesModel(BaseModel):
+    """Snowflake Dbt credentials validation model."""
+
+    type: str
+    account: str
     user: str
     password: str
     database: str
-    target_schema: str
-    role: Optional[str] = None
-    warehouse: Optional[str] = None
-    host: Optional[str] = "localhost"
-    port: Optional[int] = 5432
-
-    @root_validator(pre=True)
-    def check_required_fields_based_on_db_type(cls, values):
-        """Checks some fields are not None based on different db requirements."""
-        if values.get("type") == "snowflake":
-            snowflake_fields = ["account", "role", "warehouse"]
-            for field in snowflake_fields:
-                assert values.get(field) is not None
-        return values
-
-    class Config:
-        """Handles fields renaming.
-
-        Mainly used to remap words that are reserved by pydantic.
-        """
-
-        fields = {"target_schema": "schema", "password": "pass", "database": "dbname"}
+    target_schema: str = Field(..., alias="schema")
+    role: str
+    warehouse: str
 
 
 class DbtProjectModel(BaseModel):
@@ -169,10 +162,27 @@ class DbtProfile(BaseYamlConfig):
             _target_profile = self._get_target_profile(profile_dict=_profile_dict)
 
             if _target_profile:
-                # uses pydantic to validate profile. It will raise and break app if invalid.
-                _target_profile = DbtProfilesModel(**_target_profile)
+                _profile_type = _target_profile.get("type")
+                # call the right pydantic validator depending on the db type as dbt is not
+                # consistent with it's profiles and it's hell to have all the validation in one
+                # pydantic model.
+                if _profile_type == "snowflake":
+                    # uses pydantic to validate profile. It will raise and break app if invalid.
+                    _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
+                elif _profile_type == "postgres":
+                    _target_profile = PostgresDbtProfilesModel(**_target_profile)
+
+                # if we don't manage to read the db type for some reason.
+                elif _profile_type is None:
+                    raise ProfileParsingError(
+                        f"Could not read database type for {self._profile_name} in the profiles.yml"
+                        f" located in {self.profiles_dir}"
+                    )
+                else:
+                    raise NotImplementedError(f"{_profile_type} is not implemented yet.")
                 logger.debug(_target_profile)
                 self.profile = _target_profile.dict()
+
             else:
                 raise ProfileParsingError(
                     f"Could not find an entry for target: {self._target_name}, "
@@ -182,5 +192,5 @@ class DbtProfile(BaseYamlConfig):
         else:
             raise ProfileParsingError(
                 f"Could not find an entry for {self._profile_name} in your profiles.yml "
-                f"located in {self.profiles_dir}."
+                f"located in {self.profiles_dir}"
             )

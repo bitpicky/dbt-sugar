@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
+from sqlalchemy.exc import OperationalError
+
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
@@ -48,12 +50,17 @@ class DocumentationTask(BaseTask):
         type_of_connection = dbt_credentials.get("type", "")
 
         if type_of_connection == "postgres":
-            columns_sql = PostgresConnector(
-                user=dbt_credentials.get("user", str()),
-                password=dbt_credentials.get("password", str()),
-                host=dbt_credentials.get("host", str()),
-                database=dbt_credentials.get("database", str()),
-            ).get_columns_from_table(model, schema)
+            try:
+                columns_sql = PostgresConnector(
+                    user=dbt_credentials.get("user", str()),
+                    password=dbt_credentials.get("password", str()),
+                    host=dbt_credentials.get("host", str()),
+                    database=dbt_credentials.get("database", str()),
+                ).get_columns_from_table(model, schema)
+            except OperationalError as e:
+                raise RuntimeError(
+                    f"Could not connect to your postgres database, check your profiles.yml\n{e}"
+                )
         elif type_of_connection == "snowflake":
             columns_sql = SnowflakeConnector(
                 user=dbt_credentials.get("user", str()),

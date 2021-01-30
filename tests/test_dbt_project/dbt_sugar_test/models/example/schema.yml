@@ -1,34 +1,22 @@
 version: 2
 models:
   - name: my_first_dbt_model
-    description: A
-      starter
-      dbt
-      model
+    description: A starter dbt model
     columns:
       - name: id
-        description: The
-          primary
-          key
-          for
-          this
-          table
+        description: The primary key for this table
         tests:
           - unique
           - not_null
+      - name: answer
+        description: No description for this column.
+      - name: question
+        description: No description for this column.
   - name: my_second_dbt_model
-    description: A
-      starter
-      dbt
-      model
+    description: A starter dbt model
     columns:
       - name: id
-        description: The
-          primary
-          key
-          for
-          this
-          table
+        description: The primary key for this table
         tests:
           - unique
           - not_null

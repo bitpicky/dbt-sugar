@@ -105,6 +105,7 @@ class DbtSugarConfig:
 
         project_existance = {}
         for project in dbt_projects:
+            logger.debug(f"Looking for {project['name']} in {Path(project['path']).resolve()}")
             project_existance[project["name"]] = (
                 True if Path(project["path"]).resolve().exists() else False
             )

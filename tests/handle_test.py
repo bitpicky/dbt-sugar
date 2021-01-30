@@ -4,7 +4,8 @@ import pytest
 
 from dbt_sugar.core.task.doc import DocumentationTask
 
-TEST_PROFILES_DIR = Path(__file__).resolve().parent.joinpath("profiles.yml")
+TEST_PROFILES_DIR = Path(__file__).resolve().parent
+# .joinpath("profiles.yml")
 
 
 @pytest.mark.parametrize(
@@ -28,4 +29,4 @@ def test_handle(cli_args):
 
     handle_result = handle(parser, test_cli_args=cli_args)
 
-    assert isinstance(handle_result, DocumentationTask)
+    assert handle_result == 0

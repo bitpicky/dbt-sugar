@@ -116,8 +116,7 @@ def test_read_profile_missing(datafiles):
         profile = DbtProfile(
             profile_name="tough shit it does not exist",
             target_name=str(),
-            profiles_dir=Path(datafiles)
-            # .joinpath("profiles.yml"),
+            profiles_dir=Path(datafiles),
         )
         profile.read_profile()
 

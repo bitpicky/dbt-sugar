@@ -14,9 +14,10 @@ dbt_sugar_test:
     postgres:
       type: postgres
       user: dbt_sugar_test_user
-      password: magical_password
-      database: dbt_sugar
+      pass: magical_password
+      dbname: dbt_sugar
       schema: public
+      host: localhost
 
     bad_snowflake:
       type: snowflake

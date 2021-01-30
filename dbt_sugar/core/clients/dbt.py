@@ -27,6 +27,8 @@ class DbtProfilesModel(BaseModel):
     target_schema: str
     role: Optional[str] = None
     warehouse: Optional[str] = None
+    host: Optional[str] = "localhost"
+    port: Optional[int] = 5432
 
     @root_validator(pre=True)
     def check_required_fields_based_on_db_type(cls, values):
@@ -43,7 +45,7 @@ class DbtProfilesModel(BaseModel):
         Mainly used to remap words that are reserved by pydantic.
         """
 
-        fields = {"target_schema": "schema"}
+        fields = {"target_schema": "schema", "password": "pass", "database": "dbname"}
 
 
 class DbtProjectModel(BaseModel):

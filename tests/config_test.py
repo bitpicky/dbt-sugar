@@ -53,7 +53,7 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
         "dbt_projects": [
             {
                 "name": "dbt_sugar_test",
-                "path": "./test_dbt_project/dbt_sugar_test",
+                "path": "./tests/test_dbt_project/dbt_sugar_test",
                 "excluded_tables": ["table_a"],
             }
         ],

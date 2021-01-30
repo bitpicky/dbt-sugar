@@ -5,7 +5,7 @@ syrups:
   - name: syrup_1
     dbt_projects:
       - name: dbt_sugar_test
-        path: "./test_dbt_project/dbt_sugar_test"
+        path: "./tests/test_dbt_project/dbt_sugar_test"
         excluded_tables:
           - table_a
   - name: syrup_2

@@ -16,11 +16,10 @@ class DbtSugarTracebackManager:
         Args:
             flags (FlagParser): [description]
         """
-        self._traceback_depth: int = 4
-        if flags.full_tracebacks:
-            self._traceback_depth = int()
+        stack_depth: int = 1
+        if flags.verbose:
+            stack_depth = 4
 
-    def configure_pretty_errors(self) -> None:
         pretty_errors.configure(
             separator_character="*",
             line_number_first=False,
@@ -31,7 +30,7 @@ class DbtSugarTracebackManager:
             code_color="  " + pretty_errors.default_config.line_color,
             truncate_code=True,
             display_locals=True,
-            stack_depth=self._traceback_depth,
+            stack_depth=stack_depth,
             trace_lines_before=4,
             trace_lines_after=0,
             display_arrow=True,

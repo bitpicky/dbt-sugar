@@ -224,6 +224,9 @@ class UserInputCollector:
                     ).ask()
                     if tests:
                         results[column]["tests"] = tests
+            # remove the column if no info has been given (no tests, and no description).
+            if not results[column]:
+                _ = results.pop(column)
         return results
 
     @staticmethod

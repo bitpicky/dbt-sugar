@@ -186,7 +186,7 @@ class UserInputCollector:
         Args:
             cols (List[str]): List of columns to collect description and tests info from.
             ask_for_tests (bool, optional): When set to true UI will ask for whether the user wants
-            to add tests for each of the columns. Defaults to False.
+            to add tests for each of the columns. Defaults to True.
 
         Returns:
             Mapping[str, Mapping[str, Union[str, List[str]]]]: API paylad to be passed to back-end

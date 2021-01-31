@@ -6,8 +6,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
-from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
-from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
+from dbt_sugar.core.connectors.base_connector import BaseConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.task.base import EXCLUDE_TARGET_FILES_PATTERN, MODEL_NOT_DOCUMENTED, BaseTask
@@ -46,23 +45,20 @@ class DocumentationTask(BaseTask):
 
         dbt_credentials = self.load_dbt_credentials()
         type_of_connection = dbt_credentials.get("type", "")
+        self.connector = BaseConnector(
+            connector_type=type_of_connection,
+            user=dbt_credentials.get("user", str()),
+            password=dbt_credentials.get("password", str()),
+            database=dbt_credentials.get("database", str()),
+            host=dbt_credentials.get("host", str()),
+            account=dbt_credentials.get("account", str()),
+        )
+        if not self.connector.connection_url:
+            return 1
 
-        if type_of_connection == "postgres":
-            columns_sql = PostgresConnector(
-                user=dbt_credentials.get("user", str()),
-                password=dbt_credentials.get("password", str()),
-                host=dbt_credentials.get("host", str()),
-                database=dbt_credentials.get("database", str()),
-            ).get_columns_from_table(model, schema)
-        elif type_of_connection == "snowflake":
-            columns_sql = SnowflakeConnector(
-                user=dbt_credentials.get("user", str()),
-                password=dbt_credentials.get("password", str()),
-                account=dbt_credentials.get("account", str()),
-                database=dbt_credentials.get("database", str()),
-            ).get_columns_from_table(model, schema)
+        columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
-            return self.orchestrate_model_documentation(model, columns_sql)
+            return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
     def change_model_description(self, content: Dict[str, Any], model_name: str) -> Dict[str, Any]:
@@ -121,7 +117,9 @@ class DocumentationTask(BaseTask):
                         return path_file, False
         return None, False
 
-    def orchestrate_model_documentation(self, model_name: str, columns_sql: List[str]) -> int:
+    def orchestrate_model_documentation(
+        self, schema: str, model_name: str, columns_sql: List[str]
+    ) -> int:
         """
         Orchestrator to fully document a model will:
 
@@ -131,6 +129,7 @@ class DocumentationTask(BaseTask):
             - Updates all the new columns definitions in all dbt.
 
         Args:
+            schema (str): Name of the schema where the model lives.
             model_name (str): Name of the model to document.
             columns_sql (List[str]): Columns names that the model have in the database.
 
@@ -152,7 +151,43 @@ class DocumentationTask(BaseTask):
         self.document_columns(not_documented_columns)
 
         self.update_column_descriptions(self.columns_to_update)
+        self.add_test_into_schema_yaml(schema, model_name, path)
         return 0
+
+    def add_test_into_schema_yaml(self, schema: str, model_name: str, path: Path) -> None:
+        """
+        Method to run and add test into a schema.yml, this method will:
+
+        Run the tests and if they have been successful it will add them into the schema.yml.
+
+        Args:
+            schema (str): Name of the schema where the model lives.
+            model_name (str): Name of the model to document.
+            path (Path): to the schema_yaml.
+        """
+        tests_to_add: Dict[str, List[str]] = {}  # Column: Tests
+        for column in self.columns_to_update.keys():
+            for test in self.columns_to_update[column].get("tests", []):
+                test_result = self.connector.run_test(
+                    test,
+                    schema,
+                    model_name,
+                    column,
+                )
+                if test_result:
+                    if column in tests_to_add.keys():
+                        tests_to_add[column].append(test)
+                    else:
+                        tests_to_add[column] = [test]
+
+        content = open_yaml(path)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model["columns"]:
+                    column_name = column["name"]
+                    if column_name in tests_to_add.keys():
+                        column["tests"] = tests_to_add[column_name]
+        save_yaml(path, content)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """

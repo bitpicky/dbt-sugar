@@ -84,7 +84,9 @@ class BaseTask(abc.ABC):
             for column in model["columns"]:
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update.keys():
-                    column["description"] = dict_column_description_to_update[column_name]
+                    description = dict_column_description_to_update[column_name].get("description")
+                    if description:
+                        column["description"] = description
         save_yaml(path_file, content)
 
     def update_column_descriptions(self, dict_column_description_to_update: Dict[str, str]) -> None:

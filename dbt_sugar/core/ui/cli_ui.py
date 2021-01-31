@@ -10,7 +10,7 @@ DESCRIPTION_PROMPT_MESSAGE = "Please write down your description:"
 
 # TODO: We'll have to us a "plugin"/register design and possibly source this from the dbt project.
 # !See issue #65 for most up to date thinking on this.
-AVAILABLE_TESTS = ["unqiue", "not_null"]
+AVAILABLE_TESTS = ["unique", "not_null"]
 
 
 class ConfirmQuestion(BaseModel):

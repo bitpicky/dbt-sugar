@@ -58,7 +58,6 @@ class DocumentationTask(BaseTask):
         if not self.connector.connection_url:
             return 1
 
-
         columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)

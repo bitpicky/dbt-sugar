@@ -17,9 +17,7 @@ def __init_descriptions(params=None, dbt_profile=None):
 
 def test_load_dbt_credentials():
     profile = DbtProfile(
-        profile_name="dbt_sugar_test",
-        target_name="snowflake",
-        profiles_dir=Path(FIXTURE_DIR).joinpath("profiles.yml"),
+        profile_name="dbt_sugar_test", target_name="snowflake", profiles_dir=Path(FIXTURE_DIR)
     )
     doc_task = __init_descriptions(None, profile)
     credentials = doc_task.load_dbt_credentials()

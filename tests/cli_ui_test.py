@@ -351,5 +351,43 @@ def test__document_already_documented_cols(
     assert results == expected_results
 
 
-def test__iterate_through_columns(mocker, question_payload, questionary_outputs, expected_results):
-    ...
+@pytest.mark.parametrize(
+    "question_payload, expected_results",
+    [
+        pytest.param(
+            {"col_list": ["column_a", "column_b"], "ask_for_tests": False},
+            {
+                "column_a": {"description": "Dummy description"},
+                "column_b": {"description": "Dummy description"},
+            },
+            id="document_columns_no_test",
+        ),
+        pytest.param(
+            {"col_list": ["column_a", "column_b"], "ask_for_tests": True},
+            {
+                "column_a": {"description": "Dummy description", "tests": ["unique"]},
+                "column_b": {"description": "Dummy description", "tests": ["unique"]},
+            },
+            id="document_columns_yes_test",
+        ),
+    ],
+)
+def test__iterate_through_columns(mocker, question_payload, expected_results):
+    from dbt_sugar.core.ui.cli_ui import UserInputCollector
+
+    class Question:
+        def __init__(self, return_value):
+            self._return_value = return_value
+
+        def ask(self):
+            return self._return_value
+
+    mocker.patch("questionary.text", return_value=Question("Dummy description"))
+    mocker.patch("questionary.checkbox", return_value=Question(["unique"]))
+    mocker.patch("questionary.confirm", return_value=Question(question_payload["ask_for_tests"]))
+    results = UserInputCollector(
+        "undocumented_columns", question_payload=[]
+    )._iterate_through_columns(
+        cols=question_payload["col_list"], ask_for_tests=question_payload["ask_for_tests"]
+    )
+    assert results == expected_results

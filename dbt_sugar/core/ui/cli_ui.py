@@ -271,7 +271,10 @@ class UserInputCollector:
 
     @classmethod
     def _document_undocumented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+        cls,
+        question_payload: Sequence[Mapping[str, Any]],
+        ask_for_tests: bool = True,
+        ask_for_tags: bool = True,
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
 
         results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
@@ -287,19 +290,24 @@ class UserInputCollector:
 
         if document_all_cols:
             results = cls._iterate_through_columns(
-                cols=columns_to_document, ask_for_tests=ask_for_tests
+                cols=columns_to_document, ask_for_tests=ask_for_tests, ask_for_tags=ask_for_tags
             )
         else:
             # get the list of columns from user
             columns_to_document = questionary.prompt(question_payload)
             results = cls._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+                cols=columns_to_document["cols_to_document"],
+                ask_for_tests=ask_for_tests,
+                ask_for_tags=ask_for_tags,
             )
         return results
 
     @classmethod
     def _document_already_documented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+        cls,
+        question_payload: Sequence[Mapping[str, Any]],
+        ask_for_tests: bool = True,
+        ask_for_tags: bool = True,
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         mutable_payload = copy.deepcopy(question_payload)
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
@@ -320,7 +328,9 @@ class UserInputCollector:
         if document_any_columns:
             columns_to_document = questionary.prompt(mutable_payload)
             _results = cls._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+                cols=columns_to_document["cols_to_document"],
+                ask_for_tests=ask_for_tests,
+                ask_for_tags=ask_for_tags,
             )
 
             # remove description from col key

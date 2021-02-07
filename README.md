@@ -11,7 +11,11 @@
 
 :warning: **We're actively working on this tool and aim to have a barebones feature release by mid-Feb at the latest**.
 
-If you want to help out and join the party feel free to [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun :sparkles: join us on [Discord](https://discord.gg/bUk4MVTcqW)
+If you want to help out and join the party feel free to:
+
+- [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun
+- join us on [Discord](https://discord.gg/bUk4MVTcqW) :sparkles: and
+- check the [ROADMAP.md](ROADMAP.md) to see what's in the plans.
 
 # dbt-sugar :candy:
 

@@ -45,15 +45,6 @@ import pytest
 def test__document_model(mocker, question_payload, questionary_outputs, expected_results):
     from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
-    print(question_payload)
-    # mock for the questionary.Question --this was a bit of a fuckery to test...
-    # class Question:
-    #     def __init__(self, return_value):
-    #         self._return_value = return_value
-
-    #     def ask(self):
-    #         return self._return_value
-
     mocker.patch("questionary.prompt", return_value=questionary_outputs)
     results = UserInputCollector(question_type="model", question_payload=question_payload).collect()
     if questionary_outputs.get("wants_to_document_model") is False:

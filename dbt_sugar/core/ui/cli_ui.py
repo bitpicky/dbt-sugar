@@ -172,9 +172,9 @@ class UserInputCollector:
 
         self._is_valid_question_payload = True
 
-    @staticmethod
+    @classmethod
     def _iterate_through_columns(
-        cols: List[str], ask_for_tests: bool = True
+        cls, cols: List[str], ask_for_tests: bool = True, ask_for_tags: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         """Iterates through a provided list of columns collects documentation info.
 
@@ -195,7 +195,8 @@ class UserInputCollector:
             {
                 'col_a': {
                     'description': 'Description for col a',
-                    'tests': ['unique']
+                    'tests': ['unique'],
+                    'tags': ['PII']
                     },
                 'col_b': {'description': 'Description for col b'}
             }
@@ -224,10 +225,31 @@ class UserInputCollector:
                     ).ask()
                     if tests:
                         results[column]["tests"] = tests
+
+            # kick in the tags flow
+            if ask_for_tags:
+                wants_to_add_tags = questionary.confirm(
+                    message="Would you like to add any tags?"
+                ).ask()
+                if wants_to_add_tags:
+                    tags = questionary.text(message="Prodive a comma-separated list of tags").ask()
+                    tags = cls.__split_comma_separated_str(tags)
+                    if tags:
+                        results[column]["tags"] = tags
             # remove the column if no info has been given (no tests, and no description).
             if not results[column]:
                 _ = results.pop(column)
         return results
+
+    @staticmethod
+    def __split_comma_separated_str(tags: str) -> List[str]:
+        _tags = []
+        if isinstance(tags, str):
+            _tags = tags.split(",")
+            if isinstance(tags, list):
+                _tags = [s.strip() for s in _tags]
+            return _tags
+        raise TypeError(f"Tags can only be strings. You provided a {type(tags)}")
 
     @staticmethod
     def _document_model(

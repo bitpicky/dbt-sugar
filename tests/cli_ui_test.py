@@ -1,5 +1,15 @@
 import pytest
 
+from dbt_sugar.core.ui.cli_ui import UserInputCollector
+
+
+class Question:
+    def __init__(self, return_value):
+        self._return_value = return_value
+
+    def ask(self):
+        return self._return_value
+
 
 @pytest.mark.parametrize(
     "question_payload, questionary_outputs, expected_results",
@@ -43,7 +53,6 @@ import pytest
     ],
 )
 def test__document_model(mocker, question_payload, questionary_outputs, expected_results):
-    from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
     mocker.patch("questionary.prompt", return_value=questionary_outputs)
     results = UserInputCollector(question_type="model", question_payload=question_payload).collect()
@@ -94,13 +103,6 @@ def test__document_undocumented_columns(
     mocker, question_payload, questionary_outputs, expected_results
 ):
     from dbt_sugar.core.ui.cli_ui import UserInputCollector
-
-    class Question:
-        def __init__(self, return_value):
-            self._return_value = return_value
-
-        def ask(self):
-            return self._return_value
 
     mocker.patch(
         "questionary.confirm", return_value=Question(questionary_outputs["confirm_return"])
@@ -153,15 +155,6 @@ def test__document_undocumented_columns(
 def test__document_already_documented_cols(
     mocker, question_payload, questionary_outputs, expected_results
 ):
-    from dbt_sugar.core.ui.cli_ui import UserInputCollector
-
-    class Question:
-        def __init__(self, return_value):
-            self._return_value = return_value
-
-        def ask(self):
-            return self._return_value
-
     mocker.patch(
         "questionary.confirm", return_value=Question(questionary_outputs["confirm_return"])
     )
@@ -195,15 +188,6 @@ def test__document_already_documented_cols(
     ],
 )
 def test__iterate_through_columns(mocker, question_payload, expected_results):
-    from dbt_sugar.core.ui.cli_ui import UserInputCollector
-
-    class Question:
-        def __init__(self, return_value):
-            self._return_value = return_value
-
-        def ask(self):
-            return self._return_value
-
     mocker.patch("questionary.text", return_value=Question("Dummy description"))
     mocker.patch("questionary.checkbox", return_value=Question(["unique"]))
     mocker.patch("questionary.confirm", return_value=Question(question_payload["ask_for_tests"]))

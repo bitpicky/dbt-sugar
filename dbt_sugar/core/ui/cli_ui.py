@@ -8,6 +8,10 @@ from pydantic import BaseModel, validator
 
 DESCRIPTION_PROMPT_MESSAGE = "Please write down your description:"
 
+# TODO: We'll have to us a "plugin"/register design and possibly source this from the dbt project.
+# !See issue #65 for most up to date thinking on this.
+AVAILABLE_TESTS = ["unique", "not_null"]
+
 
 class ConfirmQuestion(BaseModel):
     """Validation model for a question confirmation type payload."""
@@ -169,13 +173,60 @@ class UserInputCollector:
         self._is_valid_question_payload = True
 
     @staticmethod
-    def _iterate_through_columns(cols: List[str]) -> Dict[str, str]:
+    def _iterate_through_columns(
+        cols: List[str], ask_for_tests: bool = True
+    ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
+        """Iterates through a provided list of columns collects documentation info.
+
+        More specifically it asks for the following
+        - a column documentation
+        - whether user wants to add tests
+            - and if so which tests to add from a list of pre-defined/aggreed tests.
+
+        Args:
+            cols (List[str]): List of columns to collect description and tests info from.
+            ask_for_tests (bool, optional): When set to true UI will ask for whether the user wants
+            to add tests for each of the columns. Defaults to True.
+
+        Returns:
+            Mapping[str, Mapping[str, Union[str, List[str]]]]: API paylad to be passed to back-end
+            that looks like this:
+            ```python
+            {
+                'col_a': {
+                    'description': 'Description for col a',
+                    'tests': ['unique']
+                    },
+                'col_b': {'description': 'Description for col b'}
+            }
+            ```
+        """
         results = dict()
         for column in cols:
             description = questionary.text(message=f"{column}: {DESCRIPTION_PROMPT_MESSAGE}").ask()
-            if description:
-                results.update({column: description})
 
+            if description:
+                results.update({column: {"description": description}})
+            else:
+                # we still want to make the column end up in the dict but we don't put a desc if
+                # empty... not sure about this
+                results.update({column: {}})
+
+            # kick in the test flows
+            if ask_for_tests:
+                wants_to_add_tests = questionary.confirm(
+                    message="Would you like to add any tests?"
+                ).ask()
+                if wants_to_add_tests:
+                    tests = questionary.checkbox(
+                        message="Please select one or more tests from the list below",
+                        choices=AVAILABLE_TESTS,
+                    ).ask()
+                    if tests:
+                        results[column]["tests"] = tests
+            # remove the column if no info has been given (no tests, and no description).
+            if not results[column]:
+                _ = results.pop(column)
         return results
 
     @staticmethod
@@ -198,9 +249,10 @@ class UserInputCollector:
 
     @classmethod
     def _document_undocumented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]]
-    ) -> Dict[str, str]:
-        results = dict()
+        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+    ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
+
+        results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
         columns_to_document = question_payload[0].get("choices", list())
         # check if user wants to document all columns
         document_all_cols = questionary.confirm(
@@ -212,17 +264,21 @@ class UserInputCollector:
         ).ask()
 
         if document_all_cols:
-            results = cls._iterate_through_columns(cols=columns_to_document)
+            results = cls._iterate_through_columns(
+                cols=columns_to_document, ask_for_tests=ask_for_tests
+            )
         else:
             # get the list of columns from user
             columns_to_document = questionary.prompt(question_payload)
-            results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+            results = cls._iterate_through_columns(
+                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+            )
         return results
 
     @classmethod
     def _document_already_documented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]]
-    ) -> Dict[str, str]:
+        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+    ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         mutable_payload = copy.deepcopy(question_payload)
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
 
@@ -241,7 +297,9 @@ class UserInputCollector:
 
         if document_any_columns:
             columns_to_document = questionary.prompt(mutable_payload)
-            _results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+            _results = cls._iterate_through_columns(
+                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+            )
 
             # remove description from col key
             for col, desc in _results.items():
@@ -251,7 +309,7 @@ class UserInputCollector:
 
         return results
 
-    def collect(self) -> Dict[str, Any]:
+    def collect(self) -> Mapping[str, Any]:
         """Question orchestractor function.
 
         Depending on the question type provided on the class will call payload validation and
@@ -261,9 +319,16 @@ class UserInputCollector:
         ```python
         {'wants_to_document_model': True, 'model_description': 'New def'}
         ```
-        - When `question_type` == 'undocumented_columns` the following dict is returned:
+        - When `question_type` == 'undocumented_columns` or `documented_columns` the following dict
+        is returned:
         ```python
-        {'col_a': 'Description for col a', 'col_b': 'Description for col b'}
+        {
+            'col_a': {
+                'description': 'Description for col a',
+                'tests': ['unique']
+                },
+            'col_b': {'description': 'Description for col b'}
+        }
         ```
 
         Raises:

@@ -43,7 +43,7 @@ psycopg2 = "^2.8.6"
 pytest-sugar = "^0.9.4"
 pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.2"
-pre-commit = "^2.10.0"
+pre-commit = "^2.10.1"
 tox = "^3.21.4"
 
 

@@ -69,8 +69,11 @@ class BaseTask(abc.ABC):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
-    def update_column_test_from_schema(
-        self, path_file: Path, model_name: str, tests: Dict[str, Any]
+    def update_model_description_test_tags(
+        self,
+        path_file: Path,
+        model_name: str,
+        dict_column_description_to_update: Dict[str, Dict[str, Any]],
     ):
         """
         Method to update a schema.yml with a Dict of columns names and tests.
@@ -78,15 +81,16 @@ class BaseTask(abc.ABC):
         Args:
             path_file (Path): Path to the schema.yml file to update the columns descriptions from.
             model_name (str): with the name of the model.
-            tests: Dict with the tests to update.
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
+            the description, tags and tests to update.
         """
         content = open_yaml(path_file)
         for model in content["models"]:
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     column_name = column["name"]
-                    if column_name in tests.keys():
-                        column["tests"] = tests[column_name]
+                    if column_name in dict_column_description_to_update.keys():
+                        column["name"] = dict_column_description_to_update[column_name]
         save_yaml(path_file, content)
 
     def update_column_description_from_schema(

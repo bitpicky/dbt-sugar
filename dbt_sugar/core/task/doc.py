@@ -158,11 +158,13 @@ class DocumentationTask(BaseTask):
         not_documented_columns = self.get_not_documented_columns(content, model_name)
         self.document_columns(not_documented_columns)
 
+        self.check_tests(schema, model_name)
+        self.update_model_description_test_tags(path, model_name, self.columns_to_update)
         self.update_column_descriptions(self.columns_to_update)
-        self.add_test_into_schema_yaml(schema, model_name, path)
+
         return 0
 
-    def add_test_into_schema_yaml(self, schema: str, model_name: str, path_file: Path) -> None:
+    def check_tests(self, schema: str, model_name: str) -> None:
         """
         Method to run and add test into a schema.yml, this method will:
 
@@ -171,25 +173,18 @@ class DocumentationTask(BaseTask):
         Args:
             schema (str): Name of the schema where the model lives.
             model_name (str): Name of the model to document.
-            path (Path): to the schema_yaml.
         """
-        tests_to_add: Dict[str, List[str]] = {}  # Column: Tests
         for column in self.columns_to_update.keys():
-            for test in self.columns_to_update[column].get("tests", []):
+            tests = self.columns_to_update[column].get("tests", [])
+            for test in tests:
                 have_run_sucessful = self.connector.run_test(
                     test,
                     schema,
                     model_name,
                     column,
                 )
-                if have_run_sucessful:
-                    if column in tests_to_add.keys():
-                        tests_to_add[column].append(test)
-                    else:
-                        tests_to_add[column] = [test]
-        self.update_column_test_from_schema(
-            path_file=path_file, model_name=model_name, tests=tests_to_add
-        )
+                if not have_run_sucessful:
+                    tests.remove(test)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """

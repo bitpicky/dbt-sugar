@@ -11,5 +11,5 @@ CREDENTIALS = dict(
 def test_generate_connection():
     from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 
-    conn = SnowflakeConnector(**CREDENTIALS).generate_connection()
+    conn = SnowflakeConnector(**CREDENTIALS)
     assert isinstance(conn.engine, sqlalchemy.engine.Engine)

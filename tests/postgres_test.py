@@ -6,7 +6,7 @@ CREDENTIALS = dict(user="dbt_sugar_test_user", password="magical_password", data
 def test_generate_connection():
     from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 
-    conn = PostgresConnector(**CREDENTIALS).generate_connection()
+    conn = PostgresConnector(**CREDENTIALS)
     assert isinstance(conn.engine, sqlalchemy.engine.Engine)
 
 

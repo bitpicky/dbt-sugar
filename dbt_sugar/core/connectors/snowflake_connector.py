@@ -3,7 +3,7 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
-from typing import Any, List, Optional, Tuple
+from typing import Optional
 
 import sqlalchemy
 from snowflake.sqlalchemy import URL
@@ -24,6 +24,7 @@ class SnowflakeConnector(BaseConnector):
         password: str,
         account: str,
         database: str,
+        host: Optional[str] = None,
     ) -> None:
         """
         Init method to instanciatee the credentials.
@@ -33,6 +34,7 @@ class SnowflakeConnector(BaseConnector):
             password (str): password.
             account (str): account name.
             database (str): database name.
+            host(Optional[str]): host name.
         """
         self.connection_url = URL(
             account=account,
@@ -40,30 +42,4 @@ class SnowflakeConnector(BaseConnector):
             password=password,
             database=database,
         )
-
-    def generate_connection(self) -> sqlalchemy.engine:
-        """
-        Method that creates the connection.
-
-        Returns:
-            sqlalchemy.engine: Engine to connect to the database.
-        """
-        return sqlalchemy.create_engine(self.connection_url)
-
-    def get_columns_from_table(
-        self,
-        target_table: str,
-        target_schema: str,
-    ) -> Optional[List[Tuple[Any]]]:
-        """
-        Method that creates cursor to run a query.
-
-        Args:
-            target_table (str): table to get the columns from.
-            target_schema (str): schema to get the table from.
-
-        Returns:
-            Optional[List[Tuple[Any]]]: With the results of the query.
-        """
-        engine = self.generate_connection()
-        return super().get_columns_from_table(engine, target_table, target_schema)
+        self.engine = sqlalchemy.create_engine(self.connection_url)

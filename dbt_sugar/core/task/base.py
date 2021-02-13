@@ -69,8 +69,28 @@ class BaseTask(abc.ABC):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
+    def update_column_test_from_schema(
+        self, path_file: Path, model_name: str, tests: Dict[str, Any]
+    ):
+        """
+        Method to update a schema.yml with a Dict of columns names and tests.
+
+        Args:
+            path_file (Path): Path to the schema.yml file to update the columns descriptions from.
+            model_name (str): with the name of the model.
+            tests: Dict with the tests to update.
+        """
+        content = open_yaml(path_file)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    column_name = column["name"]
+                    if column_name in tests.keys():
+                        column["tests"] = tests[column_name]
+        save_yaml(path_file, content)
+
     def update_column_description_from_schema(
-        self, path_file: Path, dict_column_description_to_update: Dict[str, str]
+        self, path_file: Path, dict_column_description_to_update: Dict[str, Dict[str, Any]]
     ) -> None:
         """Method to update a schema.yml with a Dict of columns names and description.
 
@@ -81,13 +101,19 @@ class BaseTask(abc.ABC):
         """
         content = open_yaml(path_file)
         for model in content["models"]:
-            for column in model["columns"]:
+            for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update.keys():
-                    column["description"] = dict_column_description_to_update[column_name]
+                    new_desctiption = dict_column_description_to_update[column_name].get(
+                        "description"
+                    )
+                    if new_desctiption:
+                        column["description"] = new_desctiption
         save_yaml(path_file, content)
 
-    def update_column_descriptions(self, dict_column_description_to_update: Dict[str, str]) -> None:
+    def update_column_descriptions(
+        self, dict_column_description_to_update: Dict[str, Dict[str, Any]]
+    ) -> None:
         """Method to update all the schema.ymls from a dbt project with a Dict of columns names and description.
 
         Args:

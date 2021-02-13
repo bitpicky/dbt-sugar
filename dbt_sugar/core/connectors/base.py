@@ -18,6 +18,33 @@ class BaseConnector(ABC):
     Parent class of all the connectors.
     """
 
+    def __init__(
+        self,
+        user: str,
+        password: str,
+        database: str,
+        host: str = "localhost",
+        account: Optional[str] = None,
+    ) -> None:
+        """
+        Init method to instanciate the credentials.
+
+        Args:
+            user (str): user name.
+            password (str): password.
+            database (str): database name.
+            host (str): host name.
+            account(Optional[str]): account name.
+        """
+        self.connection_url = sqlalchemy.engine.url.URL(
+            drivername="postgresql+psycopg2",
+            host=host,
+            username=user,
+            password=password,
+            database=database,
+        )
+        self.engine = sqlalchemy.create_engine(self.connection_url)
+
     def get_columns_from_table(
         self,
         target_table: str,

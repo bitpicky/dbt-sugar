@@ -27,7 +27,7 @@ class SnowflakeConnector(BaseConnector):
         host: Optional[str] = None,
     ) -> None:
         """
-        Init method to instanciatee the credentials.
+        Init method to instanciate the credentials.
 
         Args:
             user (str): user name.

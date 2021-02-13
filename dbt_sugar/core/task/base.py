@@ -96,7 +96,7 @@ class BaseTask(abc.ABC):
 
         Args:
             path_file (Path): Path to the schema.yml file to update the columns descriptions from.
-            dict_column_description_to_update (Dict[str, str]): Dict with the column name with
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description to update.
         """
         content = open_yaml(path_file)
@@ -117,7 +117,7 @@ class BaseTask(abc.ABC):
         """Method to update all the schema.ymls from a dbt project with a Dict of columns names and description.
 
         Args:
-            dict_column_description_to_update (Dict[str, str]): Dict with the column name with
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description to update.
         """
         for root, _, files in os.walk(self.repository_path):

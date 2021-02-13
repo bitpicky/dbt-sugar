@@ -120,12 +120,11 @@ def handle(
         sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
     )
     dbt_project.read_project()
-    from pathlib import Path
 
     dbt_profile = DbtProfile(
-        profile_name="default",
-        target_name="dev",
-        profiles_dir=Path("/Users/vlopezgil/.dbt/profiles.yml"),
+        profile_name=dbt_project.profile_name,
+        target_name=flag_parser.target,
+        profiles_dir=flag_parser.profiles_dir,
     )
     dbt_profile.read_profile()
 

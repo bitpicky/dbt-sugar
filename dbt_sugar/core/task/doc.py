@@ -4,8 +4,6 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from sqlalchemy.exc import OperationalError
-
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector

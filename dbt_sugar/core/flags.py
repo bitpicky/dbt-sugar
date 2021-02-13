@@ -24,12 +24,12 @@ class FlagParser:
         self.model: str = "test_model"
         self.schema: str = "data_warehouse"
         self.log_level: str = "info"
-        self.traceback_stack_depth: int = 4
         self.syrup: str = str()
         self.config_path: Path = Path(str())
         self.profiles_dir: Path = Path(str())
         self.is_dry_run: bool = False
         self.target: str = str()
+        self.verbose: bool = False
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
         if test_cli_args:
@@ -43,7 +43,7 @@ class FlagParser:
         # base flags that need to be set no matter what
         if self.args:
             self.log_level = self.args.log_level
-            self.full_tracebacks = self.args.full_tracebacks
+            self.verbose = self.args.verbose
             self.syrup = self.args.syrup
             self.is_dry_run = self.args.dry_run
             if self.args.profiles_dir:

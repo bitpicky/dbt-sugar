@@ -186,7 +186,7 @@ class UserInputCollector:
         Args:
             cols (List[str]): List of columns to collect description and tests info from.
             ask_for_tests (bool, optional): When set to true UI will ask for whether the user wants
-            to add tests for each of the columns. Defaults to False.
+            to add tests for each of the columns. Defaults to True.
 
         Returns:
             Mapping[str, Mapping[str, Union[str, List[str]]]]: API paylad to be passed to back-end
@@ -224,6 +224,9 @@ class UserInputCollector:
                     ).ask()
                     if tests:
                         results[column]["tests"] = tests
+            # remove the column if no info has been given (no tests, and no description).
+            if not results[column]:
+                _ = results.pop(column)
         return results
 
     @staticmethod
@@ -246,7 +249,7 @@ class UserInputCollector:
 
     @classmethod
     def _document_undocumented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]]
+        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
 
         results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
@@ -261,16 +264,20 @@ class UserInputCollector:
         ).ask()
 
         if document_all_cols:
-            results = cls._iterate_through_columns(cols=columns_to_document)
+            results = cls._iterate_through_columns(
+                cols=columns_to_document, ask_for_tests=ask_for_tests
+            )
         else:
             # get the list of columns from user
             columns_to_document = questionary.prompt(question_payload)
-            results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+            results = cls._iterate_through_columns(
+                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+            )
         return results
 
     @classmethod
     def _document_already_documented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]]
+        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         mutable_payload = copy.deepcopy(question_payload)
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
@@ -290,7 +297,9 @@ class UserInputCollector:
 
         if document_any_columns:
             columns_to_document = questionary.prompt(mutable_payload)
-            _results = cls._iterate_through_columns(cols=columns_to_document["cols_to_document"])
+            _results = cls._iterate_through_columns(
+                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+            )
 
             # remove description from col key
             for col, desc in _results.items():

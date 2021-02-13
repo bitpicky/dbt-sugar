@@ -1,9 +1,10 @@
 """Main module for dbt-sugar. Sets up CLI arguments and sets up task handlers."""
 import argparse
 import sys
-from typing import List, Union
+from typing import List
 
 import pyfiglet
+from rich.console import Console
 
 from dbt_sugar.core._version import __version__
 from dbt_sugar.core.clients.dbt import DbtProfile, DbtProject
@@ -11,9 +12,11 @@ from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
-from dbt_sugar.core.task.base import BaseTask
 from dbt_sugar.core.task.doc import DocumentationTask
+from dbt_sugar.core.ui.traceback_manager import DbtSugarTracebackManager
 from dbt_sugar.core.utils import check_and_compare_version
+
+console = Console()
 
 
 def check_and_print_version() -> str:
@@ -46,7 +49,8 @@ base_subparser.add_argument(
     "--log-level", help="overrides default log level", type=str, default=str()
 )
 base_subparser.add_argument(
-    "--full-tracebacks",
+    "-vv",
+    "--verbose",
     help="When provided the length of the tracebacks will not be truncated.",
     action="store_true",
     default=False,
@@ -102,7 +106,7 @@ document_sub_parser.add_argument(
 def handle(
     parser: argparse.ArgumentParser,
     test_cli_args: List[str] = list(),
-) -> Union[int, BaseTask]:
+) -> int:
     """Task handler factory.
 
     Args:
@@ -110,6 +114,9 @@ def handle(
     """
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=test_cli_args)
+
+    # set up traceback manager fo prettier errors
+    DbtSugarTracebackManager(flag_parser)
 
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
@@ -138,7 +145,8 @@ def handle(
         # the current implementation upsets mypy also.
         if flag_parser.is_dry_run:
             logger.warning("Running in --dry-run mode no files will be modified")
-            return task
+            logger.info(f"Would run {task}")
+            return 0
         return task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
@@ -156,13 +164,17 @@ def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = li
         version_message = check_and_print_version()
         print(version_message)
         print("\n")
-
         # print app logo with pyfiglet
-        print(
-            f"{pyfiglet.figlet_format('dbt-sugar', font='slant')}"
-            "Getting sweetness out of the cupboard 🍬! \n"
-        )
+        logo_str = str(pyfiglet.figlet_format("dbt-sugar", font="slant"))
+        console.print(logo_str, style="blue")
+        print("Getting sweetness out of the cupboard 🍬! \n")
     # TODO: Update this when a proper dry-run exists.
     exit_code = handle(parser, _cli_args)  # type: ignore
 
-    exit(exit_code)
+    if exit_code > 0:
+        logger.error("The task you wanted to run did not succed and failed silently")
+    return exit_code
+
+
+if __name__ == "__main__":
+    exit(main())

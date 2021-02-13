@@ -83,7 +83,7 @@ class BaseConnector(ABC):
             "unique": self.run_test_unique,
             "not_null": self.run_test_not_null,
         }
-        method = TESTS.get(test_name)
+        method = TESTS[test_name]
         result = method(schema, table, column)
         if result:
             logger.info(f"The {test_name} test in the column: {column}, have run successfully.")

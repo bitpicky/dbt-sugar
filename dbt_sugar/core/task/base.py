@@ -3,7 +3,7 @@ import abc
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 
@@ -69,6 +69,24 @@ class BaseTask(abc.ABC):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
+    def __combine_two_list_without_duplicates(
+        self, list1: List[Any], list2: List[Any]
+    ) -> List[Any]:
+        """
+        Method to combine two list without duplicates.
+
+        :param list1: Optional[List[Any]]
+        :param list2: List[Any]
+        :return: List[Any]
+        """
+        if not list1:
+            return list2
+
+        for item in list1:
+            if item not in list2:
+                list2.append(item)
+        return list2
+
     def update_model_description_test_tags(
         self,
         path_file: Path,
@@ -90,7 +108,26 @@ class BaseTask(abc.ABC):
                 for column in model.get("columns", []):
                     column_name = column["name"]
                     if column_name in dict_column_description_to_update.keys():
-                        column["name"] = dict_column_description_to_update[column_name]
+                        # Update the description
+                        description = dict_column_description_to_update[column_name].get(
+                            "description"
+                        )
+                        if description:
+                            column["description"] = description
+
+                        # Update the tests without duplicating them.
+                        tests = dict_column_description_to_update[column_name].get("tests")
+                        if tests:
+                            column["tests"] = self.__combine_two_list_without_duplicates(
+                                column.get("tests", []), tests
+                            )
+
+                        # Update the tags without duplicating them.
+                        tags = dict_column_description_to_update[column_name].get("tags")
+                        if tags:
+                            column["tags"] = self.__combine_two_list_without_duplicates(
+                                column.get("tags", []), tags
+                            )
         save_yaml(path_file, content)
 
     def update_column_description_from_schema(

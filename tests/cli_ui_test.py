@@ -207,5 +207,4 @@ def test__iterate_through_columns(mocker, question_payload, expected_results):
     )._iterate_through_columns(
         cols=question_payload["col_list"], ask_for_tests=question_payload["ask_for_tests"]
     )
-    print(results)
     assert results == expected_results

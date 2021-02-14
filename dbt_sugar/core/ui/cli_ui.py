@@ -246,8 +246,7 @@ class UserInputCollector:
         _tags = []
         if isinstance(tags, str):
             _tags = tags.split(",")
-            if isinstance(tags, list):
-                _tags = [s.strip() for s in _tags]
+            _tags = [s.strip() for s in _tags]
             return _tags
         raise TypeError(f"Tags can only be strings. You provided a {type(tags)}")
 

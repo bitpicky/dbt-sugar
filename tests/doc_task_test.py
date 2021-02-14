@@ -1,4 +1,5 @@
-from pathlib import Path
+from pathlib import Path, PosixPath
+from unittest.mock import call
 
 import pytest
 
@@ -70,6 +71,67 @@ def test_update_description_in_dbt_descriptions(column, description, result):
     doc_task = __init_descriptions()
     doc_task.update_description_in_dbt_descriptions(column, description)
     assert doc_task.dbt_definitions[column] == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, ui_response, result",
+    [
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "columns": [
+                            {
+                                "name": "columnA",
+                                "description": "descriptionA",
+                                "tests": ["unique"],
+                                "tags": ["hi", "hey"],
+                            },
+                            {"name": "columnF", "description": "descriptionF"},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {
+                "columnA": {
+                    "description": "this is the description",
+                    "tags": ["hi", "you"],
+                    "test": ["unique", "not_null"],
+                },
+            },
+            [
+                call(
+                    PosixPath("."),
+                    {
+                        "models": [
+                            {
+                                "name": "testmodel",
+                                "columns": [
+                                    {
+                                        "name": "columnA",
+                                        "description": "this is the description",
+                                        "tests": ["unique"],
+                                        "tags": ["hi", "you", "hey"],
+                                    },
+                                    {"name": "columnF", "description": "descriptionF"},
+                                ],
+                            }
+                        ]
+                    },
+                )
+            ],
+        ),
+    ],
+)
+def test_update_model_description_test_tags(mocker, content, model_name, ui_response, result):
+    open_yaml = mocker.patch("dbt_sugar.core.task.base.open_yaml")
+    save_yaml = mocker.patch("dbt_sugar.core.task.base.save_yaml")
+    open_yaml.return_value = content
+    doc_task = DocumentationTask(None, None)
+    doc_task.update_model_description_test_tags(Path("."), model_name, ui_response)
+    save_yaml.assert_has_calls(result)
 
 
 @pytest.mark.parametrize(

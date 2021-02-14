@@ -80,58 +80,27 @@ class BaseConnector(ABC):
             boolean: True if the test is okay, and False if the test doesn't pass.
         """
         TESTS = {
-            "unique": self.run_test_unique,
-            "not_null": self.run_test_not_null,
+            "unique": f"""select count(*) as errors from(
+                select {column} from {schema}.{table} where {column} is not null group by {column} having count(*) > 1 )
+                errors""",
+            "not_null": f"select count(*) as errors from {schema}.{table} where {column} is null",
         }
-        method = TESTS[test_name]
-        result = method(schema, table, column)
+        query = TESTS[test_name]
+        result = self.run_query_test(query)
         if result:
             logger.info(f"The {test_name} test in the column: {column}, have run successfully.")
         else:
             logger.info(f"The {test_name} test in the column: {column}, have not run successfully.")
         return result
 
-    def run_test_unique(self, schema: str, table: str, column_name: str) -> bool:
+    def run_query_test(self, query) -> bool:
         """
-        Method to check that a column have unique values.
+        Method to run a test query.
 
         Args:
-            schema (str): schema to run the test from.
-            table (str): table to run the test from.
-            column (str): column name to test.
+            query(str): with the query to run.
         Returns:
             boolean: True if the test is okay, and False if the test doesn't pass.
-        """
-        query = f"""
-                select count(*) as errors from
-                (
-                    select {column_name} from {schema}.{table}
-                    where {column_name} is not null
-                    group by {column_name}
-                    having count(*) > 1
-                ) errors
-        """
-        with self.engine.connect() as cursor:
-            result = cursor.execute(query).fetchone()
-            if result[0] < 1:
-                return True
-        return False
-
-    def run_test_not_null(self, schema: str, table: str, column_name: str) -> bool:
-        """
-        Method to check that a column doesn't have any null values.
-
-        Args:
-            schema (str): schema to run the test from.
-            table (str): table to run the test from.
-            column_name (str): column name to test.
-        Returns:
-            boolean: True if the test is okay, and False if the test doesn't pass.
-        """
-        query = f"""
-                    select count(*) as errors
-                    from {schema}.{table}
-                    where {column_name} is null
         """
         with self.engine.connect() as cursor:
             result = cursor.execute(query).fetchone()

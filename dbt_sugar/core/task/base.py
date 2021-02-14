@@ -75,9 +75,12 @@ class BaseTask(abc.ABC):
         """
         Method to combine two list without duplicates.
 
-        :param list1: Optional[List[Any]]
-        :param list2: List[Any]
-        :return: List[Any]
+        Args:
+            list1 (List[Any]): First list with any value.
+            list2 (List[Any]): Second list with any value.
+
+        Returns:
+            List[Any]: with the combine lists.
         """
         if not list1:
             return list2

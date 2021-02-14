@@ -36,7 +36,9 @@ def test_get_columns_from_table():
             "column",
             [
                 call(
-                    "select count(*) as errors from(select column from schema.table where column is not null group by column having count(*) > 1 ) errors"
+                    """select count(*) as errors from(
+                select column from schema.table where column is not null group by column having count(*) > 1 )
+                errors"""
                 )
             ],
         ),

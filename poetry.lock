@@ -736,7 +736,7 @@ rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
 name = "rich"
-version = "9.10.0"
+version = "9.11.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
@@ -986,7 +986,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "b9e02f485af4c6cbfa6eb79642230bcd9e99ef7cf15bdcf41bc1e212e0592bd0"
+content-hash = "78e9676d0ad444dcfef4033a957319bd28f5bdb7d7fe3f2b40e2b3018a8a039d"
 
 [metadata.files]
 appdirs = [
@@ -1499,8 +1499,8 @@ requests-oauthlib = [
     {file = "requests_oauthlib-1.3.0-py3.7.egg", hash = "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"},
 ]
 rich = [
-    {file = "rich-9.10.0-py3-none-any.whl", hash = "sha256:3070d53e3a93864de351c1091af1deb25f41e6051b33e485d4626b591c0cfdb3"},
-    {file = "rich-9.10.0.tar.gz", hash = "sha256:e0f2db62a52536ee32f6f584a47536465872cae2b94887cf1f080fb9eaa13eb2"},
+    {file = "rich-9.11.0-py3-none-any.whl", hash = "sha256:a8ee22199562278d2f78148cacb2f9460ccac362cd4a40f705505b41daae60e0"},
+    {file = "rich-9.11.0.tar.gz", hash = "sha256:f8f08fdac6bd67dc2dd7fe976da702d748487aa9eb5d050c48b2321bc67ed659"},
 ]
 s3transfer = [
     {file = "s3transfer-0.3.4-py2.py3-none-any.whl", hash = "sha256:1e28620e5b444652ed752cf87c7e0cb15b0e578972568c6609f0f18212f259ed"},

@@ -29,7 +29,7 @@ class DocumentationTask(BaseTask):
 
     def __init__(self, flags: FlagParser, dbt_profile: DbtProfile) -> None:
         super().__init__()
-        self.columns_to_update: Dict[str, Dict[str, Any]] = {}
+        self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
 
@@ -160,9 +160,9 @@ class DocumentationTask(BaseTask):
         # Will remove from the update the test that doesn't run correctly.
         self.check_tests(schema, model_name)
         # Method to update the description test and tags from the model.
-        self.update_model_description_test_tags(path, model_name, self.columns_to_update)
+        self.update_model_description_test_tags(path, model_name, self.column_update_payload)
         # Method to update the descriptions in all the schemas.yml
-        self.update_column_descriptions(self.columns_to_update)
+        self.update_column_descriptions(self.column_update_payload)
 
         return 0
 
@@ -176,8 +176,8 @@ class DocumentationTask(BaseTask):
             schema (str): Name of the schema where the model lives.
             model_name (str): Name of the model to document.
         """
-        for column in self.columns_to_update.keys():
-            tests = self.columns_to_update[column].get("tests", [])
+        for column in self.column_update_payload.keys():
+            tests = self.column_update_payload[column].get("tests", [])
             for test in tests:
                 have_run_sucessful = self.connector.run_test(
                     test,
@@ -212,7 +212,7 @@ class DocumentationTask(BaseTask):
             user_input = UserInputCollector(
                 "undocumented_columns", undocumented_columns_payload
             ).collect()
-            self.columns_to_update.update(user_input)
+            self.column_update_payload.update(user_input)
 
     def update_model(
         self, content: Dict[str, Any], model_name: str, columns_sql: List[str]

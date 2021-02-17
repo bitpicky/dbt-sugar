@@ -67,17 +67,17 @@ class BaseConnector(ABC):
 
     def run_test(self, test_name: str, schema: str, table: str, column: str) -> bool:
         """
-        Method to run the all the tests.
+        Method to run pre-define tests before we add them to the schema.yaml.
 
         We defined the test dictionary and call the test that the user wants.
 
         Args:
-            test_name(str): name of the test.
-            schema (str): schema to run the test from.
-            table (str): table to run the test from.
-            column (str): column name to test.
+            test_name(str): Name of the test to run. (For now only "unique" and "not null" are supported).
+            schema (str): Name of the schema in which the table to be tested lives.
+            table (str): Name of the table to on which to run the test.
+            column (str): Name of the column on which to run the test.
         Returns:
-            boolean: True if the test is okay, and False if the test doesn't pass.
+            boolean: True if the test is passes, and False if it fails.
         """
         TESTS = {
             "unique": f"""select count(*) as errors from(
@@ -86,21 +86,24 @@ class BaseConnector(ABC):
             "not_null": f"select count(*) as errors from {schema}.{table} where {column} is null",
         }
         query = TESTS[test_name]
-        result = self.run_query_test(query)
+        result = self.execute_and_check(query)
         if result:
-            logger.info(f"The {test_name} test in the column: {column}, have run successfully.")
+            logger.info(f"The '{test_name}' test on {column} PASSED.")
         else:
-            logger.info(f"The {test_name} test in the column: {column}, have not run successfully.")
+            logger.info(
+                f"""The '{test_name}' test {column}, FAILED, and will NOT be added to your schema.yml.
+                It migtht be a good idea to go and fix it."""
+            )
         return result
 
-    def run_query_test(self, query) -> bool:
+    def execute_and_check(self, query) -> bool:
         """
-        Method to run a test query.
+        Method to run a test query and check test results.
 
         Args:
-            query(str): with the query to run.
+            query(str): SQL query string to execute.
         Returns:
-            boolean: True if the test is okay, and False if the test doesn't pass.
+            boolean: True if the test passes, and False if it fails.
         """
         with self.engine.connect() as cursor:
             result = cursor.execute(query).fetchone()

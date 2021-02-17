@@ -97,11 +97,11 @@ class BaseTask(abc.ABC):
         dict_column_description_to_update: Dict[str, Dict[str, Any]],
     ):
         """
-        Method to update a schema.yml with a Dict of columns names and tests.
+        Method to update a schema.yml with a Dict of columns names, tests, and tags.
 
         Args:
-            path_file (Path): Path to the schema.yml file to update the columns descriptions from.
-            model_name (str): with the name of the model.
+            path_file (Path): Path of the schema.yml file to update.
+            model_name (str): Name of the model to update.
             dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description, tags and tests to update.
         """

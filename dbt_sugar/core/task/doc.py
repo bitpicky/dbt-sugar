@@ -44,11 +44,17 @@ class DocumentationTask(BaseTask):
             Dict[str, str]: with the database connection dictionary.
         """
         connection_params = {}
-        connections_keys = ["user", "password", "database", "host", "account"]
-        for connection_key in connections_keys:
-            connection_value = dbt_credentials.get(connection_key, None)
+        connections_keys: Dict[str, str] = {
+            "user": "username",
+            "password": "password",
+            "database": "database",
+            "host": "host",
+            "account": "account",
+        }
+        for connection_key_file, connection_key_db in connections_keys.items():
+            connection_value = dbt_credentials.get(connection_key_file, None)
             if connection_value:
-                connection_params[connection_key] = connection_value
+                connection_params[connection_key_db] = connection_value
         return connection_params
 
     def load_dbt_credentials(self) -> Dict[str, str]:
@@ -69,9 +75,8 @@ class DocumentationTask(BaseTask):
 
         dbt_credentials = self.load_dbt_credentials()
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
-
         if not connector:
-            print("The type of connector doesn't exists.")
+            logger.error("The type of connector doesn't exists.")
             return 1
 
         self.connector = connector(self.prepare_connection_params(dbt_credentials))

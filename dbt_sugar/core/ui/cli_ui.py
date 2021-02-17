@@ -232,7 +232,7 @@ class UserInputCollector:
                     message="Would you like to add any tags?"
                 ).ask()
                 if wants_to_add_tags:
-                    tags = questionary.text(message="Prodive a comma-separated list of tags").ask()
+                    tags = questionary.text(message="Provide a comma-separated list of tags").ask()
                     tags = cls.__split_comma_separated_str(tags)
                     if tags:
                         results[column]["tags"] = tags

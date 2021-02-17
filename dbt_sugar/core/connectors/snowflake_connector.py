@@ -3,7 +3,7 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
-from typing import Optional
+from typing import Dict
 
 import sqlalchemy
 from snowflake.sqlalchemy import URL
@@ -20,26 +20,15 @@ class SnowflakeConnector(BaseConnector):
 
     def __init__(
         self,
-        user: str,
-        password: str,
-        account: str,
-        database: str,
-        host: Optional[str] = None,
+        connection_params: Dict[str, str],
     ) -> None:
         """
         Init method to instanciate the credentials.
 
         Args:
-            user (str): user name.
-            password (str): password.
-            account (str): account name.
-            database (str): database name.
-            host(Optional[str]): host name.
+            connection_params (Dict[str, str]): Dict with connection parameters.
         """
         self.connection_url = URL(
-            account=account,
-            user=user,
-            password=password,
-            database=database,
+            **connection_params,
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)

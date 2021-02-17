@@ -33,6 +33,24 @@ class DocumentationTask(BaseTask):
         self._flags = flags
         self._dbt_profile = dbt_profile
 
+    def prepare_connection_params(self, dbt_credentials: Dict[str, str]) -> Dict[str, str]:
+        """
+        Method to prepare the database connection dictionary.
+
+        Args:
+            dbt_credentials (Dict[str, str]): with the database credentials.
+
+        Returns:
+            Dict[str, str]: with the database connection dictionary.
+        """
+        connection_params = {}
+        connections_keys = ["user", "password", "database", "host", "account"]
+        for connection_key in connections_keys:
+            connection_value = dbt_credentials.get(connection_key, None)
+            if connection_value:
+                connection_params[connection_key] = connection_value
+        return connection_params
+
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
         self._dbt_profile.read_profile()
@@ -50,20 +68,13 @@ class DocumentationTask(BaseTask):
         schema = self._flags.schema
 
         dbt_credentials = self.load_dbt_credentials()
-        type_of_connection = dbt_credentials.get("type", "")
+        connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
 
-        connector = DB_CONNECTORS.get(type_of_connection)
         if not connector:
             print("The type of connector doesn't exists.")
             return 1
 
-        self.connector = connector(
-            user=dbt_credentials.get("user", str()),
-            password=dbt_credentials.get("password", str()),
-            host=dbt_credentials.get("host", str()),
-            database=dbt_credentials.get("database", str()),
-            account=dbt_credentials.get("account", str()),
-        )
+        self.connector = connector(self.prepare_connection_params(dbt_credentials))
         columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)

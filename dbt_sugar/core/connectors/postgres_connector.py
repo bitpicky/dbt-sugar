@@ -3,7 +3,7 @@ Module Postgres connector.
 
 Module dependent of the base connector.
 """
-from typing import Optional
+from typing import Dict
 
 import sqlalchemy
 
@@ -19,27 +19,16 @@ class PostgresConnector(BaseConnector):
 
     def __init__(
         self,
-        user: str,
-        password: str,
-        database: str,
-        host: str = "localhost",
-        account: Optional[str] = None,
+        connection_params: Dict[str, str],
     ) -> None:
         """
         Init method to instanciate the credentials.
 
         Args:
-            user (str): user name.
-            password (str): password.
-            database (str): database name.
-            host (str): host name.
-            account(Optional[str]): account name.
+            connection_params (Dict[str, str]): Dict with connection parameters.
         """
         self.connection_url = sqlalchemy.engine.url.URL(
             drivername="postgresql+psycopg2",
-            host=host,
-            username=user,
-            password=password,
-            database=database,
+            **connection_params,
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)

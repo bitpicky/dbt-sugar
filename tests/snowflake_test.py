@@ -5,16 +5,16 @@ import sqlalchemy
 
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 
-CREDENTIALS = dict(
-    user="dbt_sugar_test_user",
-    password="magical_password",
-    database="dbt_sugar",
-    account="dummy_account",
-)
+CREDENTIALS = {
+    "username": "dbt_sugar_test_user",
+    "password": "magical_password",
+    "database": "dbt_sugar",
+    "account": "dummy_account",
+}
 
 
 def test_generate_connection():
-    conn = SnowflakeConnector(**CREDENTIALS)
+    conn = SnowflakeConnector(CREDENTIALS)
     assert isinstance(conn.engine, sqlalchemy.engine.Engine)
 
 
@@ -43,10 +43,10 @@ def test_generate_connection():
         ),
     ],
 )
-def test_run_test(mocker, test_name, schema, table, column_name, result):
-    run_query_test = mocker.patch(
-        "dbt_sugar.core.connectors.snowflake_connector.SnowflakeConnector.run_query_test"
+def test_execute_and_check(mocker, test_name, schema, table, column_name, result):
+    execute_and_check = mocker.patch(
+        "dbt_sugar.core.connectors.snowflake_connector.SnowflakeConnector.execute_and_check"
     )
-    snowflake_connector = SnowflakeConnector(**CREDENTIALS)
+    snowflake_connector = SnowflakeConnector(CREDENTIALS)
     snowflake_connector.run_test(test_name, schema, table, column_name)
-    run_query_test.assert_has_calls(result)
+    execute_and_check.assert_has_calls(result)

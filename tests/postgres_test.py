@@ -9,6 +9,8 @@ CREDENTIALS = {
     "username": "dbt_sugar_test_user",
     "password": "magical_password",
     "database": "dbt_sugar",
+    "host": "localhost",
+    "port": "5432",
 }
 
 

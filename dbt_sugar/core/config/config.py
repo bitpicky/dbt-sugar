@@ -6,7 +6,12 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
-from dbt_sugar.core.exceptions import MissingDbtProjects, NoSyrupProvided, SyrupNotFoundError
+from dbt_sugar.core.exceptions import (
+    KnownRegressionError,
+    MissingDbtProjects,
+    NoSyrupProvided,
+    SyrupNotFoundError,
+)
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
@@ -100,6 +105,17 @@ class DbtSugarConfig:
                 "Run `dbt-sugar --help` for more information."
             )
 
+    # TODO: Deprecate this when we lift off and address this regression
+    # ! REGRESSION
+    def assert_only_one_dbt_project_in_scope(self) -> bool:
+        number_of_dbt_projects = len(self.config.get("dbt_projects", list()))
+        if number_of_dbt_projects > 1:
+            raise KnownRegressionError(
+                "dbt-sugar can only support ONE dbt project per sugar. "
+                "This limitation will be lifted in the next feature release."
+            )
+        return True
+
     def assert_dbt_projects_exist(self) -> bool:
         dbt_projects = self.config["dbt_projects"]
 
@@ -153,4 +169,5 @@ class DbtSugarConfig:
         self.load_and_validate_config_yaml()
         self.parse_defaults()
         self.retain_syrup()
+        self.assert_only_one_dbt_project_in_scope()
         _ = self.assert_dbt_projects_exist()

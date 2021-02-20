@@ -78,7 +78,10 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
                 "confirm_return": True,
                 "prompt_return": {"col_a": "Custom desc", "col_b": "Custom desc"},
             },
-            {"col_a": {"description": "Custom desc"}, "col_b": {"description": "Custom desc"}},
+            {
+                "col_a": {"description": "Custom desc", "tags": ["Custom desc"]},
+                "col_b": {"description": "Custom desc", "tags": ["Custom desc"]},
+            },
             id="document_all_undocumented",
         ),
         pytest.param(
@@ -131,7 +134,7 @@ def test__document_undocumented_columns(
                 "confirm_return": True,
                 "prompt_return": {"cols_to_document": ["col_a"]},
             },
-            {"col_a": {"description": "Custom desc"}},
+            {"col_a": {"description": "Custom desc", "tags": ["Custom desc"]}},
             id="document_some_documented_cols",
         ),
         pytest.param(
@@ -180,10 +183,18 @@ def test__document_already_documented_cols(
         pytest.param(
             {"col_list": ["column_a", "column_b"], "ask_for_tests": True},
             {
-                "column_a": {"description": "Dummy description", "tests": ["unique"]},
-                "column_b": {"description": "Dummy description", "tests": ["unique"]},
+                "column_a": {
+                    "description": "Dummy description",
+                    "tests": ["unique"],
+                    "tags": ["Dummy description"],
+                },
+                "column_b": {
+                    "description": "Dummy description",
+                    "tests": ["unique"],
+                    "tags": ["Dummy description"],
+                },
             },
-            id="document_columns_yes_test",
+            id="document_columns_yes_test_and_tags",
         ),
     ],
 )

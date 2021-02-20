@@ -33,30 +33,6 @@ class DocumentationTask(BaseTask):
         self._flags = flags
         self._dbt_profile = dbt_profile
 
-    def prepare_connection_params(self, dbt_credentials: Dict[str, str]) -> Dict[str, str]:
-        """
-        Method to prepare the database connection dictionary.
-
-        Args:
-            dbt_credentials (Dict[str, str]): with the database credentials.
-
-        Returns:
-            Dict[str, str]: with the database connection dictionary.
-        """
-        connection_params = {}
-        connections_keys: Dict[str, str] = {
-            "user": "username",
-            "password": "password",
-            "database": "database",
-            "host": "host",
-            "account": "account",
-        }
-        for connection_key_file, connection_key_db in connections_keys.items():
-            connection_value = dbt_credentials.get(connection_key_file, None)
-            if connection_value:
-                connection_params[connection_key_db] = connection_value
-        return connection_params
-
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
         self._dbt_profile.read_profile()
@@ -79,7 +55,7 @@ class DocumentationTask(BaseTask):
             logger.error("The type of connector doesn't exists.")
             return 1
 
-        self.connector = connector(self.prepare_connection_params(dbt_credentials))
+        self.connector = connector(dbt_credentials)
         columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)

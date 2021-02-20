@@ -29,6 +29,10 @@ class PostgresConnector(BaseConnector):
         """
         self.connection_url = sqlalchemy.engine.url.URL(
             drivername="postgresql+psycopg2",
-            **connection_params,
+            host=connection_params.get("host", str()),
+            username=connection_params.get("user", str()),
+            password=connection_params.get("password", str()),
+            database=connection_params.get("database", str()),
+            port=connection_params.get("port", str()),
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)

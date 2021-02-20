@@ -29,6 +29,10 @@ class SnowflakeConnector(BaseConnector):
             connection_params (Dict[str, str]): Dict with connection parameters.
         """
         self.connection_url = URL(
-            **connection_params,
+            drivername="postgresql+psycopg2",
+            user=connection_params.get("user", str()),
+            password=connection_params.get("password", str()),
+            database=connection_params.get("database", str()),
+            account=connection_params.get("account", str()),
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)

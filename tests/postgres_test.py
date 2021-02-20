@@ -6,7 +6,7 @@ import sqlalchemy
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 
 CREDENTIALS = {
-    "username": "dbt_sugar_test_user",
+    "user": "dbt_sugar_test_user",
     "password": "magical_password",
     "database": "dbt_sugar",
     "host": "localhost",

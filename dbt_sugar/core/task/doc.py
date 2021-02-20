@@ -86,7 +86,7 @@ class DocumentationTask(BaseTask):
             {
                 "type": "confirm",
                 "name": "wants_to_document_model",
-                "message": f"Do you want to change the {model_name} model description?",
+                "message": f"Do you want to change the model description of {model_name}",
                 "default": True,
             },
             {

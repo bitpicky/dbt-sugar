@@ -204,7 +204,9 @@ class UserInputCollector:
         """
         results = dict()
         for column in cols:
-            description = questionary.text(message=f"{column}: {DESCRIPTION_PROMPT_MESSAGE}").ask()
+            description = questionary.text(
+                message=f"Column: '{column}': {DESCRIPTION_PROMPT_MESSAGE}"
+            ).ask()
 
             if description:
                 results.update({column: {"description": description}})

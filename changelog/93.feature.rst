@@ -1,0 +1,1 @@
+Introduces a temporary (until next feature release --or maybe in a patch) regression which will restrict dbt-sugar to only be able to manage **one** dbt project instead of more as was originally intended and hinted at by the use of plural ``dbt_projects:`` entry in ``sugar_config.yml``.

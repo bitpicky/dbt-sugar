@@ -109,3 +109,65 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
         config.load_config()
         assert config.config == expectation
         assert config._config_file_found_nearby is True
+
+
+@pytest.mark.parametrize(
+    "config_input, expect_single_project",
+    [
+        pytest.param(
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    }
+                ],
+            },
+            True,
+            id="single_dbt_project",
+        ),
+        pytest.param(
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    },
+                    {
+                        "name": "dbt_sugar_test_2",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    },
+                ],
+            },
+            False,
+            id="multiple_dbt_projects",
+        ),
+    ],
+)
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_assert_only_one_dbt_project_in_scope(
+    monkeypatch, datafiles, config_input, expect_single_project
+):
+    from dbt_sugar.core.config.config import DbtSugarConfig
+    from dbt_sugar.core.exceptions import KnownRegressionError
+    from dbt_sugar.core.flags import FlagParser
+    from dbt_sugar.core.main import parser
+
+    cli_args = ["doc", "-m", "test_model", "--config-path", str(datafiles)]
+    flags_parser = FlagParser(cli_parser=parser)
+    flags_parser.consume_cli_arguments(test_cli_args=cli_args)
+
+    config = DbtSugarConfig(flags_parser)
+    monkeypatch.setattr(DbtSugarConfig, "config", config_input)
+
+    if expect_single_project is True:
+        is_good = config.assert_only_one_dbt_project_in_scope()
+        assert is_good is True
+    else:
+        with pytest.raises(KnownRegressionError):
+            _ = config.assert_only_one_dbt_project_in_scope()

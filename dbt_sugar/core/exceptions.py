@@ -37,3 +37,7 @@ class MissingDbtProjects(DbtSugarException):
 
 class TargetNameNotProvided(DbtSugarException):
     """Thrown when no `target:` entry is provided in the profiles.yml and not passed on CLI."""
+
+
+class KnownRegressionError(DbtSugarException):
+    """Thrown when we want to warn users of a known regression or limitation that is not implemented."""

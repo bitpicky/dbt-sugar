@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dbt-sugar"
-version = "0.0.0"
-description = "A sweet CLI tool to help dbt users enfoce documentation and testing onn their dbt projects."
+version = "0.0.0-alpha.0"
+description = "A sweet CLI tool to help dbt users enforce documentation and testing on their dbt projects."
 authors = ["Bastien Boutonnet <bastien.b1@gmail.com>"]
 license = "GPLv3+"
 readme = "README.md"
@@ -45,6 +45,7 @@ pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.4"
 pre-commit = "^2.10.1"
 tox = "^3.22.0"
+bumpversion = "^0.6.0"
 
 
 [build-system]

@@ -57,10 +57,34 @@ def test_get_columns_from_table():
         ),
     ],
 )
-def test_run_test(mocker, test_name, schema, table, column_name, result):
+def test_run_test_check_query(mocker, test_name, schema, table, column_name, result):
     execute_and_check = mocker.patch(
         "dbt_sugar.core.connectors.postgres_connector.PostgresConnector.execute_and_check"
     )
     postgres_connector = PostgresConnector(CREDENTIALS)
     postgres_connector.run_test(test_name, schema, table, column_name)
     execute_and_check.assert_has_calls(result)
+
+
+@pytest.mark.parametrize(
+    "test_name, schema, table, column_name, result",
+    [
+        (
+            "unique",
+            "public",
+            "my_first_dbt_model",
+            "question",
+            False,
+        ),
+        (
+            "not_null",
+            "public",
+            "my_first_dbt_model",
+            "question",
+            True,
+        ),
+    ],
+)
+def test_run_test(mocker, test_name, schema, table, column_name, result):
+    postgres_connector = PostgresConnector(CREDENTIALS)
+    assert postgres_connector.run_test(test_name, schema, table, column_name) == result

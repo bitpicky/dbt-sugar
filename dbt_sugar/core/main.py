@@ -100,9 +100,23 @@ document_sub_parser.add_argument(
     type=str,
     default=str(),
 )
+document_sub_parser.add_argument(
+    "--no-tests",
+    help="When provided the documentation task will not ask for adding tests into the model.",
+    action="store_true",
+    default=False,
+)
 
+document_sub_parser.add_argument(
+    "--no-tags",
+    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    action="store_true",
+    default=False,
+)
 
 # task handler
+
+
 def handle(
     parser: argparse.ArgumentParser,
     test_cli_args: List[str] = list(),

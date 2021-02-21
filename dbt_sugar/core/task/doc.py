@@ -46,7 +46,11 @@ class DocumentationTask(BaseTask):
         columns_sql = []
 
         model = self._flags.model
-        schema = self._dbt_profile.profile.get("target_schema", "")
+        # FIXME: This requires people to pass a schema but we can read the schema and that's not
+        # how we want people to use this.
+        # We can get schema from dbt info so we need to get it from the DbtProfile and the
+        # dbt profile should be responsible for giving prio to CLI or not.
+        schema = self._flags.schema
 
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))

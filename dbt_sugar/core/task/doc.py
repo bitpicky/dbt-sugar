@@ -4,8 +4,6 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from sqlalchemy.exc import OperationalError
-
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
@@ -17,6 +15,11 @@ from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
 NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 
+DB_CONNECTORS = {
+    "postgres": PostgresConnector,
+    "snowflake": SnowflakeConnector,
+}
+
 
 class DocumentationTask(BaseTask):
     """Documentation Task object.
@@ -26,7 +29,7 @@ class DocumentationTask(BaseTask):
 
     def __init__(self, flags: FlagParser, dbt_profile: DbtProfile) -> None:
         super().__init__()
-        self.columns_to_update: Dict[str, str] = {}
+        self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
 
@@ -47,29 +50,15 @@ class DocumentationTask(BaseTask):
         schema = self._flags.schema
 
         dbt_credentials = self.load_dbt_credentials()
-        type_of_connection = dbt_credentials.get("type", "")
+        connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
+        if not connector:
+            logger.error("The type of connector doesn't exists.")
+            return 1
 
-        if type_of_connection == "postgres":
-            try:
-                columns_sql = PostgresConnector(
-                    user=dbt_credentials.get("user", str()),
-                    password=dbt_credentials.get("password", str()),
-                    host=dbt_credentials.get("host", str()),
-                    database=dbt_credentials.get("database", str()),
-                ).get_columns_from_table(model, schema)
-            except OperationalError as e:
-                raise RuntimeError(
-                    f"Could not connect to your postgres database, check your profiles.yml\n{e}"
-                )
-        elif type_of_connection == "snowflake":
-            columns_sql = SnowflakeConnector(
-                user=dbt_credentials.get("user", str()),
-                password=dbt_credentials.get("password", str()),
-                account=dbt_credentials.get("account", str()),
-                database=dbt_credentials.get("database", str()),
-            ).get_columns_from_table(model, schema)
+        self.connector = connector(dbt_credentials)
+        columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
-            return self.orchestrate_model_documentation(model, columns_sql)
+            return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
     def change_model_description(self, content: Dict[str, Any], model_name: str) -> Dict[str, Any]:
@@ -128,7 +117,9 @@ class DocumentationTask(BaseTask):
                         return path_file, False
         return None, False
 
-    def orchestrate_model_documentation(self, model_name: str, columns_sql: List[str]) -> int:
+    def orchestrate_model_documentation(
+        self, schema: str, model_name: str, columns_sql: List[str]
+    ) -> int:
         """
         Orchestrator to fully document a model will:
 
@@ -158,8 +149,34 @@ class DocumentationTask(BaseTask):
         not_documented_columns = self.get_not_documented_columns(content, model_name)
         self.document_columns(not_documented_columns)
 
-        self.update_column_descriptions(self.columns_to_update)
+        self.check_tests(schema, model_name)
+        self.update_model_description_test_tags(path, model_name, self.column_update_payload)
+        # Method to update the descriptions in all the schemas.yml
+        self.update_column_descriptions(self.column_update_payload)
+
         return 0
+
+    def check_tests(self, schema: str, model_name: str) -> None:
+        """
+        Method to run and add test into a schema.yml, this method will:
+
+        Run the tests and if they have been successful it will add them into the schema.yml.
+
+        Args:
+            schema (str): Name of the schema where the model lives.
+            model_name (str): Name of the model to document.
+        """
+        for column in self.column_update_payload.keys():
+            tests = self.column_update_payload[column].get("tests", [])
+            for test in tests:
+                have_run_sucessful = self.connector.run_test(
+                    test,
+                    schema,
+                    model_name,
+                    column,
+                )
+                if not have_run_sucessful:
+                    tests.remove(test)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """
@@ -185,7 +202,7 @@ class DocumentationTask(BaseTask):
             user_input = UserInputCollector(
                 "undocumented_columns", undocumented_columns_payload
             ).collect()
-            self.columns_to_update.update(user_input)
+            self.column_update_payload.update(user_input)
 
     def update_model(
         self, content: Dict[str, Any], model_name: str, columns_sql: List[str]
@@ -204,11 +221,12 @@ class DocumentationTask(BaseTask):
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in columns_sql:
-                    columns_names = [column["name"] for column in model["columns"]]
+                    columns = model.get("columns", [])
+                    columns_names = [column["name"] for column in columns]
                     if column not in columns_names:
                         description = self.get_column_description_from_dbt_definitions(column)
                         logger.info(f"Updating column with name {column}")
-                        model["columns"].append({"name": column, "description": description})
+                        columns.append({"name": column, "description": description})
         return content
 
     def create_new_model(

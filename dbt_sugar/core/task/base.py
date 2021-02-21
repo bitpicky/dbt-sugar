@@ -3,7 +3,7 @@ import abc
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 
@@ -69,29 +69,99 @@ class BaseTask(abc.ABC):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
+    def __combine_two_list_without_duplicates(
+        self, list1: List[Any], list2: List[Any]
+    ) -> List[Any]:
+        """
+        Method to combine two list without duplicates.
+
+        Args:
+            list1 (List[Any]): First list with any value.
+            list2 (List[Any]): Second list with any value.
+
+        Returns:
+            List[Any]: with the combine lists.
+        """
+        if not list1:
+            return list2
+
+        for item in list1:
+            if item not in list2:
+                list2.append(item)
+        return list2
+
+    def update_model_description_test_tags(
+        self,
+        path_file: Path,
+        model_name: str,
+        dict_column_description_to_update: Dict[str, Dict[str, Any]],
+    ):
+        """
+        Method to update a schema.yml with a Dict of columns names, tests, and tags.
+
+        Args:
+            path_file (Path): Path of the schema.yml file to update.
+            model_name (str): Name of the model to update.
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
+            the description, tags and tests to update.
+        """
+        content = open_yaml(path_file)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    column_name = column["name"]
+                    if column_name in dict_column_description_to_update.keys():
+                        # Update the description
+                        description = dict_column_description_to_update[column_name].get(
+                            "description"
+                        )
+                        if description:
+                            column["description"] = description
+
+                        # Update the tests without duplicating them.
+                        tests = dict_column_description_to_update[column_name].get("tests")
+                        if tests:
+                            column["tests"] = self.__combine_two_list_without_duplicates(
+                                column.get("tests", []), tests
+                            )
+
+                        # Update the tags without duplicating them.
+                        tags = dict_column_description_to_update[column_name].get("tags")
+                        if tags:
+                            column["tags"] = self.__combine_two_list_without_duplicates(
+                                column.get("tags", []), tags
+                            )
+        save_yaml(path_file, content)
+
     def update_column_description_from_schema(
-        self, path_file: Path, dict_column_description_to_update: Dict[str, str]
+        self, path_file: Path, dict_column_description_to_update: Dict[str, Dict[str, Any]]
     ) -> None:
         """Method to update a schema.yml with a Dict of columns names and description.
 
         Args:
             path_file (Path): Path to the schema.yml file to update the columns descriptions from.
-            dict_column_description_to_update (Dict[str, str]): Dict with the column name with
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description to update.
         """
         content = open_yaml(path_file)
         for model in content["models"]:
-            for column in model["columns"]:
+            for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update.keys():
-                    column["description"] = dict_column_description_to_update[column_name]
+                    new_desctiption = dict_column_description_to_update[column_name].get(
+                        "description"
+                    )
+                    if new_desctiption:
+                        column["description"] = new_desctiption
         save_yaml(path_file, content)
 
-    def update_column_descriptions(self, dict_column_description_to_update: Dict[str, str]) -> None:
+    def update_column_descriptions(
+        self, dict_column_description_to_update: Dict[str, Dict[str, Any]]
+    ) -> None:
         """Method to update all the schema.ymls from a dbt project with a Dict of columns names and description.
 
         Args:
-            dict_column_description_to_update (Dict[str, str]): Dict with the column name with
+            dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description to update.
         """
         for root, _, files in os.walk(self.repository_path):

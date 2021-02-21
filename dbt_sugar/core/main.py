@@ -128,6 +128,7 @@ def handle(
         sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
     )
     dbt_project.read_project()
+
     dbt_profile = DbtProfile(
         profile_name=dbt_project.profile_name,
         target_name=flag_parser.target,

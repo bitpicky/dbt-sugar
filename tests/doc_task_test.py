@@ -1,3 +1,4 @@
+from argparse import Namespace
 from pathlib import Path, PosixPath
 from unittest.mock import call
 

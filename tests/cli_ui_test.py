@@ -79,8 +79,8 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
                 "prompt_return": {"col_a": "Custom desc", "col_b": "Custom desc"},
             },
             {
-                "col_a": {"description": "Custom desc", "tags": ["Custom desc"]},
-                "col_b": {"description": "Custom desc", "tags": ["Custom desc"]},
+                "col_a": {"description": "Custom desc"},
+                "col_b": {"description": "Custom desc"},
             },
             id="document_all_undocumented",
         ),
@@ -113,8 +113,11 @@ def test__document_undocumented_columns(
     mocker.patch("questionary.prompt", return_value=questionary_outputs["prompt_return"])
     mocker.patch("questionary.text", return_value=Question("Custom desc"))
     results = UserInputCollector(
-        question_type="undocumented_columns", question_payload=question_payload
-    )._document_undocumented_cols(question_payload=question_payload, ask_for_tests=False)
+        question_type="undocumented_columns",
+        question_payload=question_payload,
+        ask_for_tests=False,
+        ask_for_tags=False,
+    )._document_undocumented_cols(question_payload=question_payload)
     assert results == expected_results
 
 
@@ -134,7 +137,7 @@ def test__document_undocumented_columns(
                 "confirm_return": True,
                 "prompt_return": {"cols_to_document": ["col_a"]},
             },
-            {"col_a": {"description": "Custom desc", "tags": ["Custom desc"]}},
+            {"col_a": {"description": "Custom desc"}},
             id="document_some_documented_cols",
         ),
         pytest.param(
@@ -164,8 +167,11 @@ def test__document_already_documented_cols(
     mocker.patch("questionary.prompt", return_value=questionary_outputs["prompt_return"])
     mocker.patch("questionary.text", return_value=Question("Custom desc"))
     results = UserInputCollector(
-        question_type="undocumented_columns", question_payload=question_payload
-    )._document_already_documented_cols(question_payload=question_payload, ask_for_tests=False)
+        question_type="undocumented_columns",
+        question_payload=question_payload,
+        ask_for_tests=False,
+        ask_for_tags=False,
+    )._document_already_documented_cols(question_payload=question_payload)
     assert results == expected_results
 
 
@@ -203,8 +209,6 @@ def test__iterate_through_columns(mocker, question_payload, expected_results):
     mocker.patch("questionary.checkbox", return_value=Question(["unique"]))
     mocker.patch("questionary.confirm", return_value=Question(question_payload["ask_for_tests"]))
     results = UserInputCollector(
-        "undocumented_columns", question_payload=[]
-    )._iterate_through_columns(
-        cols=question_payload["col_list"], ask_for_tests=question_payload["ask_for_tests"]
-    )
+        "undocumented_columns", question_payload=[], ask_for_tests=question_payload["ask_for_tests"]
+    )._iterate_through_columns(cols=question_payload["col_list"])
     assert results == expected_results

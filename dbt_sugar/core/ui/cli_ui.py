@@ -172,9 +172,9 @@ class UserInputCollector:
 
         self._is_valid_question_payload = True
 
-    @staticmethod
+    @classmethod
     def _iterate_through_columns(
-        cols: List[str], ask_for_tests: bool = True
+        cls, cols: List[str], ask_for_tests: bool = True, ask_for_tags: bool = True
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         """Iterates through a provided list of columns collects documentation info.
 
@@ -195,7 +195,8 @@ class UserInputCollector:
             {
                 'col_a': {
                     'description': 'Description for col a',
-                    'tests': ['unique']
+                    'tests': ['unique'],
+                    'tags': ['PII']
                     },
                 'col_b': {'description': 'Description for col b'}
             }
@@ -203,7 +204,9 @@ class UserInputCollector:
         """
         results = dict()
         for column in cols:
-            description = questionary.text(message=f"{column}: {DESCRIPTION_PROMPT_MESSAGE}").ask()
+            description = questionary.text(
+                message=f"Column: '{column}': {DESCRIPTION_PROMPT_MESSAGE}"
+            ).ask()
 
             if description:
                 results.update({column: {"description": description}})
@@ -224,10 +227,30 @@ class UserInputCollector:
                     ).ask()
                     if tests:
                         results[column]["tests"] = tests
+
+            # kick in the tags flow
+            if ask_for_tags:
+                wants_to_add_tags = questionary.confirm(
+                    message="Would you like to add any tags?"
+                ).ask()
+                if wants_to_add_tags:
+                    tags = questionary.text(message="Provide a comma-separated list of tags").ask()
+                    tags = cls.__split_comma_separated_str(tags)
+                    if tags:
+                        results[column]["tags"] = tags
             # remove the column if no info has been given (no tests, and no description).
             if not results[column]:
                 _ = results.pop(column)
         return results
+
+    @staticmethod
+    def __split_comma_separated_str(tags: str) -> List[str]:
+        _tags = []
+        if isinstance(tags, str):
+            _tags = tags.split(",")
+            _tags = [s.strip() for s in _tags]
+            return _tags
+        raise TypeError(f"Tags can only be strings. You provided a {type(tags)}")
 
     @staticmethod
     def _document_model(
@@ -249,7 +272,10 @@ class UserInputCollector:
 
     @classmethod
     def _document_undocumented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+        cls,
+        question_payload: Sequence[Mapping[str, Any]],
+        ask_for_tests: bool = True,
+        ask_for_tags: bool = True,
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
 
         results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
@@ -265,19 +291,24 @@ class UserInputCollector:
 
         if document_all_cols:
             results = cls._iterate_through_columns(
-                cols=columns_to_document, ask_for_tests=ask_for_tests
+                cols=columns_to_document, ask_for_tests=ask_for_tests, ask_for_tags=ask_for_tags
             )
         else:
             # get the list of columns from user
             columns_to_document = questionary.prompt(question_payload)
             results = cls._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+                cols=columns_to_document["cols_to_document"],
+                ask_for_tests=ask_for_tests,
+                ask_for_tags=ask_for_tags,
             )
         return results
 
     @classmethod
     def _document_already_documented_cols(
-        cls, question_payload: Sequence[Mapping[str, Any]], ask_for_tests: bool = True
+        cls,
+        question_payload: Sequence[Mapping[str, Any]],
+        ask_for_tests: bool = True,
+        ask_for_tags: bool = True,
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
         mutable_payload = copy.deepcopy(question_payload)
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
@@ -298,7 +329,9 @@ class UserInputCollector:
         if document_any_columns:
             columns_to_document = questionary.prompt(mutable_payload)
             _results = cls._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"], ask_for_tests=ask_for_tests
+                cols=columns_to_document["cols_to_document"],
+                ask_for_tests=ask_for_tests,
+                ask_for_tags=ask_for_tags,
             )
 
             # remove description from col key

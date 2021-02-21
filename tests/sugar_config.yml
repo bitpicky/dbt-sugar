@@ -12,7 +12,17 @@ syrups:
     dbt_projects:
       - name: dwh
         path: path
-        excluded_tables:
-          - table_a
-      - name: prediction
-        path: path
+  - name: syrup_4
+    dbt_projects:
+      - name: dbt_sugar_test
+        path: "./test_dbt_project/dbt_sugar_test"
+  # TODO: Remove this when we have dealt with this regression.
+  # ! REGRESSION
+  # - name: syrup_3
+  # dbt_projects:
+  # - name: dwh
+  # path: path
+  # excluded_tables:
+  # - table_a
+  # - name: prediction
+  # path: path

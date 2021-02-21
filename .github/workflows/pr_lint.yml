@@ -10,5 +10,5 @@ jobs:
     steps:
       - uses: seferov/pr-lint-action@master
         with:
-          title-regex: "^feat|fix|refactor|chore|docs|ci|style|release|revert|Bump|Update "
+          title-regex: "^feat|fix|refactor|chore|docs|ci|style|release|revert|regr|Bump|Update "
           title-regex-flags: "g"

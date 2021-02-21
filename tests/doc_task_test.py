@@ -1,3 +1,4 @@
+from argparse import Namespace
 from pathlib import Path, PosixPath
 from unittest.mock import call
 
@@ -462,7 +463,8 @@ def test_document_columns(mocker):
         def ask(self):
             return self._return_value
 
-    doc_task = __init_descriptions()
+    doc_task = DocumentationTask(Namespace(ask_for_tags=True, ask_for_tests=True), None)
+    doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     mocker.patch("questionary.prompt", return_value={"cols_to_document": ["columnA"]})
     mocker.patch("questionary.confirm", return_value=Question(False))
     mocker.patch(

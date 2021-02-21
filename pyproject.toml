@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dbt-sugar"
-version = "0.0.0"
-description = "A sweet CLI tool to help dbt users enfoce documentation and testing onn their dbt projects."
+version = "0.0.0-alpha.0"
+description = "A sweet CLI tool to help dbt users enforce documentation and testing on their dbt projects."
 authors = ["Bastien Boutonnet <bastien.b1@gmail.com>"]
 license = "GPLv3+"
 readme = "README.md"

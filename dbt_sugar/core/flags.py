@@ -28,8 +28,8 @@ class FlagParser:
         self.config_path: Path = Path(str())
         self.profiles_dir: Path = Path(str())
         self.is_dry_run: bool = False
-        self.no_tests: bool = False
-        self.no_tags: bool = False
+        self.ask_for_tests: bool = True
+        self.ask_for_tags: bool = True
         self.target: str = str()
         self.verbose: bool = False
 
@@ -58,5 +58,6 @@ class FlagParser:
             self.model = self.args.model
             self.schema = self.args.schema
             self.target = self.args.target
-            self.no_tests = self.args.no_tests
-            self.no_tags = self.args.no_tags
+            # we reverse the flag so that we don't have double negatives later in the code
+            self.ask_for_tests = self.args.ask_for_tests
+            self.ask_for_tags = self.args.ask_for_tags

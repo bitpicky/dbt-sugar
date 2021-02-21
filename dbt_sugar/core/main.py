@@ -100,18 +100,36 @@ document_sub_parser.add_argument(
     type=str,
     default=str(),
 )
+# document_sub_parser.add_argument(
+
 document_sub_parser.add_argument(
-    "--no-tests",
-    help="When provided the documentation task will not ask for adding tests into the model.",
-    action="store_true",
-    default=False,
+    "--no-ask-tests",
+    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    action="store_false",
+    dest="ask_for_tests",
 )
 
 document_sub_parser.add_argument(
-    "--no-tags",
-    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    "--ask-tests",
+    help="When passed dbt-sugar will ask you if you want to add tests to your models.",
     action="store_true",
-    default=False,
+    dest="ask_for_tests",
+    default=True,
+)
+
+document_sub_parser.add_argument(
+    "--no-ask-tags",
+    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    action="store_false",
+    dest="ask_for_tags",
+)
+
+document_sub_parser.add_argument(
+    "--ask-tags",
+    help="When passed dbt-sugar will ask you if you want to add tests to your models.",
+    action="store_true",
+    dest="ask_for_tags",
+    default=True,
 )
 
 # task handler

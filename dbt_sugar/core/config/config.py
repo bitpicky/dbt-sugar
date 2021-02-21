@@ -29,6 +29,8 @@ class SyrupModel(BaseModel):
 
     name: str
     dbt_projects: List[DbtProjectsModel]
+    always_enforce_tests: Optional[bool] = True
+    always_add_tags: Optional[bool] = True
 
 
 class DefaultsModel(BaseModel):

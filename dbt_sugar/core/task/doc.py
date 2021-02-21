@@ -149,9 +149,7 @@ class DocumentationTask(BaseTask):
         not_documented_columns = self.get_not_documented_columns(content, model_name)
         self.document_columns(not_documented_columns)
 
-        # Will remove from the update the test that doesn't run correctly.
         self.check_tests(schema, model_name)
-        # Method to update the description test and tags from the model.
         self.update_model_description_test_tags(path, model_name, self.column_update_payload)
         # Method to update the descriptions in all the schemas.yml
         self.update_column_descriptions(self.column_update_payload)

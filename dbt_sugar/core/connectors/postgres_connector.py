@@ -22,10 +22,11 @@ class PostgresConnector(BaseConnector):
         connection_params: Dict[str, str],
     ) -> None:
         """
-        Init method to instanciate the credentials.
+        Creates the URL and the Engine for future connections.
 
         Args:
-            connection_params (Dict[str, str]): Dict with connection parameters.
+            connection_params (Dict[str, str]): Dict containing database connection
+                parameters and credentials.
         """
         self.connection_url = sqlalchemy.engine.url.URL(
             drivername="postgresql+psycopg2",

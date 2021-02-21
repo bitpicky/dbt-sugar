@@ -200,7 +200,11 @@ class DocumentationTask(BaseTask):
                 }
             ]
             user_input = UserInputCollector(
-                "undocumented_columns", undocumented_columns_payload
+                "undocumented_columns",
+                undocumented_columns_payload
+                # TODO: Add the functionality of tests and tags
+                # no_tests=self._flags.no_tests,
+                # no_tags=self._flags.no_tags,
             ).collect()
             self.column_update_payload.update(user_input)
 

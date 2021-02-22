@@ -6,7 +6,10 @@ models:
       - name: id
         description: The primary key for this table
       - name: answer
-        description: No description for this column.
+        description:
+          description: answer col
+          tests:
+            - unique
       - name: question
         description: No description for this column.
   - name: my_second_dbt_model

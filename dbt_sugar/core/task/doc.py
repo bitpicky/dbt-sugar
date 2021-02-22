@@ -35,6 +35,7 @@ class DocumentationTask(BaseTask):
         self._dbt_profile = dbt_profile
         self._sugar_config = config
 
+    # FIXME: Id ont' think this is needed here, the dbt profile is already read in the main.py
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
         self._dbt_profile.read_profile()
@@ -49,7 +50,7 @@ class DocumentationTask(BaseTask):
         columns_sql = []
 
         model = self._flags.model
-        schema = self._flags.schema
+        schema = self._dbt_profile.profile.get("target_schema", "")
 
         dbt_credentials = self.load_dbt_credentials()
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))

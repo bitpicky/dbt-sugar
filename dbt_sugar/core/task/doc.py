@@ -35,7 +35,8 @@ class DocumentationTask(BaseTask):
         self._dbt_profile = dbt_profile
         self._sugar_config = config
 
-    # FIXME: Id ont' think this is needed here, the dbt profile is already read in the main.py
+    # FIXME: Ask Virginia why this is here, I don't think it's needed since we already read the
+    # profile in main.py
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
         self._dbt_profile.read_profile()

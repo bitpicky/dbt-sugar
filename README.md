@@ -3,13 +3,14 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
 ![python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue)
+![Build](https://github.com/bitpicky/dbt-sugar/workflows/main_ci.yml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bitpicky/dbt-sugar/main.svg)](https://results.pre-commit.ci/latest/github/bitpicky/dbt-sugar/main)
 [![codecov](https://codecov.io/gh/bitpicky/dbt-sugar/branch/main/graph/badge.svg?token=JB0E0LZDW1)](https://codecov.io/gh/bitpicky/dbt-sugar)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1e6a887de605ef8e0eca/maintainability)](https://codeclimate.com/github/bitpicky/dbt-sugar/maintainability)
 
 [![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
 
-:warning: **We're actively working on this tool and aim to have a barebones feature release by mid-Feb at the latest**.
+:warning: **We're actively working on this tool and aim to have an MVP very very soon!**
 
 If you want to help out and join the party feel free to:
 

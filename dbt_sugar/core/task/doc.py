@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
+from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
@@ -27,11 +28,12 @@ class DocumentationTask(BaseTask):
     Holds methods and attrs necessary to orchestrate a model documentation task.
     """
 
-    def __init__(self, flags: FlagParser, dbt_profile: DbtProfile) -> None:
+    def __init__(self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig) -> None:
         super().__init__()
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
+        self._sugar_config = config
 
     def load_dbt_credentials(self) -> Dict[str, str]:
         """Method to load the DBT profile credentials."""
@@ -202,8 +204,8 @@ class DocumentationTask(BaseTask):
             user_input = UserInputCollector(
                 "undocumented_columns",
                 undocumented_columns_payload,
-                ask_for_tests=self._flags.ask_for_tests,
-                ask_for_tags=self._flags.ask_for_tags,
+                ask_for_tests=self._sugar_config.config["always_enforce_tests"],
+                ask_for_tags=self._sugar_config.config["always_add_tags"],
             ).collect()
             self.column_update_payload.update(user_input)
 

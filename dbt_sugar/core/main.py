@@ -172,7 +172,7 @@ def handle(
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile)
+        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile, sugar_config)
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.

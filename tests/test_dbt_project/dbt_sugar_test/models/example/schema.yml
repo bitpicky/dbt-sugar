@@ -6,8 +6,7 @@ models:
       - name: id
         description: The primary key for this table
       - name: answer
-        description:
-          description: No description for this column.
+        description: No description for this column.
       - name: question
         description: No description for this column.
   - name: my_second_dbt_model

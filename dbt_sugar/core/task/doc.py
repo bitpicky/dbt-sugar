@@ -1,6 +1,7 @@
 """Document Task module."""
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
@@ -148,35 +149,55 @@ class DocumentationTask(BaseTask):
 
         not_documented_columns = self.get_not_documented_columns(content, model_name)
         self.document_columns(not_documented_columns)
-
-        self.check_tests(schema, model_name)
         self.update_model_description_test_tags(path, model_name, self.column_update_payload)
+        self.check_tests(path, model_name)
+
         # Method to update the descriptions in all the schemas.yml
         self.update_column_descriptions(self.column_update_payload)
-
         return 0
 
-    def check_tests(self, schema: str, model_name: str) -> None:
+    def delete_fail_tests_from_schema(
+        self, path_file: Path, model_name: str, test_to_delete: Dict[str, List[str]]
+    ):
+        """
+        Method to delete the failing tests from the schema.yml.
+
+        Args:
+            path_file (Path): Path of the schema.yml file to update.
+            model_name (str): Name of the model to document.
+            test_to_delete (Dict[str, List[str]]): with the tests that have failed.
+        """
+        content = open_yaml(path_file)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    test_to_delete_from_column = test_to_delete.get(column, [])
+                    test_from_column = column.get("tests", [])
+                    test_pass = [x for x in test_from_column if x not in test_to_delete_from_column]
+                    column["tests"] = test_pass
+        save_yaml(path_file, content)
+
+    def check_tests(self, path_file: Path, model_name: str) -> None:
         """
         Method to run and add test into a schema.yml, this method will:
 
         Run the tests and if they have been successful it will add them into the schema.yml.
 
         Args:
-            schema (str): Name of the schema where the model lives.
+            path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
+        dbt_command = f"dbt test --models {model_name}".split()
+        dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
+        test_to_delete = {}
+
         for column in self.column_update_payload.keys():
             tests = self.column_update_payload[column].get("tests", [])
             for test in tests:
-                have_run_sucessful = self.connector.run_test(
-                    test,
-                    schema,
-                    model_name,
-                    column,
-                )
-                if not have_run_sucessful:
-                    tests.remove(test)
+                test_fail = f"ERROR {test}_{model_name}_{column}"
+                if test_fail in dbt_result_command:
+                    test_to_delete[column] = test
+        self.delete_fail_tests_from_schema(path_file, model_name, test_to_delete)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """

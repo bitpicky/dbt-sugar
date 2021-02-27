@@ -181,7 +181,9 @@ class DocumentationTask(BaseTask):
                 if not have_run_sucessful:
                     tests.remove(test)
 
-    def document_columns(self, columns: Dict[str, str], question_type: str) -> None:
+    def document_columns(
+        self, columns: Dict[str, str], question_type: str = "undocumented_columns"
+    ) -> None:
         """
         Method to document the columns from a model.
 
@@ -194,11 +196,18 @@ class DocumentationTask(BaseTask):
         columns_names = list(columns.keys())
         for i in range(0, len(columns_names), NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+
+            choices_undocumented = columns_names[i:final_index]
+            # The choices variable need to have the descripions for documented columns.
+            if question_type == "documented_columns":
+                choices_documented = {key: columns[key] for key in choices_undocumented}
+            choices = choices_documented if choices_documented else choices_undocumented
+
             undocumented_columns_payload: List[Mapping[str, Any]] = [
                 {
                     "type": "checkbox",
                     "name": "cols_to_document",
-                    "choices": columns_names[i:final_index],
+                    "choices": choices,
                     "message": "Select the columns you want to document.",
                 }
             ]

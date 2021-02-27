@@ -198,6 +198,7 @@ class DocumentationTask(BaseTask):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
 
             choices_undocumented = columns_names[i:final_index]
+            choices_documented = {}
             # The choices variable need to have the descripions for documented columns.
             if question_type == "documented_columns":
                 choices_documented = {key: columns[key] for key in choices_undocumented}

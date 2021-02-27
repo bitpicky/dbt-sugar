@@ -10,8 +10,8 @@ from dbt_sugar.core.task.doc import DocumentationTask
 FIXTURE_DIR = Path(__file__).resolve().parent
 
 
-def __init_descriptions(params=None, dbt_profile=None):
-    doc_task = DocumentationTask(params, dbt_profile)
+def __init_descriptions(params=None, dbt_profile=None, config=None):
+    doc_task = DocumentationTask(params, dbt_profile, config)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     return doc_task
 
@@ -191,7 +191,7 @@ def test_update_model_description_test_tags(mocker, content, model_name, ui_resp
     open_yaml = mocker.patch("dbt_sugar.core.task.base.open_yaml")
     save_yaml = mocker.patch("dbt_sugar.core.task.base.save_yaml")
     open_yaml.return_value = content
-    doc_task = DocumentationTask(None, None)
+    doc_task = DocumentationTask(None, None, None)
     doc_task.update_model_description_test_tags(Path("."), model_name, ui_response)
     save_yaml.assert_has_calls(result)
 
@@ -524,7 +524,11 @@ def test_document_columns(mocker):
         def ask(self):
             return self._return_value
 
-    doc_task = __init_descriptions()
+    class MockDbtSugarConfig:
+        config = {"always_enforce_tests": True, "always_add_tags": True}
+
+    doc_task = DocumentationTask(None, None, MockDbtSugarConfig)
+    doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     mocker.patch("questionary.prompt", return_value={"cols_to_document": ["columnA"]})
     mocker.patch("questionary.confirm", return_value=Question(False))
     mocker.patch(

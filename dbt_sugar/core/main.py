@@ -100,9 +100,41 @@ document_sub_parser.add_argument(
     type=str,
     default=str(),
 )
+# document_sub_parser.add_argument(
 
+document_sub_parser.add_argument(
+    "--no-ask-tests",
+    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    action="store_false",
+    dest="ask_for_tests",
+)
+
+document_sub_parser.add_argument(
+    "--ask-tests",
+    help="When passed dbt-sugar will ask you if you want to add tests to your models.",
+    action="store_true",
+    dest="ask_for_tests",
+    default=True,
+)
+
+document_sub_parser.add_argument(
+    "--no-ask-tags",
+    help="When provided the documentation task will not ask for adding TAGs into the model.",
+    action="store_false",
+    dest="ask_for_tags",
+)
+
+document_sub_parser.add_argument(
+    "--ask-tags",
+    help="When passed dbt-sugar will ask you if you want to add tests to your models.",
+    action="store_true",
+    dest="ask_for_tags",
+    default=True,
+)
 
 # task handler
+
+
 def handle(
     parser: argparse.ArgumentParser,
     test_cli_args: List[str] = list(),
@@ -140,7 +172,7 @@ def handle(
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile)
+        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile, sugar_config)
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.

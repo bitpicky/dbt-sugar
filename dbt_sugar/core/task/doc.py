@@ -157,7 +157,7 @@ class DocumentationTask(BaseTask):
         return 0
 
     def delete_fail_tests_from_schema(
-        self, path_file: Path, model_name: str, test_to_delete: Dict[str, List[str]]
+        self, path_file: Path, model_name: str, tests_to_delete: Dict[str, List[str]]
     ):
         """
         Method to delete the failing tests from the schema.yml.
@@ -165,16 +165,21 @@ class DocumentationTask(BaseTask):
         Args:
             path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
-            test_to_delete (Dict[str, List[str]]): with the tests that have failed.
+            tests_to_delete (Dict[str, List[str]]): with the tests that have failed.
         """
         content = open_yaml(path_file)
         for model in content["models"]:
             if model["name"] == model_name:
                 for column in model.get("columns", []):
-                    test_to_delete_from_column = test_to_delete.get(column, [])
-                    test_from_column = column.get("tests", [])
-                    test_pass = [x for x in test_from_column if x not in test_to_delete_from_column]
-                    column["tests"] = test_pass
+                    tests_to_delete_from_column = tests_to_delete.get(column["name"], [])
+                    tests_from_column = column.get("tests", [])
+                    tests_pass = [
+                        x for x in tests_from_column if x not in tests_to_delete_from_column
+                    ]
+                    if not tests_pass and tests_from_column:
+                        del column["tests"]
+                    elif tests_pass:
+                        column["tests"] = tests_pass
         save_yaml(path_file, content)
 
     def check_tests(self, path_file: Path, model_name: str) -> None:
@@ -189,15 +194,19 @@ class DocumentationTask(BaseTask):
         """
         dbt_command = f"dbt test --models {model_name}".split()
         dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
-        test_to_delete = {}
+        tests_to_delete: Dict[str, List[str]] = {}
 
         for column in self.column_update_payload.keys():
             tests = self.column_update_payload[column].get("tests", [])
             for test in tests:
-                test_fail = f"ERROR {test}_{model_name}_{column}"
-                if test_fail in dbt_result_command:
-                    test_to_delete[column] = test
-        self.delete_fail_tests_from_schema(path_file, model_name, test_to_delete)
+                test_fail = f"FAIL ([0-9]+) {test}_{model_name}_{column}"
+                test_error = f"ERROR {test}_{model_name}_{column}"
+                if re.search(test_fail, dbt_result_command) or re.search(
+                    test_error, dbt_result_command
+                ):
+                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+        if tests_to_delete:
+            self.delete_fail_tests_from_schema(path_file, model_name, tests_to_delete)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """

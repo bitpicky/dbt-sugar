@@ -147,7 +147,10 @@ class DocumentationTask(BaseTask):
         save_yaml(path, content)
 
         not_documented_columns = self.get_not_documented_columns(content, model_name)
-        self.document_columns(not_documented_columns)
+        self.document_columns(not_documented_columns, "undocumented_columns")
+
+        documented_columns = self.get_documented_columns(content, model_name)
+        self.document_columns(documented_columns, "documented_columns")
 
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(path, model_name, self.column_update_payload)
@@ -178,7 +181,7 @@ class DocumentationTask(BaseTask):
                 if not have_run_sucessful:
                     tests.remove(test)
 
-    def document_columns(self, columns: Dict[str, str]) -> None:
+    def document_columns(self, columns: Dict[str, str], question_type: str) -> None:
         """
         Method to document the columns from a model.
 
@@ -199,9 +202,7 @@ class DocumentationTask(BaseTask):
                     "message": "Select the columns you want to document.",
                 }
             ]
-            user_input = UserInputCollector(
-                "undocumented_columns", undocumented_columns_payload
-            ).collect()
+            user_input = UserInputCollector(question_type, undocumented_columns_payload).collect()
             self.column_update_payload.update(user_input)
 
     def update_model(

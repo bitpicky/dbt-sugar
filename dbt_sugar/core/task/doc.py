@@ -204,7 +204,10 @@ class DocumentationTask(BaseTask):
                 if re.search(test_fail, dbt_result_command) or re.search(
                     test_error, dbt_result_command
                 ):
+                    logger.info(f"The test {test} in the column {column} has FAILED to execute.")
                     tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+                else:
+                    logger.info(f"The test {test} in the column {column} has PASS.")
         if tests_to_delete:
             self.delete_fail_tests_from_schema(path_file, model_name, tests_to_delete)
 

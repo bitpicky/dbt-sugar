@@ -55,8 +55,10 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
                 "name": "dbt_sugar_test",
                 "path": "./tests/test_dbt_project/dbt_sugar_test",
                 "excluded_tables": ["table_a"],
-            }
+            },
         ],
+        "always_add_tags": True,
+        "always_enforce_tests": True,
     }
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
@@ -171,3 +173,77 @@ def test_assert_only_one_dbt_project_in_scope(
     else:
         with pytest.raises(KnownRegressionError):
             _ = config.assert_only_one_dbt_project_in_scope()
+
+
+@pytest.mark.parametrize(
+    "test_and_flag_args, expectation",
+    [
+        pytest.param(
+            "",
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    }
+                ],
+                "always_enforce_tests": True,
+                "always_add_tags": True,
+            },
+            id="no_test_or_tag_override",
+        ),
+        pytest.param(
+            "--no-ask-tests",
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    }
+                ],
+                "always_enforce_tests": False,
+                "always_add_tags": True,
+            },
+            id="no_tests_on_cli",
+        ),
+        pytest.param(
+            "--no-ask-tags",
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_tables": ["table_a"],
+                    }
+                ],
+                "always_enforce_tests": True,
+                "always_add_tags": False,
+            },
+            id="no_tags_on_cli",
+        ),
+    ],
+)
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test__integrate_cli_flags(datafiles, test_and_flag_args, expectation):
+    from dbt_sugar.core.config.config import DbtSugarConfig
+    from dbt_sugar.core.flags import FlagParser
+    from dbt_sugar.core.main import parser
+
+    config_filepath = Path(datafiles).joinpath("sugar_config.yml")
+    cli_args = ["doc", "-m", "test_model", "--config-path", str(config_filepath)]
+    if test_and_flag_args:
+        cli_args.append(test_and_flag_args)
+
+    fp = FlagParser(cli_parser=parser)
+    fp.consume_cli_arguments(test_cli_args=cli_args)
+
+    config = DbtSugarConfig(fp)
+    config.load_config()
+
+    remapped = config._integrate_cli_flags(config.config_model.dict())
+    assert remapped == expectation

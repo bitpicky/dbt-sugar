@@ -17,8 +17,14 @@ def __init_descriptions(params=None, dbt_profile=None, config=None):
 
 
 def test_load_dbt_credentials():
+    class MockFlagParser:
+        schema = ""
+
     profile = DbtProfile(
-        profile_name="dbt_sugar_test", target_name="snowflake", profiles_dir=Path(FIXTURE_DIR)
+        flags=MockFlagParser,
+        profile_name="dbt_sugar_test",
+        target_name="snowflake",
+        profiles_dir=Path(FIXTURE_DIR),
     )
     doc_task = __init_descriptions(None, profile)
     credentials = doc_task.load_dbt_credentials()

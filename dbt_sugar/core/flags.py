@@ -22,7 +22,7 @@ class FlagParser:
         """
         self.cli_parser = cli_parser
         self.model: str = "test_model"
-        self.schema: str = "data_warehouse"
+        self.schema: str = ""
         self.log_level: str = "info"
         self.syrup: str = str()
         self.config_path: Path = Path(str())

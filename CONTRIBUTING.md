@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking into making `dbt-sugar` better! We have some loosely defined rules and preferences to make the contribution a bit smoother. Don't let those deter you from contributing though, most of them can absolutely be fixed in the PR process, and if anything seems obscure feel free to reach out on the discord channel [Discord](https://discord.gg/bUk4MVTcqW)
+Thanks for looking into making `dbt-sugar` better! We have some loosely defined rules and preferences to make the contribution a bit smoother. Don't let those deter you from contributing though, most of them can absolutely be fixed in the PR process, and if anything seems obscure feel free to reach out on the discord channel [Discord](https://discord.gg/cQB49ejbCA).
 
 ## How can you contribute?
 
@@ -50,13 +50,15 @@ Please follow generally accepted git best practices by using:
 - **descriptive commit messages**,
 - **imperative mood**
 
-> **TIP**: ✨ it generally helps to say in your heard "This commit will..." and then start writing. You'll end up with the right phrasing and it will trigger you to think about a useful description.
+> **TIP**: ✨ it generally helps to say in your head "This commit will..." and then start writing. You'll end up with the right phrasing and it will trigger you to think about a useful description.
+
+This leads to you writing commit messages such as `implement my awesome feature` instead of `implementing feature a` or `implemented feature a` which are less conventional.
 
 We'll squash your PR at merge time.
 
 #### Fork it, let's go! 🥁
 
-Fork the repo and get going. If you're not too experienced with forks, feel free to shoot us a DM on [Discord](https://discord.gg/bUk4MVTcqW). For example the `#dev-help` channel is a good place to do that. Here's a quick guide though:
+Fork the repo and get going. If you're not too experienced with forks, feel free to shoot us a DM on [Discord](https://discord.gg/cQB49ejbCA) and join the `#dbt-sugar-dev` channek. Here's a quick guide though:
 
 **Shit how do we do this fork thing?**
 
@@ -74,11 +76,11 @@ For official guidelines check the [GitHub documentation](https://docs.github.com
    As you would for a regular cloned repo, `git branch`, `git add`, `git commit`, `git push`.
    The push will go to your fork remote which is totally fine.
 
-4. Create a Pull Request.
+4. Create a Pull Request from your own forked repository.
 
-   When the time comes to merge your code back on the original repo (here). Go to your fork's GitHub page, click the "Pull Request" button and choose to merge into the original repo.
+   When the time comes to merge your code back on the [original repo](https://github.com/bitpicky/dbt-sugar). Go to your fork's GitHub page, click the "Pull Request" button and choose to merge into the original repo.
 
-5. [Keep your fork up to date](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo#keep-your-fork-synced) (optional but sometimes needed).
+5. [Keep your fork up to date](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo#keep-your-fork-synced). This is required if you want to integrate new features from master into your branch or if you want to resolve upstream conflicts. Don't worry too much about it the maintainers will help you with this if you don't really feel 100%.
 
    Say, you want to update or pull the original repo you can add the original repo as another remote called `upstream` (actually you can name if whatever you want but usually that's how people name this) to your config like so:
 
@@ -90,7 +92,7 @@ For official guidelines check the [GitHub documentation](https://docs.github.com
 
 #### Pre-commit
 
-We have configured [`pre-commit`](https://pre-commit.com/) in our repository to ensure that all things related to linting, code formatting, and import sorting is taken care of ahead of the PR.
+We have configured [`pre-commit`](https://pre-commit.com/) in our repository to ensure that all things related to linting, code formatting, and import sorting is taken care of ahead of the PR. We want to make sure the review process can focus on the code change that matter rather than petty discussion about line-length, indentation etc.
 
 It is recommended to install `pre-commit` on your machine if you have not done so already by doing the following:
 
@@ -100,7 +102,7 @@ pip install pre-commit
 
 If you don't want to bother, that's also OK because we also have [pre-commit.ci](https://pre-commit.ci/) on the PR side of things, you might just get annoying test failures that you could have taken care of earlier. But no worries, we'll help you out!
 
-#### Formatting
+#### Formatting (Enforced by pre-commit)
 
 - We format our code with the [`black`](https://github.com/psf/black) formatter. The pre-commit hooks will attempt to fix your formatting issues for you but it's "annoying" so you can set up `black` to format your code on save in your IDE and then you'll never have a problem again. The good thing with black is that we don't ever have to discuss formatting and style while reviewing your PR which is soooooo much nicer! :heart_eyes:
 
@@ -111,6 +113,7 @@ If you don't want to bother, that's also OK because we also have [pre-commit.ci]
 #### Type Hinting
 
 - It is recommended to use Type Hinting and have [`mypy`](http://mypy-lang.org/) enabled as your linter. Most IDE's have an extension or a way to help with this. Typing isn't necessary but **really, really** preferred. The mainteners might therefore make suggestions on how to implement typing or will enfore it for you directly in your branch.
+- Mypy is also part of our `pre-commit` and it should alert you if you have any issues with type hints.
 
 ### Development
 

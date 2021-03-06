@@ -1,8 +1,12 @@
 # dbt-sugar Roadmap 🛣 🚧
 
+## Vision
+
+We created dbt-sugar because documenting dbt models consistently enforcing tests can easily slip out of the developer's workflow. In the regular dbt workflow, you often have to open a few `schema.yml` files, call `dbt test` etc. If you want to homogenise column descriptions across your models, it means you will have to remember or search for and modify them. dbt-sugar takes care of doing all that for you (and more).
+
 We're currently focusing on getting a basic minimum viable product out for dbt-sugar. You can follow the development and planned work by monitoring our [projects page](https://github.com/bitpicky/dbt-sugar/projects).
 
-## MVP Release: Nils Frahm - All Melody - v0.0.0
+## MVP Release: v0.0.0 Nils Frahm - All Melody
 
 This release focuses on shipping basic features to get the project going. We want to solve the following:
 
@@ -10,7 +14,7 @@ This release focuses on shipping basic features to get the project going. We wan
 - Provide users with a tool to easily add **tests** (and assert that they are true right at the moment where they are being added) to their dbt models.
 - Provide users with a tool to easily add **tags** to their dbt models.
 
-## Toxe - Honey Island - v0.1.0
+## v0.1.0 - Toxe - Honey Island
 
 This release will focus on making the basic features shipped in `v0.0.0` smarter:
 
@@ -22,15 +26,15 @@ This release will focus on making the basic features shipped in `v0.0.0` smarter
 
 In this, yet to be named release, we plan to add a new set of tasks besides documentation:
 
-- A **audit** task which would provide test and documntation coverage to users.
+- An **audit** task which would provide test and documntation coverage to users.
 - A **validate** task which would allow users to compare their development table vs. a production version and perform a series of tests such as:
-  - column and row counts
+  - column and row counts to be able to easily validate the impact of your changes between development and production environments.
   - distributional analyses (means, mediand, histograms etc) --we will probably leverage the [Great Expectations API](https://greatexpectations.io/) to do so.
 
 ## Do you want to contribute to ideas or functionality?
 
-You can help us build faster or build a better product by engaging via the following media:
+We love it when users engage with us! You can help us build faster or more awesome features by doing any of the following:
 
 - check out our [CONTRIBUTING.md](CONTRIBUTING.md)
 - [create a new issue](https://github.com/bitpicky/dbt-sugar/issues/new) to discus a feature or report a bug.
-- join our [Discord](https://discord.gg/BYAYBnB9GH) to engage with community members and developers.
+- join our [Discord](https://discord.gg/cQB49ejbCA) to engage with community members and developers.

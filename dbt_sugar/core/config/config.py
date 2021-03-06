@@ -1,7 +1,7 @@
 """Holds config for dbt-sugar."""
 
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -29,6 +29,8 @@ class SyrupModel(BaseModel):
 
     name: str
     dbt_projects: List[DbtProjectsModel]
+    always_enforce_tests: Optional[bool] = True
+    always_add_tags: Optional[bool] = True
 
 
 class DefaultsModel(BaseModel):
@@ -49,6 +51,10 @@ class DbtSugarConfig:
     """dbt-sugar configuration class."""
 
     SUGAR_CONFIG_FILENAME = "sugar_config.yml"
+    CLI_OVERRIDE_FLAGS = [
+        {"cli_arg_name": "ask_for_tests", "maps_to": "always_enforce_tests"},
+        {"cli_arg_name": "ask_for_tags", "maps_to": "always_add_tags"},
+    ]
 
     def __init__(self, flags: FlagParser, max_dir_upwards_iterations: int = 4) -> None:
         """Constructor for DbtSugarConfig.
@@ -74,7 +80,8 @@ class DbtSugarConfig:
     def config(self):
         if self.config_model:
             logger.debug(f"Config model dict: {self.config_model.dict()}")
-            return self.config_model.dict()
+            config_dict = self._integrate_cli_flags(self.config_model.dict())
+            return config_dict
         raise AttributeError(f"{type(self).__name__} does not have a parsed config.")
 
     def load_and_validate_config_yaml(self) -> None:
@@ -163,6 +170,11 @@ class DbtSugarConfig:
                     f"Unable to find {self.SUGAR_CONFIG_FILENAME} in any nearby "
                     f"directories after {self._max_folder_iterations} iterations upwards."
                 )
+
+    def _integrate_cli_flags(self, config_dict: Dict[str, Any]):
+        for flag_dict in self.CLI_OVERRIDE_FLAGS:
+            config_dict[flag_dict["maps_to"]] = getattr(self._flags, flag_dict["cli_arg_name"])
+        return config_dict
 
     def load_config(self) -> None:
         self.locate_config()

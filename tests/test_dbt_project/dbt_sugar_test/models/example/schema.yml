@@ -5,9 +5,6 @@ models:
     columns:
       - name: id
         description: The primary key for this table
-        tests:
-          - unique
-          - not_null
       - name: answer
         description: No description for this column.
       - name: question

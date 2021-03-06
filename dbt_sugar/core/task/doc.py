@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from shlex import quote
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from dbt_sugar.core.clients.dbt import DbtProfile
@@ -156,7 +157,7 @@ class DocumentationTask(BaseTask):
         self.update_column_descriptions(self.column_update_payload)
         return 0
 
-    def delete_fail_tests_from_schema(
+    def delete_failed_tests_from_schema(
         self, path_file: Path, model_name: str, tests_to_delete: Dict[str, List[str]]
     ):
         """
@@ -192,24 +193,24 @@ class DocumentationTask(BaseTask):
             path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
-        dbt_command = f"dbt test --models {model_name}".split()
+        dbt_command = f"dbt test --models {quote(model_name)}".split()
         dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
         tests_to_delete: Dict[str, List[str]] = {}
 
         for column in self.column_update_payload.keys():
             tests = self.column_update_payload[column].get("tests", [])
             for test in tests:
-                test_fail = f"FAIL ([0-9]+) {test}_{model_name}_{column}"
-                test_error = f"ERROR {test}_{model_name}_{column}"
-                if re.search(test_fail, dbt_result_command) or re.search(
-                    test_error, dbt_result_command
-                ):
-                    logger.info(f"The test {test} in the column {column} has FAILED to execute.")
-                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+                test_passed_pattern = f"PASS {test}_{model_name}_{column}"
+                if re.search(test_passed_pattern, dbt_result_command):
+                    logger.info(f"The test {test} in the column {column} has PASSED.")
                 else:
-                    logger.info(f"The test {test} in the column {column} has PASS.")
+                    logger.info(
+                        f"""The test {test} in the column {column} has FAILED to execute.
+                        The test won't be added to your schema.yml file"""
+                    )
+                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
         if tests_to_delete:
-            self.delete_fail_tests_from_schema(path_file, model_name, tests_to_delete)
+            self.delete_failed_tests_from_schema(path_file, model_name, tests_to_delete)
 
     def document_columns(self, columns: Dict[str, str]) -> None:
         """

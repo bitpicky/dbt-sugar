@@ -11,6 +11,7 @@ from dbt_sugar.core.exceptions import (
     ProfileParsingError,
     TargetNameNotProvided,
 )
+from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt", "profiles").with_suffix(".yml")
@@ -110,8 +111,11 @@ class DbtProject(BaseYamlConfig):
 class DbtProfile(BaseYamlConfig):
     """Holds parsed profile dict from dbt profiles."""
 
+    CLI_OVERRIDE_FLAGS = [{"cli_arg_name": "schema", "maps_to": "target_schema"}]
+
     def __init__(
         self,
+        flags: FlagParser,
         profile_name: str,
         target_name: str,
         profiles_dir: Optional[Path] = None,
@@ -124,12 +128,13 @@ class DbtProfile(BaseYamlConfig):
                 "outputs" in the dbt's profile.yml (https://docs.getdbt.com/dbt-cli/configure-your-profile/)
         """
         # attrs parsed from constructor
+        self._flags = flags
         self._profile_name = profile_name
         self._target_name = target_name
         self._profiles_dir = profiles_dir
 
         # attrs populated by class methods
-        self.profile: Optional[Dict[str, str]] = None
+        self.profile: Dict[str, str]
 
     @property
     def profiles_dir(self):
@@ -183,6 +188,9 @@ class DbtProfile(BaseYamlConfig):
                 logger.debug(_target_profile)
                 self.profile = _target_profile.dict()
 
+                # override profile info with potential CLI args
+                self._integrate_cli_flags()
+
             else:
                 raise ProfileParsingError(
                     f"Could not find an entry for target: {self._target_name}, "
@@ -194,3 +202,11 @@ class DbtProfile(BaseYamlConfig):
                 f"Could not find an entry for {self._profile_name} in your profiles.yml "
                 f"located in {self.profiles_dir}"
             )
+
+    def _integrate_cli_flags(self) -> None:
+        for flag_override_dict in self.CLI_OVERRIDE_FLAGS:
+            cli_arg_value = getattr(self._flags, flag_override_dict["cli_arg_name"])
+            if cli_arg_value and isinstance(self.profile, dict):
+                self.profile[flag_override_dict["maps_to"]] = cli_arg_value
+            else:
+                logger.debug("No schema passed to CLI will try to read from profile.yml")

@@ -162,6 +162,7 @@ def handle(
     dbt_project.read_project()
 
     dbt_profile = DbtProfile(
+        flags=flag_parser,
         profile_name=dbt_project.profile_name,
         target_name=flag_parser.target,
         profiles_dir=flag_parser.profiles_dir,

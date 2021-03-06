@@ -126,12 +126,12 @@ def test_update_description_in_dbt_descriptions(column, description, result):
         ),
     ],
 )
-def test_delete_fail_tests_from_schema(mocker, content, model_name, tests_to_delete, result):
+def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_delete, result):
     open_yaml = mocker.patch("dbt_sugar.core.task.doc.open_yaml")
     save_yaml = mocker.patch("dbt_sugar.core.task.doc.save_yaml")
     open_yaml.return_value = content
     doc_task = DocumentationTask(None, None)
-    doc_task.delete_fail_tests_from_schema(Path("."), model_name, tests_to_delete)
+    doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
     save_yaml.assert_has_calls(result)
 
 

@@ -131,7 +131,7 @@ class DocumentationTask(BaseTask):
         content = None
         path, schema_exists = self.find_model_in_dbt(model_name)
         if not path:
-            logger.info(f"Not able to find the model with name {model_name} in the project.")
+            logger.error(f"Model: {model_name} could not be found in your dbt project.")
             return 1
         if schema_exists:
             content = open_yaml(path)

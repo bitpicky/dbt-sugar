@@ -11,14 +11,14 @@ dbt_sugar_test:
       warehouse: dummy_warehouse
       schema: dummy_target_schema
 
-    # postgres:
-    # type: postgres
-    # user: dbt_sugar_test_user
-    # pass: magical_password
-    # dbname: dbt_sugar
-    # schema: public
-    # host: localhost
-    # port: 5432
+    postgres:
+      type: postgres
+      user: dbt_sugar_test_user
+      pass: magical_password
+      dbname: dbt_sugar
+      schema: public
+      host: localhost
+      port: 5432
 
     bad_snowflake:
       type: snowflake

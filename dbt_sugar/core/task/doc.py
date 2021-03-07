@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
+from rich.progress import BarColumn, Progress
+
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
@@ -164,17 +166,37 @@ class DocumentationTask(BaseTask):
             schema (str): Name of the schema where the model lives.
             model_name (str): Name of the model to document.
         """
-        for column in self.column_update_payload.keys():
-            tests = self.column_update_payload[column].get("tests", [])
-            for test in tests:
-                have_run_sucessful = self.connector.run_test(
-                    test,
-                    schema,
-                    model_name,
-                    column,
-                )
-                if not have_run_sucessful:
-                    tests.remove(test)
+        with Progress(
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            transient=True,
+        ) as progress:
+            test_checking_task = progress.add_task(
+                "[bold] checking your tests...", total=len(self.column_update_payload.keys())
+            )
+            for column in self.column_update_payload.keys():
+                tests = self.column_update_payload[column].get("tests", [])
+                for test in tests:
+                    has_passed = self.connector.run_test(
+                        test,
+                        schema,
+                        model_name,
+                        column,
+                    )
+                    message = self._generate_test_success_message(test, column, has_passed)
+                    progress.console.log(message)
+                    if not has_passed:
+                        tests.remove(test)
+                progress.advance(test_checking_task)
+
+    def _generate_test_success_message(self, test_name: str, column_name: str, has_passed: bool):
+        if has_passed:
+            return f"The '{test_name}' test on [bold]{column_name}[/bold] [green]PASSED"
+        return (
+            f"The '{test_name}' test on [bold]{column_name}[/bold] [red]FAILED[/red]. \nIt will not be added "
+            "to your schema.yml."
+        )
 
     def document_columns(
         self, columns: Dict[str, str], question_type: str = "undocumented_columns"

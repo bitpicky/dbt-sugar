@@ -77,7 +77,7 @@ class BaseConnector(ABC):
             logger.info(f"The '{test_name}' test on {column} PASSED.")
         else:
             logger.info(
-                f"""The '{test_name}' test {column}, FAILED, and will NOT be added to your schema.yml.
+                f"""The '{test_name}' test on {column}, FAILED, and will NOT be added to your schema.yml.
                 It migtht be a good idea to go and fix it."""
             )
         return result

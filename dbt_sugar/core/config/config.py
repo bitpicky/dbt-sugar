@@ -128,20 +128,23 @@ class DbtSugarConfig:
 
         project_existance = {}
         for project in dbt_projects:
-            logger.debug(f"Looking for {project['name']} in {Path(project['path']).resolve()}")
-            project_existance[project["name"]] = (
-                True if Path(project["path"]).resolve().exists() else False
-            )
+            resolved_dbt_project_path = Path(project["path"]).resolve()
+            logger.debug(f"Looking for {project['name']} in {resolved_dbt_project_path}")
+            project_existance[project["name"]] = {
+                "exists": True if resolved_dbt_project_path.exists() else False,
+                "path": resolved_dbt_project_path,
+            }
 
         bogus_projects = dict()
-        for project, exists in project_existance.items():
-            if exists is False:
-                bogus_projects[project] = exists
+        for project, details in project_existance.items():
+            if details["exists"] is False:
+                bogus_projects[project] = details["path"]
 
         # TODO: Maybe we want to revisit this and not have a raise but rather a logger warning and says we'll ignore
         if bogus_projects:
             raise MissingDbtProjects(
-                f"The following dbt projects are missing: \n{list(bogus_projects.keys())}"
+                f"The following dbt projects are missing: \n\n{bogus_projects}. \n\n "
+                "Check your sugar_config.yml"
             )
         return True
 

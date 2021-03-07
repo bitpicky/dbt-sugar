@@ -206,7 +206,7 @@ def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = li
     exit_code = handle(parser, _cli_args)  # type: ignore
 
     if exit_code > 0:
-        logger.error("The task you wanted to run did not succed and failed silently")
+        logger.error("The task you wanted to run failed.")
     return exit_code
 
 

@@ -8,8 +8,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import sqlalchemy
 
-from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
-
 
 class BaseConnector(ABC):
     """
@@ -53,7 +51,7 @@ class BaseConnector(ABC):
 
     def run_test(self, test_name: str, schema: str, table: str, column: str) -> bool:
         """
-        Method to run pre-define tests before we add them to the schema.yaml.
+        Method to run pre-defined tests before we add them to the schema.yaml.
 
         We defined the test dictionary and call the test that the user wants.
 
@@ -73,13 +71,6 @@ class BaseConnector(ABC):
         }
         query = TESTS[test_name]
         result = self.execute_and_check(query)
-        if result:
-            logger.info(f"The '{test_name}' test on {column} PASSED.")
-        else:
-            logger.info(
-                f"""The '{test_name}' test {column}, FAILED, and will NOT be added to your schema.yml.
-                It migtht be a good idea to go and fix it."""
-            )
         return result
 
     def execute_and_check(self, query) -> bool:

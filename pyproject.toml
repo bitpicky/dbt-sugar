@@ -45,6 +45,7 @@ pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.4"
 pre-commit = "^2.10.1"
 tox = "^3.22.0"
+asciinema = "^2.0.2"
 
 
 [build-system]

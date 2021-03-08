@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
+from rich.progress import BarColumn, Progress
+
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
@@ -45,8 +47,9 @@ class DocumentationTask(BaseTask):
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
-            logger.error("The type of connector doesn't exists.")
-            return 1
+            raise NotImplementedError(
+                f"Connector '{dbt_credentials.get('type')}' is not implemented."
+            )
 
         self.connector = connector(dbt_credentials)
         columns_sql = self.connector.get_columns_from_table(model, schema)
@@ -131,8 +134,9 @@ class DocumentationTask(BaseTask):
         content = None
         path, schema_exists = self.find_model_in_dbt(model_name)
         if not path:
-            logger.error(f"Model: {model_name} could not be found in your dbt project.")
-            return 1
+            raise FileNotFoundError(
+                f"Model: '{model_name}' could not be found in your dbt project."
+            )
         if schema_exists:
             content = open_yaml(path)
         content = self.process_model(content, model_name, columns_sql)
@@ -162,17 +166,37 @@ class DocumentationTask(BaseTask):
             schema (str): Name of the schema where the model lives.
             model_name (str): Name of the model to document.
         """
-        for column in self.column_update_payload.keys():
-            tests = self.column_update_payload[column].get("tests", [])
-            for test in tests:
-                have_run_sucessful = self.connector.run_test(
-                    test,
-                    schema,
-                    model_name,
-                    column,
-                )
-                if not have_run_sucessful:
-                    tests.remove(test)
+        with Progress(
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            transient=True,
+        ) as progress:
+            test_checking_task = progress.add_task(
+                "[bold] checking your tests...", total=len(self.column_update_payload.keys())
+            )
+            for column in self.column_update_payload.keys():
+                tests = self.column_update_payload[column].get("tests", [])
+                for test in tests:
+                    has_passed = self.connector.run_test(
+                        test,
+                        schema,
+                        model_name,
+                        column,
+                    )
+                    message = self._generate_test_success_message(test, column, has_passed)
+                    progress.console.log(message)
+                    if not has_passed:
+                        tests.remove(test)
+                progress.advance(test_checking_task)
+
+    def _generate_test_success_message(self, test_name: str, column_name: str, has_passed: bool):
+        if has_passed:
+            return f"The '{test_name}' test on [bold]{column_name}[/bold] [green]PASSED"
+        return (
+            f"The '{test_name}' test on [bold]{column_name}[/bold] [red]FAILED[/red]. \nIt will not be added "
+            "to your schema.yml."
+        )
 
     def document_columns(
         self, columns: Dict[str, str], question_type: str = "undocumented_columns"
@@ -234,7 +258,7 @@ class DocumentationTask(BaseTask):
                     columns_names = [column["name"] for column in columns]
                     if column not in columns_names:
                         description = self.get_column_description_from_dbt_definitions(column)
-                        logger.info(f"Updating column with name {column}")
+                        logger.info(f"Updating column '{column.lower()}'")
                         columns.append({"name": column, "description": description})
         return content
 
@@ -251,7 +275,7 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: with the content of the schema.yml with the model created.
         """
-        logger.info("The model doesn't exists, creating a new model.")
+        logger.info(f"The model '{model_name}' has not been docummented yet. Creating a new entry.")
         columns = []
         for column_sql in columns_sql:
             description = self.get_column_description_from_dbt_definitions(column_sql)

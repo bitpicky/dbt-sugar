@@ -180,8 +180,8 @@ class DbtProfile(BaseYamlConfig):
                 # if we don't manage to read the db type for some reason.
                 elif _profile_type is None:
                     raise ProfileParsingError(
-                        f"Could not read database type for {self._profile_name} in the profiles.yml"
-                        f" located in {self.profiles_dir}"
+                        f"Could not read or find a database type for {self._profile_name} in your dbt "
+                        "profiles.yml. Check that this field is not missing."
                     )
                 else:
                     raise NotImplementedError(f"{_profile_type} is not implemented yet.")
@@ -193,14 +193,13 @@ class DbtProfile(BaseYamlConfig):
 
             else:
                 raise ProfileParsingError(
-                    f"Could not find an entry for target: {self._target_name}, "
-                    f"under the {self._profile_name} config."
+                    f"Could not find an entry for target: '{self._target_name}', "
+                    f"for the '{self._profile_name}' profile in your dbt profiles.yml."
                 )
 
         else:
             raise ProfileParsingError(
-                f"Could not find an entry for {self._profile_name} in your profiles.yml "
-                f"located in {self.profiles_dir}"
+                f"Could not find an entry for '{self._profile_name}' in your profiles.yml"
             )
 
     def _integrate_cli_flags(self) -> None:

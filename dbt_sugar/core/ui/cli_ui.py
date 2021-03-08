@@ -243,7 +243,7 @@ class UserInputCollector:
                 if wants_to_add_tags:
                     tags = questionary.text(message="Provide a comma-separated list of tags").ask()
                     tags = self.__split_comma_separated_str(tags)
-                    if tags:
+                    if len(tags) > 0:
                         results[column]["tags"] = tags
             # remove the column if no info has been given (no tests, and no description).
             if not results[column]:

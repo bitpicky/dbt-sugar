@@ -82,7 +82,7 @@ def test_update_description_in_dbt_descriptions(column, description, result):
 @pytest.mark.parametrize(
     "content, model_name, tests_to_delete, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -129,6 +129,7 @@ def test_update_description_in_dbt_descriptions(column, description, result):
                     },
                 )
             ],
+            id="delete_failed_test_from_schema",
         ),
     ],
 )

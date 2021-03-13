@@ -31,7 +31,7 @@ PyYAML = "^5.4.1"
 questionary = "^1.9.0"
 yamlloader = "^1.0.0"
 pyfiglet = "^0.8.post1"
-rich = "^9.12.3"
+rich = "^9.13.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
@@ -43,8 +43,8 @@ psycopg2 = "^2.8.6"
 pytest-sugar = "^0.9.4"
 pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.4"
-pre-commit = "^2.11.0"
-tox = "^3.22.0"
+pre-commit = "^2.11.1"
+tox = "^3.23.0"
 asciinema = "^2.0.2"
 
 

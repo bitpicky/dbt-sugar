@@ -254,6 +254,10 @@ class DocumentationTask(BaseTask):
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in columns_sql:
+                    # Checking that the model have the columns attribute.
+                    if not model.get("columns", None):
+                        model["columns"] = []
+
                     columns = model.get("columns", [])
                     columns_names = [column["name"] for column in columns]
                     if column not in columns_names:

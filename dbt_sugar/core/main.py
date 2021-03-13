@@ -178,7 +178,7 @@ def handle(
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.
         if flag_parser.is_dry_run:
-            logger.warning("Running in --dry-run mode no files will be modified")
+            logger.warning("[yellow]Running in --dry-run mode no files will be modified")
             logger.info(f"Would run {task}")
             return 0
         return task.run()
@@ -206,7 +206,7 @@ def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = li
     exit_code = handle(parser, _cli_args)  # type: ignore
 
     if exit_code > 0:
-        logger.error("The task you wanted to run failed.")
+        logger.error("[red]The process you were running did not complete successfully.")
     return exit_code
 
 

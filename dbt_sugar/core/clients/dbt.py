@@ -102,7 +102,7 @@ class DbtProject(BaseYamlConfig):
 
         if not self.profile_name:
             logger.warning(
-                f"There was no `profile:` entry in {self._dbt_project_filename}. "
+                f"[yellow]There was no `profile:` entry in {self._dbt_project_filename}. "
                 "dbt-sugar will try to find a 'default' profile. This might lead to unexpected"
                 "behaviour or an error when no defaulf profile can be found in your dbt profiles.yml"
             )

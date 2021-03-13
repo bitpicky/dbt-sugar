@@ -32,7 +32,7 @@ def check_and_compare_version(external_version: Optional[str] = str()) -> Tuple[
         needs_update = semver_parse(pypi_version) > semver_parse(installed_version)
         if needs_update:
             logger.warning(
-                f"Looks like you're a bit behind. A newer version of dbt-sugar v{pypi_version} "
+                f"[yellow]Looks like you're a bit behind. A newer version of dbt-sugar v{pypi_version} "
                 "is available."
             )
         return needs_update, pypi_version

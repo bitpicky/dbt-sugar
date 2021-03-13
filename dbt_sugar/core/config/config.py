@@ -143,7 +143,7 @@ class DbtSugarConfig:
         # TODO: Maybe we want to revisit this and not have a raise but rather a logger warning and says we'll ignore
         if bogus_projects:
             raise MissingDbtProjects(
-                f"The following dbt projects are missing: \n\n{bogus_projects}. \n\n "
+                f"The following dbt projects are missing or cannot be found: \n\n{bogus_projects}. \n\n"
                 "Check your sugar_config.yml"
             )
         return True

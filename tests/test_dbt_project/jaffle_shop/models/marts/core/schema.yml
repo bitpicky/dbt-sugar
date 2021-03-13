@@ -24,3 +24,26 @@ models:
         description: Count of the number of orders a customer has placed
       - name: total_order_amount
         description: Total value (AUD) of a customer's orders
+  - name: fct_orders
+    description: No description for this model.
+    columns:
+      - name: order_id
+        description: Unique order identifier increasing integer
+      - name: customer_id
+        description: Identifier of a customer. PK of the dim_company model
+      - name: order_date
+        description: No description for this column.
+      - name: status
+        description:
+          Orders can be in different statuses such as pending, refunded, confirmed etc. This column
+          contains this piece of information.
+      - name: credit_card_amount
+        description: No description for this column.
+      - name: coupon_amount
+        description: No description for this column.
+      - name: bank_transfer_amount
+        description: No description for this column.
+      - name: gift_card_amount
+        description: No description for this column.
+      - name: amount
+        description: No description for this column.

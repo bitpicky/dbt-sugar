@@ -6,13 +6,14 @@ models:
         tests:
           - unique
           - not_null
+        description: Unique identifier of the customer who made the purchase. Links to the dim_customer table.
   - name: stg_orders
     columns:
       - name: order_id
         tests:
           - unique
           - not_null
-        description: Unique order identifier
+        description: Unique order identifier increasing integer
       - name: status
         tests:
           - accepted_values:

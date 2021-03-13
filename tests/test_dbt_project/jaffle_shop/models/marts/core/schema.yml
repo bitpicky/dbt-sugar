@@ -6,7 +6,7 @@ models:
       on a customer's orders
     columns:
       - name: customer_id
-        description: This is a unique identifier for a customer
+        description: Identifier of a customer. PK of the dim_company model
         tests:
           - unique
           - not_null

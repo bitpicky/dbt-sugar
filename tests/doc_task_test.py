@@ -212,7 +212,7 @@ def test_is_model_in_schema_content(content, model_name, result):
 @pytest.mark.parametrize(
     "content, model_name, columns_sql, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -232,6 +232,29 @@ def test_is_model_in_schema_content(content, model_name, result):
                             {"description": "descriptionA", "name": "columnA"},
                             {"description": "No description for this column.", "name": "columnC"},
                         ],
+                    }
+                ]
+            },
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                    }
+                ]
+            },
+            "testmodel",
+            ["columnA", "columnB", "columnC"],
+            {
+                "models": [
+                    {
+                        "columns": [
+                            {"description": "descriptionA", "name": "columnA"},
+                            {"description": "descriptionB", "name": "columnB"},
+                            {"description": COLUMN_NOT_DOCUMENTED, "name": "columnC"},
+                        ],
+                        "name": "testmodel",
                     }
                 ]
             },

@@ -190,12 +190,13 @@ class DocumentationTask(BaseTask):
                         tests.remove(test)
                 progress.advance(test_checking_task)
 
-    def _generate_test_success_message(self, test_name: str, column_name: str, has_passed: bool):
+    @staticmethod
+    def _generate_test_success_message(test_name: str, column_name: str, has_passed: bool):
         if has_passed:
-            return f"The '{test_name}' test on [bold]{column_name}[/bold] [green]PASSED"
+            return f"The [bold]{test_name}[/bold] test on '{column_name}' [green]PASSED"
         return (
-            f"The '{test_name}' test on [bold]{column_name}[/bold] [red]FAILED[/red]. \nIt will not be added "
-            "to your schema.yml."
+            f"The [bold]{test_name}[/bold] test on '{column_name}' [red]FAILED[/red]. \n\t└[bold]It will not be added "
+            "to your schema.yml.[/bold]"
         )
 
     def document_columns(

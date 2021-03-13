@@ -465,22 +465,19 @@ def test_document_columns(mocker):
 
 
 @pytest.mark.parametrize(
-    "model_name, path_model, is_schema",
+    "model_name, path_model, schema_exists",
     [
         pytest.param(
             "my_first_dbt_model",
             Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
             False,
+            id="find_model",
         ),
-        pytest.param(
-            "not_exists",
-            None,
-            False,
-        ),
+        pytest.param("model_does_not_exists", None, False, id="find_model_does_not_exists"),
     ],
 )
-def test_find_model_in_dbt(model_name, path_model, is_schema):
+def test_find_model_in_dbt(model_name, path_model, schema_exists):
     doc_task = __init_descriptions()
     path_file, schema = doc_task.find_model_in_dbt(model_name)
     assert path_file == path_model
-    assert schema == is_schema
+    assert schema == schema_exists

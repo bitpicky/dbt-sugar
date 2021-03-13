@@ -470,7 +470,7 @@ def test_document_columns(mocker):
         (
             "my_first_dbt_model",
             Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
-            True,
+            False,
         ),
         (
             "not_exists",

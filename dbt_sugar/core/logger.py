@@ -28,14 +28,6 @@ class LogManager:
         """
         Path(log_file_path).mkdir(parents=True, exist_ok=True)
 
-        # logging.basicConfig(
-        #     # level="NOTSET",
-        #     format="%(message)s",
-        #     datefmt="[%X]",
-        #     handlers=[RichHandler(rich_tracebacks=True)],
-        # )
-        # setup colorlog
-
         log_filename = Path(log_file_path, "dbt_sugar_log.log")
         logger = logging.getLogger("dbt-sugar logger")
         # set the logger to the lowest level (then each handler will have it's level --this ensures
@@ -56,10 +48,14 @@ class LogManager:
 
         # if we want to print the log to console we're going to add a streamhandler
         if log_to_console:
-            c_handler = RichHandler(rich_tracebacks=True, show_level=False)
+            c_handler = RichHandler(
+                rich_tracebacks=True,
+                show_level=False,
+                markup=True,
+                enable_link_path=False,
+                show_path=False,
+            )
             c_handler.setLevel(logging.INFO)
-            # c_format = logging.Formatter("%(message)s")
-            # c_handler.setFormatter(c_format)
             logger.addHandler(c_handler)
 
         self.logger = logger
@@ -70,7 +66,6 @@ class LogManager:
         self.logger.setLevel(logging.DEBUG)
         for handler in self.logger.handlers:
             handler.setLevel(logging.DEBUG)
-            # handler.setFormatter(self.f_format)
 
 
 log_manager = LogManager()

@@ -16,30 +16,6 @@ def __init_descriptions(params=None, dbt_profile=None, config=None):
     return doc_task
 
 
-def test_load_dbt_credentials():
-    class MockFlagParser:
-        schema = ""
-
-    profile = DbtProfile(
-        flags=MockFlagParser,
-        profile_name="dbt_sugar_test",
-        target_name="snowflake",
-        profiles_dir=Path(FIXTURE_DIR),
-    )
-    doc_task = __init_descriptions(None, profile)
-    credentials = doc_task.load_dbt_credentials()
-    assert credentials == {
-        "type": "snowflake",
-        "account": "dummy_account",
-        "user": "dummy_user",
-        "password": "dummy_password",
-        "database": "dummy_database",
-        "target_schema": "dummy_target_schema",
-        "role": "dummy_role",
-        "warehouse": "dummy_warehouse",
-    }
-
-
 @pytest.mark.parametrize(
     "column, result",
     [

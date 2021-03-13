@@ -37,17 +37,6 @@ class DocumentationTask(BaseTask):
         self._dbt_profile = dbt_profile
         self._sugar_config = config
 
-    # FIXME: Ask Virginia why this is here, I don't think it's needed since we already read the
-    # profile in main.py
-    def load_dbt_credentials(self) -> Dict[str, str]:
-        """Method to load the DBT profile credentials."""
-        self._dbt_profile.read_profile()
-        dbt_credentials = self._dbt_profile.profile
-        if not dbt_credentials:
-            logger.info("Not able to locate DBT profile.")
-            exit(1)
-        return dbt_credentials
-
     def run(self) -> int:
         """Main script to run the command doc"""
         columns_sql = []
@@ -55,7 +44,7 @@ class DocumentationTask(BaseTask):
         model = self._flags.model
         schema = self._dbt_profile.profile.get("target_schema", "")
 
-        dbt_credentials = self.load_dbt_credentials()
+        dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
             logger.error("The type of connector doesn't exists.")
@@ -144,7 +133,7 @@ class DocumentationTask(BaseTask):
         content = None
         path, schema_exists = self.find_model_in_dbt(model_name)
         if not path:
-            logger.info(f"Not able to find the model with name {model_name} in the project.")
+            logger.error(f"Model: {model_name} could not be found in your dbt project.")
             return 1
         if schema_exists:
             content = open_yaml(path)

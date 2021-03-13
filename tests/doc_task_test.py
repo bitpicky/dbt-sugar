@@ -235,6 +235,7 @@ def test_is_model_in_schema_content(content, model_name, result):
                     }
                 ]
             },
+            id="update_columns_from_model",
         ),
         pytest.param(
             {
@@ -258,6 +259,7 @@ def test_is_model_in_schema_content(content, model_name, result):
                     }
                 ]
             },
+            id="update_columns_from_model_without_columns",
         ),
     ],
 )

@@ -309,6 +309,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
             },
             "testmodel",
             {"columnA": "descriptionA", "columnB": "descriptionB"},
+            id="get_documented_columns",
         ),
         pytest.param(
             {
@@ -326,6 +327,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
             },
             "testmodel1",
             {},
+            id="get_documented_columns_from_not_existing_model",
         ),
         pytest.param(
             {
@@ -343,6 +345,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
             },
             "testmodel",
             {"columnB": "descriptionB"},
+            id="get_documented_columns_with_columns_without_description",
         ),
     ],
 )
@@ -370,6 +373,7 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel",
             {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
+            id="get_not_documented_columns",
         ),
         pytest.param(
             {
@@ -387,6 +391,7 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel1",
             {},
+            id="get_not_documented_columns_from_not_existing_model",
         ),
         pytest.param(
             {
@@ -404,6 +409,7 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel",
             {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
+            id="get_not_documented_columns_with_columns_without_description",
         ),
     ],
 )

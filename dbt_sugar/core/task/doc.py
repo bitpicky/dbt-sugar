@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
+from rich.console import Console
 from rich.progress import BarColumn, Progress
 
 from dbt_sugar.core.clients.dbt import DbtProfile
@@ -16,6 +17,7 @@ from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.task.base import EXCLUDE_TARGET_FILES_PATTERN, MODEL_NOT_DOCUMENTED, BaseTask
 from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
+console = Console()
 NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 
 DB_CONNECTORS = {
@@ -251,7 +253,7 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: with the content of the schema.yml with the model updated.
         """
-        logger.info("The model already exists, update the model.")
+        logger.info(f"The model '{model_name}' already exists, updating its documentation.")
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in columns_sql:

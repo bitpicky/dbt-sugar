@@ -293,7 +293,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
 @pytest.mark.parametrize(
     "content, model_name, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -310,7 +310,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
             "testmodel",
             {"columnA": "descriptionA", "columnB": "descriptionB"},
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -327,7 +327,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
             "testmodel1",
             {},
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -354,7 +354,7 @@ def test_get_documented_columns(content, model_name, result):
 @pytest.mark.parametrize(
     "content, model_name, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -371,7 +371,7 @@ def test_get_documented_columns(content, model_name, result):
             "testmodel",
             {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -388,7 +388,7 @@ def test_get_documented_columns(content, model_name, result):
             "testmodel1",
             {},
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -407,7 +407,7 @@ def test_get_documented_columns(content, model_name, result):
         ),
     ],
 )
-def test_get_documented_columns(content, model_name, result):
+def test_get_not_documented_columns(content, model_name, result):
     doc_task = __init_descriptions()
     assert doc_task.get_not_documented_columns(content, model_name) == result
 

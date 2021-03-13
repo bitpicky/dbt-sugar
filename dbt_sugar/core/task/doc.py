@@ -103,14 +103,14 @@ class DocumentationTask(BaseTask):
             and boolean indicating whether the schema.yml exists.
         """
         for root, _, files in os.walk(self.repository_path):
-            files = [f for f in files if not re.match(EXCLUDE_TARGET_FILES_PATTERN, f)]
-            for file in files:
-                if file == f"{model_name}.sql":
-                    path_file = Path(os.path.join(root, "schema.yml"))
-                    if path_file.is_file():
-                        return path_file, True
-                    else:
-                        return path_file, False
+            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+                for file in files:
+                    if file == f"{model_name}.sql":
+                        path_file = Path(os.path.join(root, "schema.yml"))
+                        if path_file.is_file():
+                            return path_file, True
+                        else:
+                            return path_file, False
         return None, False
 
     def orchestrate_model_documentation(

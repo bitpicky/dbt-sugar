@@ -13,6 +13,7 @@ FIXTURE_DIR = Path(__file__).resolve().parent
 def __init_descriptions(params=None, dbt_profile=None, config=None):
     doc_task = DocumentationTask(params, dbt_profile, config)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
+    doc_task.repository_path = "tests/test_dbt_project/"
     return doc_task
 
 
@@ -526,3 +527,22 @@ def test_document_columns(mocker):
     )
     doc_task.document_columns(doc_task.dbt_definitions)
     doc_task.dbt_definitions = {"columnA": "newDescriptionA", "columnB": "descriptionB"}
+
+
+@pytest.mark.parametrize(
+    "model_name, path_model, schema_exists",
+    [
+        pytest.param(
+            "my_first_dbt_model",
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
+            False,
+            id="find_model",
+        ),
+        pytest.param("model_does_not_exists", None, False, id="find_model_does_not_exists"),
+    ],
+)
+def test_find_model_in_dbt(model_name, path_model, schema_exists):
+    doc_task = __init_descriptions()
+    path_file, schema = doc_task.find_model_in_dbt(model_name)
+    assert path_file == path_model
+    assert schema == schema_exists

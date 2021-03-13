@@ -165,16 +165,13 @@ class BaseTask(abc.ABC):
             the description to update.
         """
         for root, _, files in os.walk(self.repository_path):
-            files = [
-                f
-                for f in files
-                if not re.match(EXCLUDE_TARGET_FILES_PATTERN, f) and f == "schema.yml"
-            ]
-            for file in files:
-                path_file = Path(os.path.join(root, file))
-                self.update_column_description_from_schema(
-                    path_file, dict_column_description_to_update
-                )
+            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+                files = [f for f in files if f == "schema.yml"]
+                for file in files:
+                    path_file = Path(os.path.join(root, file))
+                    self.update_column_description_from_schema(
+                        path_file, dict_column_description_to_update
+                    )
 
     def update_description_in_dbt_descriptions(
         self, column_name: str, column_description: str
@@ -206,15 +203,12 @@ class BaseTask(abc.ABC):
     def save_all_descriptions(self) -> None:
         """Save the columns descriptions from all the dbt project."""
         for root, _, files in os.walk(self.repository_path):
-            files = [
-                f
-                for f in files
-                if not re.match(EXCLUDE_TARGET_FILES_PATTERN, f) and f == "schema.yml"
-            ]
-            for file in files:
-                path_file = Path(os.path.join(root, file))
-                content = open_yaml(path_file)
-                self.save_descriptions_from_schema(content)
+            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+                files = [f for f in files if f == "schema.yml"]
+                for file in files:
+                    path_file = Path(os.path.join(root, file))
+                    content = open_yaml(path_file)
+                    self.save_descriptions_from_schema(content)
 
     def is_model_in_schema_content(self, content, model_name) -> bool:
         """Method to check if a model exists in a schema.yaml content.

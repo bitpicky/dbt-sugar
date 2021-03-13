@@ -467,12 +467,12 @@ def test_document_columns(mocker):
 @pytest.mark.parametrize(
     "model_name, path_model, is_schema",
     [
-        (
+        pytest.param(
             "my_first_dbt_model",
             Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
             False,
         ),
-        (
+        pytest.param(
             "not_exists",
             None,
             False,

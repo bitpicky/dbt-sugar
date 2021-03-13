@@ -45,7 +45,7 @@ class BaseTask(abc.ABC):
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
-                    if column["description"] != COLUMN_NOT_DOCUMENTED:
+                    if column.get("description", COLUMN_NOT_DOCUMENTED) != COLUMN_NOT_DOCUMENTED:
                         documented_columns[column["name"]] = column["description"]
         return documented_columns
 
@@ -65,7 +65,7 @@ class BaseTask(abc.ABC):
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
-                    if column["description"] == COLUMN_NOT_DOCUMENTED:
+                    if column.get("description", COLUMN_NOT_DOCUMENTED) == COLUMN_NOT_DOCUMENTED:
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 

@@ -319,7 +319,7 @@ def test_create_new_model(content, model_name, columns_sql, result):
 @pytest.mark.parametrize(
     "content, model_name, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -335,8 +335,9 @@ def test_create_new_model(content, model_name, columns_sql, result):
             },
             "testmodel",
             {"columnA": "descriptionA", "columnB": "descriptionB"},
+            id="get_documented_columns",
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -352,6 +353,25 @@ def test_create_new_model(content, model_name, columns_sql, result):
             },
             "testmodel1",
             {},
+            id="get_documented_columns_from_not_existing_model",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA"},
+                            {"name": "columnB", "description": "descriptionB"},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnB": "descriptionB"},
+            id="get_documented_columns_with_columns_without_description",
         ),
     ],
 )
@@ -363,7 +383,7 @@ def test_get_documented_columns(content, model_name, result):
 @pytest.mark.parametrize(
     "content, model_name, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -379,8 +399,9 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel",
             {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
+            id="get_not_documented_columns",
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -396,10 +417,29 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel1",
             {},
+            id="get_not_documented_columns_from_not_existing_model",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": COLUMN_NOT_DOCUMENTED},
+                            {"name": "columnC"},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
+            id="get_not_documented_columns_with_columns_without_description",
         ),
     ],
 )
-def test_get_documented_columns(content, model_name, result):
+def test_get_not_documented_columns(content, model_name, result):
     doc_task = __init_descriptions()
     assert doc_task.get_not_documented_columns(content, model_name) == result
 

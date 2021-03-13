@@ -327,6 +327,23 @@ def test_create_new_model(content, model_name, columns_sql, result):
             "testmodel1",
             {},
         ),
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA"},
+                            {"name": "columnB", "description": "descriptionB"},
+                            {"name": "columnC", "description": COLUMN_NOT_DOCUMENTED},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnB": "descriptionB"},
+        ),
     ],
 )
 def test_get_documented_columns(content, model_name, result):
@@ -370,6 +387,23 @@ def test_get_documented_columns(content, model_name, result):
             },
             "testmodel1",
             {},
+        ),
+        (
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [
+                            {"name": "columnA", "description": "descriptionA"},
+                            {"name": "columnB", "description": COLUMN_NOT_DOCUMENTED},
+                            {"name": "columnC"},
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnB": COLUMN_NOT_DOCUMENTED, "columnC": COLUMN_NOT_DOCUMENTED},
         ),
     ],
 )

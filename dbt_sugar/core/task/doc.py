@@ -1,8 +1,5 @@
 """Document Task module."""
-import os
-import re
-from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress
@@ -14,7 +11,7 @@ from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
-from dbt_sugar.core.task.base import EXCLUDE_TARGET_FILES_PATTERN, MODEL_NOT_DOCUMENTED, BaseTask
+from dbt_sugar.core.task.base import MODEL_NOT_DOCUMENTED, BaseTask
 from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
 console = Console()
@@ -88,32 +85,6 @@ class DocumentationTask(BaseTask):
                 if model["name"] == model_name:
                     model["description"] = user_input["model_description"]
         return content
-
-    def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
-        """
-        Method to find a model name in the dbt project.
-
-            - If we find the sql of the model but there is no schema we return the Path
-            and False (to create the schema).
-            - If we find the sql of the model and there is schema we return the Path and True.
-
-        Args:
-            model_name (str): model name to find in the dbt project.
-
-        Returns:
-            Tuple[Optional[Path], bool]: Optional path of the sql model if found
-            and boolean indicating whether the schema.yml exists.
-        """
-        for root, _, files in os.walk(self.repository_path):
-            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
-                for file in files:
-                    if file == f"{model_name}.sql":
-                        path_file = Path(os.path.join(root, "schema.yml"))
-                        if path_file.is_file():
-                            return path_file, True
-                        else:
-                            return path_file, False
-        return None, False
 
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]

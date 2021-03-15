@@ -61,3 +61,6 @@ class FlagParser:
             # we reverse the flag so that we don't have double negatives later in the code
             self.ask_for_tests = self.args.ask_for_tests
             self.ask_for_tags = self.args.ask_for_tags
+
+        if self.task == "audit":
+            self.model = self.args.model

@@ -154,7 +154,7 @@ def test_update_model_description_test_tags(mocker, content, model_name, ui_resp
 )
 def test_save_descriptions_from_schema(content, column, description):
     doc_task = __init_descriptions()
-    doc_task.save_descriptions_from_schema(content)
+    doc_task.save_descriptions_from_schema(content, "")
     assert doc_task.dbt_definitions[column] == description
 
 

@@ -35,142 +35,143 @@ class AuditTask(BaseTask):
             if not schema_exists:
                 logger.info("The model is not documented.")
                 return 1
-
             self.model_content = open_yaml(path_file)
-            self.get_columns_descriptions_statistics_for_model()
-            self.get_columns_tests_statistics_for_model()
+            self.derive_model_coverage()
         else:
-            self.get_all_columns_descriptions_statistics_per_model()
-            self.get_all_columns_tests_statistics_per_model()
+            self.derive_project_coverage()
         return 0
 
-    def get_columns_tests_statistics_for_model(self) -> None:
-        """
-        Method to get the tests statistics from a model.
+    def derive_model_coverage(self):
+        """Method to get the coverage from a specific model."""
+        self.get_model_column_description_coverage()
+        self.get_model_test_coverage()
 
-        For the process a column is not tested if it does not have any tests.
-        """
+    def derive_project_coverage(self):
+        """Method to get the coverage from a DBT project."""
+        self.get_project_column_description_coverage()
+        self.get_project_test_coverage()
+
+    def get_model_test_coverage(self) -> None:
+        """Method to get the tests coverage from a specific model."""
+        # Init variables
+        model_number_columns = 0
+        model_columns_without_tests = 0
+        untested_columns = []
+
         columns = self.dbt_tests.get(self.model_name)
 
         if not columns:
             logger.info(f"Not able to get the test statistics for the model {self.model_name}")
             return
 
-        # Init variables
-        model_number_columns = 0
-        model_columns_without_tests = 0
-        untested_columns = []
-
         for column in columns:
-            tests = column["tests"]
             model_number_columns += 1
-            if len(tests) == 0:
+            if len(column["tests"]) == 0:
                 model_columns_without_tests += 1
                 untested_columns.append(column["name"])
 
-        percentage_not_tested_columns = round(
-            100 - ((model_columns_without_tests / model_number_columns) * 100), 2
+        percentage_not_tested_columns = self.calculate_coverage_percentage(
+            number_failures=model_columns_without_tests, total=model_number_columns
         )
 
-        # To print nice the data with the total coverage at the last column.
-        data = {
-            (column): (
-                str(percentage_not_tested_columns) if i == (len(untested_columns) - 1) else ""
-            )
-            for i, column in enumerate(untested_columns)
-        }
+        data = self.print_nicely_the_data(
+            data=untested_columns, total=percentage_not_tested_columns
+        )
 
         self.create_table(
             title="Test Coverage", columns=["undocument columns", "coverage"], data=data
         )
 
-    def get_columns_descriptions_statistics_for_model(self) -> None:
-        """
-        Method to get the descriptions statistics from a model.
-
-        For the process a column is not documented if the description is:
-        Not No description for this column.
-        """
-        documented_columns = self.get_documented_columns(
-            content=self.model_content,
-            model_name=self.model_name,
-        )
+    def get_model_column_description_coverage(self) -> None:
+        """Method to get the descriptions coverage from a specific model."""
         not_documented_columns = self.get_not_documented_columns(
             content=self.model_content,
             model_name=self.model_name,
-        )
-
-        number_documented_columns = len(documented_columns.keys())
-        number_not_documented_columns = len(not_documented_columns.keys())
-
-        total_number_columns = number_documented_columns + number_not_documented_columns
-        percentage_not_documented_columns = round(
-            100 - ((number_not_documented_columns / total_number_columns) * 100), 2
-        )
-
-        # To print nice the data with the total coverage at the last column.
-        data = {
-            (column): (
-                str(percentage_not_documented_columns)
-                if i == (len(not_documented_columns.keys()) - 1)
-                else ""
+        ).keys()
+        number_not_documented_columns = len(not_documented_columns)
+        number_documented_columns = len(
+            self.get_documented_columns(
+                content=self.model_content,
+                model_name=self.model_name,
             )
-            for i, column in enumerate(not_documented_columns.keys())
-        }
+        )
+
+        percentage_not_documented_columns = self.calculate_coverage_percentage(
+            number_failures=number_not_documented_columns,
+            total=(number_documented_columns + number_not_documented_columns),
+        )
+
+        data = self.print_nicely_the_data(
+            data=list(not_documented_columns), total=percentage_not_documented_columns
+        )
 
         self.create_table(
             title="Documentation Coverage", columns=["undocument columns", "coverage"], data=data
         )
 
-    def create_table(self, title: str, columns: List[str], data: Dict[str, Any]) -> None:
+    def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:
+        """
+        This method to transform a list into a dictionary with the data
+
+        as the keys and the total as the last element value.
+
+        Args:
+            data (List): list of data to modify.
+
+        Returns:
+            Dict[str, str]: with a dictionary with the data as keys and
+            the total as a value but only for the last element in the list.
+        """
+        return {
+            (column): (str(total) if i == (len(data) - 1) else "") for i, column in enumerate(data)
+        }
+
+    def create_table(self, title: str, columns: List[str], data: Dict[str, str]) -> None:
         """
         Method to create a nice table to print the results.
 
         Args:
             title (str): Title that you want to give to the table.
             columns (List[str]): List of columns that the table is going to have.
-            data (Dict[str, Any]): with the rows that we want to print.
+            data (Dict[str, str]): with the rows that we want to print.
         """
         table = Table(title)
         for column in columns:
             table.add_column(column, justify="right", style="bright_yellow", no_wrap=True)
 
         for model, percentage in data.items():
-            table.add_row("", model, str(percentage))
+            table.add_row("", model, percentage)
 
         console = Console()
         console.print(table)
 
-    def get_all_columns_tests_statistics_per_model(self) -> None:
-        """
-        Method to get the model descriptions statistics per DBT project.
-
-        For the process a column is not tested if it does not have any tests.
-        """
+    def get_project_test_coverage(self) -> None:
+        """Method to get the model tests coverage per model in a DBT project."""
         print_statistics = {}
         total_number_columns = 0
         number_columns_without_tests = 0
 
         for model_name in self.dbt_tests.keys():
             columns = self.dbt_tests[model_name]
+
             model_number_columns = 0
             model_columns_without_tests = 0
+
             for column in columns:
-                tests = column["tests"]
                 total_number_columns += 1
                 model_number_columns += 1
 
-                if len(tests) == 0:
+                if len(column["tests"]) == 0:
                     number_columns_without_tests += 1
                     model_columns_without_tests += 1
 
-            print_statistics[model_name] = str(
-                round(100 - ((model_columns_without_tests / model_number_columns) * 100), 2)
+            print_statistics[model_name] = self.calculate_coverage_percentage(
+                number_failures=model_columns_without_tests, total=model_number_columns
             )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = str(
-            round(100 - ((number_columns_without_tests / total_number_columns) * 100), 2)
+        print_statistics["TOTAL"] = self.calculate_coverage_percentage(
+            number_failures=number_columns_without_tests, total=total_number_columns
         )
 
         self.create_table(
@@ -179,36 +180,33 @@ class AuditTask(BaseTask):
             data=print_statistics,
         )
 
-    def get_all_columns_descriptions_statistics_per_model(self) -> None:
-        """
-        Method to get the model tests statistics per DBT project.
-
-        For the process a column is not documented if the description is:
-        Not No description for this column.
-        """
+    def get_project_column_description_coverage(self) -> None:
+        """Method to get the model descriptions coverage per model in a DBT project."""
         print_statistics = {}
         for model_name, path in self.all_dbt_models.items():
             content = open_yaml(path)
-            documented_columns = self.get_documented_columns(
-                content=content,
-                model_name=model_name,
-            )
-            not_documented_columns = self.get_not_documented_columns(
-                content=content,
-                model_name=model_name,
-            )
-            number_documented_columns = len(documented_columns.keys())
-            number_not_documented_columns = len(not_documented_columns.keys())
 
-            total_number_columns = number_documented_columns + number_not_documented_columns
-
-            percentage_not_documented_columns = round(
-                100 - ((number_not_documented_columns / total_number_columns) * 100), 2
+            number_documented_columns = len(
+                self.get_documented_columns(
+                    content=content,
+                    model_name=model_name,
+                )
             )
-            print_statistics[model_name] = str(percentage_not_documented_columns)
+
+            number_not_documented_columns = len(
+                self.get_not_documented_columns(
+                    content=content,
+                    model_name=model_name,
+                )
+            )
+
+            print_statistics[model_name] = self.calculate_coverage_percentage(
+                number_failures=number_not_documented_columns,
+                total=(number_documented_columns + number_not_documented_columns),
+            )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = self.get_total_columns_descriptions_statistics()
+        print_statistics["TOTAL"] = self.get_project_total_test_coverage()
 
         self.create_table(
             title="Documentation Coverage",
@@ -216,28 +214,39 @@ class AuditTask(BaseTask):
             data=print_statistics,
         )
 
-    def get_total_columns_descriptions_statistics(self) -> str:
+    def calculate_coverage_percentage(self, number_failures: int, total: int) -> str:
         """
-        Method to get the descriptions statistics for an entire DBT project.
+        Method to calculate the percentage of coverage.
 
-        For the process a column is not documented if the description is:
-        Not No description for this column.
+        Args:
+            number_failures (int): With the number of failures.
+            total (int): With the number of total cases.
+
+        Returns:
+            str: with the calculation of the percentage.
+        """
+        if total == 0:
+            return "0.0"
+
+        percentage_failure = round((1 - (number_failures / total)) * 100, 2)
+        return str(percentage_failure)
+
+    def get_project_total_test_coverage(self) -> str:
+        """
+        Method to get the descriptions coverage for an entire DBT project.
 
         Returns:
             str: with global descriptions statistics.
         """
         number_not_documented_columns = 0
-        number_documented_columns = 0
+        number_of_columns = 0
 
         for description in self.dbt_definitions.values():
             if description == COLUMN_NOT_DOCUMENTED:
                 number_not_documented_columns += 1
-            else:
-                number_documented_columns += 1
+            number_of_columns += 1
 
-        total_number_columns = number_documented_columns + number_not_documented_columns
-
-        percentage_not_documented_columns = round(
-            100 - ((number_not_documented_columns / total_number_columns) * 100), 2
+        return self.calculate_coverage_percentage(
+            number_failures=number_not_documented_columns,
+            total=number_of_columns,
         )
-        return str(percentage_not_documented_columns)

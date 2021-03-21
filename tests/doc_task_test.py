@@ -3,7 +3,6 @@ from unittest.mock import call
 
 import pytest
 
-from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 from dbt_sugar.core.task.doc import DocumentationTask
 
@@ -507,7 +506,7 @@ def test_document_columns(mocker):
         def __init__(self, return_value):
             self._return_value = return_value
 
-        def ask(self):
+        def unsafe_ask(self):
             return self._return_value
 
     class MockDbtSugarConfig:

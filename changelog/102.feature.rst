@@ -1,0 +1,3 @@
+Users can get the documentation and tests statistics with the command Audit:
+- They can audit a full DBT project, will give the statististics per model and the total.
+- They can audit a specific model adding the parameter model.

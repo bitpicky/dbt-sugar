@@ -101,3 +101,73 @@ def test_calculate_coverage_percentage(failures, total, result):
 def test_print_nicely_the_data(data, total, result):
     audit_task = __init_descriptions()
     assert audit_task.print_nicely_the_data(data=data, total=total) == result
+
+
+@pytest.mark.parametrize(
+    "dbt_tests, model_name, call_input",
+    [
+        pytest.param(
+            {
+                "dim_company": [
+                    {"name": "id", "tests": []},
+                    {"name": "name", "tests": []},
+                    {"name": "age", "tests": []},
+                    {"name": "address", "tests": ["not_null"]},
+                    {"name": "salary", "tests": ["unique"]},
+                ],
+                "stg_customers": [{"name": "customer_id", "tests": ["unique", "not_null"]}],
+            },
+            "dim_company",
+            [
+                call(
+                    columns=["undocument columns", "coverage"],
+                    data={"age": "40.0", "id": "", "name": ""},
+                    title="Test Coverage",
+                )
+            ],
+            id="check_test_coverage_calculation",
+        ),
+    ],
+)
+def test_get_model_test_coverage(mocker, dbt_tests, model_name, call_input):
+    create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
+    audit_task = __init_descriptions()
+    audit_task.model_name = model_name
+    audit_task.dbt_tests = dbt_tests
+
+    audit_task.get_model_test_coverage()
+    create_table.assert_has_calls(call_input)
+
+
+@pytest.mark.parametrize(
+    "dbt_tests, call_input",
+    [
+        pytest.param(
+            {
+                "dim_company": [
+                    {"name": "id", "tests": []},
+                    {"name": "name", "tests": []},
+                    {"name": "age", "tests": []},
+                    {"name": "address", "tests": ["not_null"]},
+                    {"name": "salary", "tests": ["unique"]},
+                ],
+                "stg_customers": [{"name": "customer_id", "tests": ["unique", "not_null"]}],
+            },
+            [
+                call(
+                    columns=["Model Name", "% coverage"],
+                    data={"dim_company": "40.0", "stg_customers": "100.0", "": "", "TOTAL": "50.0"},
+                    title="Test Coverage",
+                )
+            ],
+            id="check_test_coverage_calculation",
+        ),
+    ],
+)
+def test_get_project_test_coverage(mocker, dbt_tests, call_input):
+    create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
+    audit_task = __init_descriptions()
+    audit_task.dbt_tests = dbt_tests
+
+    audit_task.get_project_test_coverage()
+    create_table.assert_has_calls(call_input)

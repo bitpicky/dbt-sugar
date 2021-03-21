@@ -139,12 +139,6 @@ audit_sub_parser = sub_parsers.add_parser(
 )
 audit_sub_parser.set_defaults(cls=AuditTask, which="audit")
 audit_sub_parser.add_argument(
-    "--dry-run",
-    help="When provided the documentation task will not modify your files",
-    action="store_true",
-    default=False,
-)
-audit_sub_parser.add_argument(
     "-m",
     "--model",
     help="Name of the dbt model to document",
@@ -206,13 +200,6 @@ def handle(
 
     if flag_parser.task == "audit":
         audit_task: AuditTask = AuditTask(flag_parser)
-        # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
-        # dry run but for now this allows testing without side effects.
-        # the current implementation upsets mypy also.
-        if flag_parser.is_dry_run:
-            logger.warning("[yellow]Running in --dry-run mode no files will be modified")
-            logger.info(f"Would run {audit_task}")
-            return 0
         return audit_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")

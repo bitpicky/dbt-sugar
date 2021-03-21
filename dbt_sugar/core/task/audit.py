@@ -41,12 +41,12 @@ class AuditTask(BaseTask):
             self.derive_project_coverage()
         return 0
 
-    def derive_model_coverage(self):
+    def derive_model_coverage(self) -> None:
         """Method to get the coverage from a specific model."""
         self.get_model_column_description_coverage()
         self.get_model_test_coverage()
 
-    def derive_project_coverage(self):
+    def derive_project_coverage(self) -> None:
         """Method to get the coverage from a DBT project."""
         self.get_project_column_description_coverage()
         self.get_project_test_coverage()
@@ -88,6 +88,7 @@ class AuditTask(BaseTask):
             content=self.model_content,
             model_name=self.model_name,
         ).keys()
+
         number_not_documented_columns = len(not_documented_columns)
         number_documented_columns = len(
             self.get_documented_columns(

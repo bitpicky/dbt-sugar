@@ -81,7 +81,7 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Test Coverage", columns=["undocument columns", "coverage"], data=data
+            title="Test Coverage", columns=["untested columns", "coverage"], data=data
         )
 
     def get_model_column_description_coverage(self) -> None:

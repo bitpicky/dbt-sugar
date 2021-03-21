@@ -129,7 +129,7 @@ def test_print_nicely_the_data(data, total, result):
             "dim_company",
             [
                 call(
-                    columns=["undocument columns", "coverage"],
+                    columns=["untested columns", "coverage"],
                     data={"age": "40.0", "id": "", "name": ""},
                     title="Test Coverage",
                 )

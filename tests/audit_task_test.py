@@ -15,7 +15,14 @@ FIXTURE_DIR = Path(__file__).resolve().parent
 
 def __init_descriptions():
     flag_parser = FlagParser(parser)
-    flag_parser.consume_cli_arguments(test_cli_args=["audit"])
+    config_filepath = Path(FIXTURE_DIR).joinpath("sugar_config.yml")
+    flag_parser.consume_cli_arguments(
+        test_cli_args=[
+            "audit",
+            "--config-path",
+            str(config_filepath),
+        ]
+    )
 
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()

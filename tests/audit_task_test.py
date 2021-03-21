@@ -129,7 +129,7 @@ def test_print_nicely_the_data(data, total, result):
             "dim_company",
             [
                 call(
-                    columns=["untested columns", "coverage"],
+                    columns=["untested columns", "% coverage"],
                     data={"age": "40.0", "id": "", "name": ""},
                     title="Test Coverage",
                 )
@@ -209,7 +209,7 @@ def test_get_project_test_coverage(mocker, dbt_tests, call_input):
             "dim_company",
             [
                 call(
-                    columns=["undocument columns", "coverage"],
+                    columns=["undocument columns", "% coverage"],
                     data={"id": "", "name": "", "age": "", "address": "20.0"},
                     title="Documentation Coverage",
                 )

@@ -21,7 +21,8 @@ class AuditTask(BaseTask):
     """
 
     def __init__(self, flags: FlagParser, dbt_path: Path) -> None:
-        super().__init__(dbt_path=dbt_path)
+        self.dbt_path = dbt_path
+        super().__init__(dbt_path=self.dbt_path)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self.model_name = self._flags.model
@@ -30,6 +31,7 @@ class AuditTask(BaseTask):
     def run(self) -> int:
         """Main script to run the command doc"""
         if self.model_name:
+            logger.info(f"Running audit of model [bold magenta]{self.model_name}.[/bold magenta]\n")
             path_file, schema_exists = self.find_model_in_dbt(self.model_name)
             if not path_file:
                 logger.info("Could not find the Model in the DBT project")
@@ -40,6 +42,7 @@ class AuditTask(BaseTask):
             self.model_content = open_yaml(path_file)
             self.derive_model_coverage()
         else:
+            logger.info(f"Running audit of DBT project in {self.dbt_path}.\n")
             self.derive_project_coverage()
         return 0
 
@@ -81,7 +84,7 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Test Coverage", columns=["untested columns", "coverage"], data=data
+            title="Test Coverage", columns=["untested columns", "% coverage"], data=data
         )
 
     def get_model_column_description_coverage(self) -> None:
@@ -109,7 +112,7 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Documentation Coverage", columns=["undocument columns", "coverage"], data=data
+            title="Documentation Coverage", columns=["undocument columns", "% coverage"], data=data
         )
 
     def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:

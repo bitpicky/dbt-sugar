@@ -213,7 +213,7 @@ class UserInputCollector:
         for column in cols:
             description = questionary.text(
                 message=f"Column: '{column}': {DESCRIPTION_PROMPT_MESSAGE}"
-            ).ask()
+            ).unsafe_ask()
 
             if description:
                 results.update({column: {"description": description}})
@@ -226,12 +226,12 @@ class UserInputCollector:
             if self._ask_for_tests:
                 wants_to_add_tests = questionary.confirm(
                     message="Would you like to add any tests?"
-                ).ask()
+                ).unsafe_ask()
                 if wants_to_add_tests:
                     tests = questionary.checkbox(
                         message="Please select one or more tests from the list below",
                         choices=AVAILABLE_TESTS,
-                    ).ask()
+                    ).unsafe_ask()
                     if tests:
                         results[column]["tests"] = tests
 
@@ -239,9 +239,11 @@ class UserInputCollector:
             if self._ask_for_tags:
                 wants_to_add_tags = questionary.confirm(
                     message="Would you like to add any tags?"
-                ).ask()
+                ).unsafe_ask()
                 if wants_to_add_tags:
-                    tags = questionary.text(message="Provide a comma-separated list of tags").ask()
+                    tags = questionary.text(
+                        message="Provide a comma-separated list of tags"
+                    ).unsafe_ask()
                     if tags:
                         tags = self.__split_comma_separated_str(tags)
                         results[column]["tags"] = tags
@@ -291,7 +293,7 @@ class UserInputCollector:
                 "Do you want to document them all?"
             ),
             auto_enter=True,
-        ).ask()
+        ).unsafe_ask()
 
         if document_all_cols:
             results = self._iterate_through_columns(cols=columns_to_document)
@@ -321,7 +323,7 @@ class UserInputCollector:
         document_any_columns = questionary.confirm(
             message="Do you want to document any of the already documented columns in this model?",
             auto_enter=True,
-        ).ask()
+        ).unsafe_ask()
 
         if document_any_columns:
             columns_to_document = questionary.prompt(mutable_payload)

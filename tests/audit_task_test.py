@@ -4,7 +4,6 @@ from unittest.mock import call
 
 import pytest
 
-from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.main import parser
 from dbt_sugar.core.task.audit import AuditTask

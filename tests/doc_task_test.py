@@ -4,14 +4,23 @@ from unittest.mock import call
 import pytest
 
 from dbt_sugar.core.clients.dbt import DbtProfile
+from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.flags import FlagParser
+from dbt_sugar.core.main import parser
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 from dbt_sugar.core.task.doc import DocumentationTask
 
 FIXTURE_DIR = Path(__file__).resolve().parent
 
 
-def __init_descriptions(params=None, dbt_profile=None, config=None):
-    doc_task = DocumentationTask(params, dbt_profile, config)
+def __init_descriptions(params=None, dbt_profile=None):
+    flag_parser = FlagParser(parser)
+    flag_parser.consume_cli_arguments(test_cli_args=["doc", "-m", "test"])
+
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    doc_task = DocumentationTask(params, dbt_profile, sugar_config)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     doc_task.repository_path = "tests/test_dbt_project/"
     return doc_task
@@ -112,7 +121,7 @@ def test_update_model_description_test_tags(mocker, content, model_name, ui_resp
     open_yaml = mocker.patch("dbt_sugar.core.task.base.open_yaml")
     save_yaml = mocker.patch("dbt_sugar.core.task.base.save_yaml")
     open_yaml.return_value = content
-    doc_task = DocumentationTask(None, None, None)
+    doc_task = __init_descriptions()
     doc_task.update_model_description_test_tags(Path("."), model_name, ui_response)
     save_yaml.assert_has_calls(result)
 
@@ -513,7 +522,7 @@ def test_document_columns(mocker):
     class MockDbtSugarConfig:
         config = {"always_enforce_tests": True, "always_add_tags": True}
 
-    doc_task = DocumentationTask(None, None, MockDbtSugarConfig)
+    doc_task = __init_descriptions()
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     mocker.patch("questionary.prompt", return_value={"cols_to_document": ["columnA"]})
     mocker.patch("questionary.confirm", return_value=Question(False))

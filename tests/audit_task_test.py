@@ -4,6 +4,9 @@ from unittest.mock import call
 
 import pytest
 
+from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.flags import FlagParser
+from dbt_sugar.core.main import parser
 from dbt_sugar.core.task.audit import AuditTask
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 
@@ -11,11 +14,13 @@ FIXTURE_DIR = Path(__file__).resolve().parent
 
 
 def __init_descriptions():
-    parser = ArgumentParser()
-    parser.add_argument("-m", "--model", default=None)
-    params = parser.parse_args([])
+    flag_parser = FlagParser(parser)
+    flag_parser.consume_cli_arguments(test_cli_args=["audit"])
 
-    audit_task = AuditTask(params)
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    audit_task = AuditTask(flag_parser, sugar_config)
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     audit_task.repository_path = "tests/test_dbt_project/"
     return audit_task

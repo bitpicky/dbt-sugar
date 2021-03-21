@@ -7,7 +7,7 @@ class Question:
     def __init__(self, return_value):
         self._return_value = return_value
 
-    def ask(self):
+    def unsafe_ask(self):
         return self._return_value
 
 

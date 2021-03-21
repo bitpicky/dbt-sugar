@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
-from dbt_sugar.core.config.config import DbtSugarConfig
 
 COLUMN_NOT_DOCUMENTED = "No description for this column."
 MODEL_NOT_DOCUMENTED = "No description for this model."
@@ -16,9 +15,9 @@ EXCLUDE_TARGET_FILES_PATTERN = r"\/target\/"
 class BaseTask(abc.ABC):
     """Sets up basic API for task-like classes."""
 
-    def __init__(self, config: DbtSugarConfig) -> None:
-        sugar_config = config.config_model
-        self.repository_path = sugar_config.dbt_projects[0].path
+    def __init__(self, dbt_path: Path) -> None:
+        self.repository_path = dbt_path
+        print(dbt_path)
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}

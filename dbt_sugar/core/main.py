@@ -188,7 +188,9 @@ def handle(
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile, sugar_config)
+        task: DocumentationTask = DocumentationTask(
+            flag_parser, dbt_profile, sugar_config, dbt_project._project_dir
+        )
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.
@@ -199,7 +201,7 @@ def handle(
         return task.run()
 
     if flag_parser.task == "audit":
-        audit_task: AuditTask = AuditTask(flag_parser, sugar_config)
+        audit_task: AuditTask = AuditTask(flag_parser, dbt_project._project_dir)
         return audit_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")

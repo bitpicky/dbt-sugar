@@ -30,7 +30,7 @@ def __init_descriptions(params=None, dbt_profile=None):
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
 
-    doc_task = DocumentationTask(params, dbt_profile, sugar_config)
+    doc_task = DocumentationTask(params, dbt_profile, sugar_config, FIXTURE_DIR)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     doc_task.repository_path = "tests/test_dbt_project/"
     return doc_task

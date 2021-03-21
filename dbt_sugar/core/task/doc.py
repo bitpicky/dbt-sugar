@@ -1,4 +1,5 @@
 """Document Task module."""
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 
 from rich.console import Console
@@ -29,8 +30,10 @@ class DocumentationTask(BaseTask):
     Holds methods and attrs necessary to orchestrate a model documentation task.
     """
 
-    def __init__(self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig) -> None:
-        super().__init__(config=config)
+    def __init__(
+        self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
+    ) -> None:
+        super().__init__(dbt_path=dbt_path)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile

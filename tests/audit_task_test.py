@@ -24,10 +24,7 @@ def __init_descriptions():
         ]
     )
 
-    sugar_config = DbtSugarConfig(flag_parser)
-    sugar_config.load_config()
-
-    audit_task = AuditTask(flag_parser, sugar_config)
+    audit_task = AuditTask(flag_parser, FIXTURE_DIR)
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     audit_task.repository_path = "tests/test_dbt_project/"
     return audit_task

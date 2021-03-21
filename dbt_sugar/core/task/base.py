@@ -17,7 +17,6 @@ class BaseTask(abc.ABC):
 
     def __init__(self, dbt_path: Path) -> None:
         self.repository_path = dbt_path
-        print(dbt_path)
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}

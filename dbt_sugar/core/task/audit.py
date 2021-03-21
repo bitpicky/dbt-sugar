@@ -1,4 +1,4 @@
-"""Document Task module."""
+"""Audit Task module."""
 from typing import Any, Dict, List
 
 from rich.console import Console

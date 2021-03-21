@@ -30,7 +30,7 @@ class DocumentationTask(BaseTask):
     """
 
     def __init__(self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig) -> None:
-        super().__init__()
+        super().__init__(config=config)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile

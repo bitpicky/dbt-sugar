@@ -199,7 +199,7 @@ def handle(
         return task.run()
 
     if flag_parser.task == "audit":
-        audit_task: AuditTask = AuditTask(flag_parser)
+        audit_task: AuditTask = AuditTask(flag_parser, sugar_config)
         return audit_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")

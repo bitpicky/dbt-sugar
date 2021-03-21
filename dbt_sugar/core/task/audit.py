@@ -24,6 +24,7 @@ class AuditTask(BaseTask):
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self.model_name = self._flags.model
+        self.model_content: Dict[str, Any] = {}
 
     def run(self) -> int:
         """Main script to run the command doc"""

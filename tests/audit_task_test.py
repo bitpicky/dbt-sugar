@@ -171,3 +171,52 @@ def test_get_project_test_coverage(mocker, dbt_tests, call_input):
 
     audit_task.get_project_test_coverage()
     create_table.assert_has_calls(call_input)
+
+
+@pytest.mark.parametrize(
+    "model_content, model_name, call_input",
+    [
+        pytest.param(
+            {
+                "version": 2,
+                "models": [
+                    {
+                        "name": "dim_company",
+                        "description": "aa.",
+                        "columns": [
+                            {"name": "id", "description": "No description for this column."},
+                            {"name": "name", "description": "No description for this column."},
+                            {"name": "age", "description": "No description for this column."},
+                            {
+                                "name": "address",
+                                "description": "No description for this column.",
+                                "tests": ["not_null"],
+                            },
+                            {"name": "salary", "description": "hey.", "tests": ["unique"]},
+                        ],
+                    }
+                ],
+            },
+            "dim_company",
+            [
+                call(
+                    columns=["undocument columns", "coverage"],
+                    data={"id": "", "name": "", "age": "", "address": "20.0"},
+                    title="Documentation Coverage",
+                )
+            ],
+            id="check_column_description_coverage_calculation",
+        ),
+    ],
+)
+def test_get_model_column_description_coverage(mocker, model_content, model_name, call_input):
+    audit_task = __init_descriptions()
+    audit_task.get_model_column_description_coverage()
+
+    create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
+    audit_task = __init_descriptions()
+    audit_task.model_content = model_content
+    audit_task.model_name = model_name
+
+    audit_task.get_model_column_description_coverage()
+    create_table.assert_has_calls(call_input)

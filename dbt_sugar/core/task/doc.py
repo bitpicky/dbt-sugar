@@ -105,6 +105,7 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: with the keys name and description in the begining of the dictionary.
         """
+        # DEPRECATION: Drop ordered dict when dropping python 3.6 support
         ordered_dict = OrderedDict(model)
         ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)

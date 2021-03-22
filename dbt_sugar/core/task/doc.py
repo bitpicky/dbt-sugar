@@ -1,4 +1,5 @@
 """Document Task module."""
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
@@ -94,6 +95,39 @@ class DocumentationTask(BaseTask):
                     model["description"] = user_input["model_description"]
         return content
 
+    def order_by_dict(self, model):
+        ordered_dict = OrderedDict(model)
+        ordered_dict.move_to_end("description", last=False)
+        ordered_dict.move_to_end("name", last=False)
+        return dict(ordered_dict)
+
+    def order_schema_yml(self, content_yml: Dict[str, Any]):
+        """
+        Order the content from a schema.yml. Will order:
+
+            - The schema.yml content in alphabetical order.
+            - The models in alphabetical order.
+            - The columns from each model in alphabetical order.
+
+        Args:
+            content_yml (Dict[str, Any]): schema yml content to order.
+        Returns:
+            content_yml (Dict[str, Any]): schema yml content with the content ordered.
+        """
+        for i, model in enumerate(content_yml.get("models", {})):
+            # Adding name and description in the first positions of a model.
+            content_yml["models"][i] = self.order_by_dict(content_yml["models"][i])
+
+            # Sorting columns names in alphabetical order.
+            if model.get("columns", None):
+                content_yml["models"][i]["columns"] = sorted(
+                    model["columns"],
+                    key=lambda k: k["name"].lower(),
+                )
+        # Sorting models names in alphabetical order.
+        content_yml["models"] = sorted(content_yml["models"], key=lambda k: k["name"].lower())
+        return content_yml
+
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]
     ) -> int:
@@ -134,7 +168,7 @@ class DocumentationTask(BaseTask):
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
 
-        save_yaml(path, content)
+        save_yaml(path, self.order_schema_yml(content))
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(path, model_name, self.column_update_payload)
         # Method to update the descriptions in all the schemas.yml

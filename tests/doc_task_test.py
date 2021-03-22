@@ -697,3 +697,46 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
 def test_order_schema_yml(content, result):
     doc_task = __init_descriptions()
     assert doc_task.order_schema_yml(content) == result
+
+
+@pytest.mark.parametrize(
+    "content, result",
+    [
+        pytest.param(
+            {
+                "columns": [
+                    {"name": "salary", "description": "hey.", "tests": ["unique"]},
+                    {
+                        "name": "address",
+                        "description": "No description for this column.",
+                        "tests": ["not_null"],
+                    },
+                    {"name": "age", "description": "No description for this column."},
+                    {"name": "id", "description": "dsadasd"},
+                    {"name": "name", "description": "No description for this column."},
+                ],
+                "description": "qweqew",
+                "name": "dim_company",
+            },
+            {
+                "name": "dim_company",
+                "description": "qweqew",
+                "columns": [
+                    {"name": "salary", "description": "hey.", "tests": ["unique"]},
+                    {
+                        "name": "address",
+                        "description": "No description for this column.",
+                        "tests": ["not_null"],
+                    },
+                    {"name": "age", "description": "No description for this column."},
+                    {"name": "id", "description": "dsadasd"},
+                    {"name": "name", "description": "No description for this column."},
+                ],
+            },
+            id="move_name_description_to_beginning",
+        ),
+    ],
+)
+def test_move_name_and_description_to_first_position(content, result):
+    doc_task = __init_descriptions()
+    assert doc_task.move_name_and_description_to_first_position(content) == result

@@ -17,7 +17,7 @@ NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 class AuditTask(BaseTask):
     """Audit Task object.
 
-    Holds methods and attrs necessary to audit a model or a DBT project.
+    Holds methods and attrs necessary to audit a model or a dbt project.
     """
 
     def __init__(self, flags: FlagParser, dbt_path: Path) -> None:
@@ -187,7 +187,7 @@ class AuditTask(BaseTask):
         )
 
     def get_project_column_description_coverage(self) -> None:
-        """Method to get the model descriptions coverage per model in a DBT project."""
+        """Method to get the model descriptions coverage per model in a dbt project."""
         print_statistics = {}
         for model_name, path in self.all_dbt_models.items():
             content = open_yaml(path)
@@ -239,7 +239,7 @@ class AuditTask(BaseTask):
 
     def get_project_total_test_coverage(self) -> str:
         """
-        Method to get the descriptions coverage for an entire DBT project.
+        Method to get the descriptions coverage for an entire dbt project.
 
         Returns:
             str: with global descriptions statistics.

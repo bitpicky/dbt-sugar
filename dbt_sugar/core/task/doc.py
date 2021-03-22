@@ -131,7 +131,7 @@ class DocumentationTask(BaseTask):
             documented_columns = self.get_documented_columns(content, model_name)
             self.document_columns(documented_columns, "documented_columns")
         except KeyboardInterrupt:
-            logger.info("The user has exit the program, not saving the changes.")
+            logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
 
         save_yaml(path, content)

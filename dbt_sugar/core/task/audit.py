@@ -34,7 +34,7 @@ class AuditTask(BaseTask):
             logger.info(f"Running audit of model [bold magenta]{self.model_name}.[/bold magenta]\n")
             path_file, schema_exists = self.find_model_in_dbt(self.model_name)
             if not path_file:
-                logger.info("Could not find the Model in the DBT project")
+                logger.info(f"Could not find {self.model_name} in the project at {self.dbt_path}")
                 return 1
             if not schema_exists:
                 logger.info("The model is not documented.")

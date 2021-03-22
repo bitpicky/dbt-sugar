@@ -192,18 +192,37 @@ class DocumentationTask(BaseTask):
             columns (Dict[str, str]): Dict of columns with the column name as the key
             and the column description to populate schema.yml as the value.
         """
+        allowed_question_types_map = {
+            "undocumented_columns": "undocumented columns",
+            "documented_columns": "documented columns",
+        }
+        assert (
+            question_type in allowed_question_types_map.keys()
+        ), f"question_type must be one of those: {list(allowed_question_types_map.keys())}"
+
+        # set up pagination messaging
         columns_names = list(columns.keys())
-        for i in range(0, len(columns_names), NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
+        number_of_colums_to_document = len(columns_names)
+        is_paginated = number_of_colums_to_document > NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+        if is_paginated:
+            logger.info(
+                f"There are {number_of_colums_to_document} columns to document in total we will show them to you "
+                f"{NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION} at a time."
+            )
+
+        # go through columns to document
+        for i in range(0, number_of_colums_to_document, NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+            is_first_page = True if final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION else False
 
             choices_undocumented = columns_names[i:final_index]
             choices_documented = {}
-            # The choices variable need to have the descripions for documented columns.
+            # Feed the current description into the choices messahe.
             if question_type == "documented_columns":
                 choices_documented = {key: columns[key] for key in choices_undocumented}
             choices = choices_documented if choices_documented else choices_undocumented
 
-            undocumented_columns_payload: List[Mapping[str, Any]] = [
+            payload: List[Mapping[str, Any]] = [
                 {
                     "type": "checkbox",
                     "name": "cols_to_document",
@@ -213,9 +232,11 @@ class DocumentationTask(BaseTask):
             ]
             user_input = UserInputCollector(
                 question_type,
-                undocumented_columns_payload,
+                payload,
                 ask_for_tests=self._sugar_config.config["always_enforce_tests"],
                 ask_for_tags=self._sugar_config.config["always_add_tags"],
+                is_paginated=is_paginated,
+                is_first_page=is_first_page,
             ).collect()
             self.column_update_payload.update(user_input)
 

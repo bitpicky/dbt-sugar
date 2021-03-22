@@ -42,7 +42,7 @@ class AuditTask(BaseTask):
             self.model_content = open_yaml(path_file)
             self.derive_model_coverage()
         else:
-            logger.info(f"Running audit of DBT project in {self.dbt_path}.\n")
+            logger.info(f"Running audit of dbt project in {self.dbt_path}.\n")
             self.derive_project_coverage()
         return 0
 

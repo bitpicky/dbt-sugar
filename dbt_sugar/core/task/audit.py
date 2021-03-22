@@ -66,7 +66,9 @@ class AuditTask(BaseTask):
         columns = self.dbt_tests.get(self.model_name)
 
         if not columns:
-            logger.info(f"Not able to get the test statistics for the model {self.model_name}")
+            logger.info(
+                f"There is not documentation for the model {self.model_name}, you might need to run dbt-sugar doc."
+            )
             return
 
         for column in columns:
@@ -101,10 +103,15 @@ class AuditTask(BaseTask):
                 model_name=self.model_name,
             )
         )
+        number_columns = number_documented_columns + number_not_documented_columns
+
+        # This means that they are not columns, and we want to skip the printing.
+        if number_columns == 0:
+            return
 
         percentage_not_documented_columns = self.calculate_coverage_percentage(
             number_failures=number_not_documented_columns,
-            total=(number_documented_columns + number_not_documented_columns),
+            total=number_columns,
         )
 
         data = self.print_nicely_the_data(

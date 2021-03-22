@@ -1,5 +1,5 @@
 defaults:
-  syrup: jaffle_shop
+  syrup: syrup_1
   target: dev
 syrups:
   - name: syrup_1

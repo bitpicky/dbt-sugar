@@ -95,7 +95,16 @@ class DocumentationTask(BaseTask):
                     model["description"] = user_input["model_description"]
         return content
 
-    def order_by_dict(self, model):
+    def move_name_and_description_to_first_position(self, model: Dict[str, Any]):
+        """
+        Move keys name and description to the beginning of the dictionary.
+
+        Args:
+            model (Dict[str, Any]): Name of the model to document.
+
+        Returns:
+            Dict[str, Any]: with the keys name and description in the begining of the dictionary.
+        """
         ordered_dict = OrderedDict(model)
         ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
@@ -116,7 +125,9 @@ class DocumentationTask(BaseTask):
         """
         for i, model in enumerate(content_yml.get("models", {})):
             # Adding name and description in the first positions of a model.
-            content_yml["models"][i] = self.order_by_dict(content_yml["models"][i])
+            content_yml["models"][i] = self.move_name_and_description_to_first_position(
+                content_yml["models"][i]
+            )
 
             # Sorting columns names in alphabetical order.
             if model.get("columns", None):

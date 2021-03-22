@@ -47,7 +47,6 @@ class FlagParser:
             self.log_level = self.args.log_level
             self.verbose = self.args.verbose
             self.syrup = self.args.syrup
-            self.is_dry_run = self.args.dry_run
             if self.args.profiles_dir:
                 self.profiles_dir = Path(self.args.profiles_dir).expanduser()
             if self.args.config_path:
@@ -57,7 +56,11 @@ class FlagParser:
         if self.task == "doc":
             self.model = self.args.model
             self.schema = self.args.schema
+            self.is_dry_run = self.args.dry_run
             self.target = self.args.target
             # we reverse the flag so that we don't have double negatives later in the code
             self.ask_for_tests = self.args.ask_for_tests
             self.ask_for_tags = self.args.ask_for_tags
+
+        if self.task == "audit":
+            self.model = self.args.model

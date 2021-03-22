@@ -3,7 +3,7 @@ import abc
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 
@@ -15,9 +15,11 @@ EXCLUDE_TARGET_FILES_PATTERN = r"\/target\/"
 class BaseTask(abc.ABC):
     """Sets up basic API for task-like classes."""
 
-    def __init__(self) -> None:
-        self.repository_path = Path().absolute()
+    def __init__(self, dbt_path: Path) -> None:
+        self.repository_path = dbt_path
+        self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
+        self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.save_all_descriptions()
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
@@ -173,6 +175,22 @@ class BaseTask(abc.ABC):
                         path_file, dict_column_description_to_update
                     )
 
+    def update_test_in_dbt_tests(self, model_name: str, column: Dict[str, Any]) -> None:
+        """Update a column tests in the global tests dictionary.
+
+        Args:
+            model_name (str): with the model name.
+            column (Dict[str, Any]): column information.
+        """
+        if model_name not in self.dbt_tests:
+            self.dbt_tests[model_name] = [
+                {"name": column["name"], "tests": column.get("tests", [])}
+            ]
+        else:
+            self.dbt_tests[model_name].append(
+                {"name": column["name"], "tests": column.get("tests", [])}
+            )
+
     def update_description_in_dbt_descriptions(
         self, column_name: str, column_description: str
     ) -> None:
@@ -186,7 +204,7 @@ class BaseTask(abc.ABC):
             column_description = COLUMN_NOT_DOCUMENTED
         self.dbt_definitions[column_name] = column_description
 
-    def save_descriptions_from_schema(self, content: Dict[str, Any]) -> None:
+    def save_descriptions_from_schema(self, content: Dict[str, Any], path_schema: Path) -> None:
         """Save the columns descriptions from a schema.yml into the global descriptions dictionary.
 
         Args:
@@ -196,9 +214,11 @@ class BaseTask(abc.ABC):
             return
 
         for model in content.get("models", []):
+            self.all_dbt_models[model["name"]] = path_schema
             for column in model.get("columns", []):
                 column_description = column.get("description", None)
                 self.update_description_in_dbt_descriptions(column["name"], column_description)
+                self.update_test_in_dbt_tests(model["name"], column)
 
     def save_all_descriptions(self) -> None:
         """Save the columns descriptions from all the dbt project."""
@@ -208,7 +228,7 @@ class BaseTask(abc.ABC):
                 for file in files:
                     path_file = Path(os.path.join(root, file))
                     content = open_yaml(path_file)
-                    self.save_descriptions_from_schema(content)
+                    self.save_descriptions_from_schema(content, path_file)
 
     def is_model_in_schema_content(self, content, model_name) -> bool:
         """Method to check if a model exists in a schema.yaml content.
@@ -227,6 +247,32 @@ class BaseTask(abc.ABC):
             if model["name"] == model_name:
                 return True
         return False
+
+    def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
+        """
+        Method to find a model name in the dbt project.
+
+            - If we find the sql of the model but there is no schema we return the Path
+            and False (to create the schema).
+            - If we find the sql of the model and there is schema we return the Path and True.
+
+        Args:
+            model_name (str): model name to find in the dbt project.
+
+        Returns:
+            Tuple[Optional[Path], bool]: Optional path of the sql model if found
+            and boolean indicating whether the schema.yml exists.
+        """
+        for root, _, files in os.walk(self.repository_path):
+            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+                for file in files:
+                    if file == f"{model_name}.sql":
+                        path_file = Path(os.path.join(root, "schema.yml"))
+                        if path_file.is_file():
+                            return path_file, True
+                        else:
+                            return path_file, False
+        return None, False
 
     @abc.abstractmethod
     def run(self) -> int:

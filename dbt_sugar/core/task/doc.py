@@ -1,6 +1,6 @@
 """Document Task module."""
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress

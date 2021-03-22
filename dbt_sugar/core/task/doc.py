@@ -126,7 +126,7 @@ class DocumentationTask(BaseTask):
             documented_columns = self.get_documented_columns(content, model_name)
             self.document_columns(documented_columns, "documented_columns")
         except KeyboardInterrupt:
-            logger.info("The user has exit the program, not saving the changes.")
+            logger.info("dbt-sugar doc was cancelled by the user, all changes will be discarded.")
             return 0
 
         save_yaml(path, content)

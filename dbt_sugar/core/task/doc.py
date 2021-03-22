@@ -120,16 +120,21 @@ class DocumentationTask(BaseTask):
             )
         if schema_exists:
             content = open_yaml(path)
+
         content, is_already_documented = self.process_model(content, model_name, columns_sql)
-        content = self.change_model_description(content, model_name, is_already_documented)
+        try:
+            content = self.change_model_description(content, model_name, is_already_documented)
+
+            not_documented_columns = self.get_not_documented_columns(content, model_name)
+            self.document_columns(not_documented_columns, "undocumented_columns")
+
+            documented_columns = self.get_documented_columns(content, model_name)
+            self.document_columns(documented_columns, "documented_columns")
+        except KeyboardInterrupt:
+            logger.info("The user has exited the doc task, all changes have been discarded.")
+            return 0
+
         save_yaml(path, content)
-
-        not_documented_columns = self.get_not_documented_columns(content, model_name)
-        self.document_columns(not_documented_columns, "undocumented_columns")
-
-        documented_columns = self.get_documented_columns(content, model_name)
-        self.document_columns(documented_columns, "documented_columns")
-
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(path, model_name, self.column_update_payload)
         # Method to update the descriptions in all the schemas.yml

@@ -3,14 +3,33 @@ from unittest.mock import call
 
 import pytest
 
+from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.flags import FlagParser
+from dbt_sugar.core.main import parser
 from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 from dbt_sugar.core.task.doc import DocumentationTask
 
 FIXTURE_DIR = Path(__file__).resolve().parent
 
 
-def __init_descriptions(params=None, dbt_profile=None, config=None):
-    doc_task = DocumentationTask(params, dbt_profile, config)
+def __init_descriptions(params=None, dbt_profile=None):
+    flag_parser = FlagParser(parser)
+    config_filepath = Path(FIXTURE_DIR).joinpath("sugar_config.yml")
+
+    flag_parser.consume_cli_arguments(
+        test_cli_args=[
+            "doc",
+            "-m",
+            "test",
+            "--config-path",
+            str(config_filepath),
+        ]
+    )
+
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    doc_task = DocumentationTask(params, dbt_profile, sugar_config, FIXTURE_DIR)
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     doc_task.repository_path = "tests/test_dbt_project/"
     return doc_task
@@ -111,7 +130,7 @@ def test_update_model_description_test_tags(mocker, content, model_name, ui_resp
     open_yaml = mocker.patch("dbt_sugar.core.task.base.open_yaml")
     save_yaml = mocker.patch("dbt_sugar.core.task.base.save_yaml")
     open_yaml.return_value = content
-    doc_task = DocumentationTask(None, None, None)
+    doc_task = __init_descriptions()
     doc_task.update_model_description_test_tags(Path("."), model_name, ui_response)
     save_yaml.assert_has_calls(result)
 
@@ -153,7 +172,7 @@ def test_update_model_description_test_tags(mocker, content, model_name, ui_resp
 )
 def test_save_descriptions_from_schema(content, column, description):
     doc_task = __init_descriptions()
-    doc_task.save_descriptions_from_schema(content)
+    doc_task.save_descriptions_from_schema(content, "")
     assert doc_task.dbt_definitions[column] == description
 
 
@@ -444,9 +463,9 @@ def test_get_not_documented_columns(content, model_name, result):
 
 
 @pytest.mark.parametrize(
-    "content, model_name, result",
+    "content, model_name, is_already_documented, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -457,6 +476,7 @@ def test_get_not_documented_columns(content, model_name, result):
                 ]
             },
             "testmodel",
+            True,
             {
                 "models": [
                     {
@@ -466,8 +486,9 @@ def test_get_not_documented_columns(content, model_name, result):
                     }
                 ]
             },
+            id="model already in schema.yml with no columns",
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -477,6 +498,7 @@ def test_get_not_documented_columns(content, model_name, result):
                 ]
             },
             "testmodel",
+            False,
             {
                 "models": [
                     {
@@ -486,10 +508,11 @@ def test_get_not_documented_columns(content, model_name, result):
                     }
                 ]
             },
+            id="model not already present in schema.yml",
         ),
     ],
 )
-def test_change_model_description(mocker, content, model_name, result):
+def test_change_model_description(mocker, content, model_name, is_already_documented, result):
     doc_task = __init_descriptions()
     mocker.patch(
         "questionary.prompt",
@@ -498,7 +521,7 @@ def test_change_model_description(mocker, content, model_name, result):
             "model_description": "New description for the model.",
         },
     )
-    assert doc_task.change_model_description(content, model_name) == result
+    assert doc_task.change_model_description(content, model_name, is_already_documented) == result
 
 
 def test_document_columns(mocker):
@@ -512,7 +535,7 @@ def test_document_columns(mocker):
     class MockDbtSugarConfig:
         config = {"always_enforce_tests": True, "always_add_tags": True}
 
-    doc_task = DocumentationTask(None, None, MockDbtSugarConfig)
+    doc_task = __init_descriptions()
     doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     mocker.patch("questionary.prompt", return_value={"cols_to_document": ["columnA"]})
     mocker.patch("questionary.confirm", return_value=Question(False))

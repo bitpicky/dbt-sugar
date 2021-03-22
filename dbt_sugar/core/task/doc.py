@@ -1,6 +1,4 @@
 """Document Task module."""
-import os
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
@@ -14,7 +12,7 @@ from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
-from dbt_sugar.core.task.base import EXCLUDE_TARGET_FILES_PATTERN, MODEL_NOT_DOCUMENTED, BaseTask
+from dbt_sugar.core.task.base import MODEL_NOT_DOCUMENTED, BaseTask
 from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
 console = Console()
@@ -32,8 +30,10 @@ class DocumentationTask(BaseTask):
     Holds methods and attrs necessary to orchestrate a model documentation task.
     """
 
-    def __init__(self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig) -> None:
-        super().__init__()
+    def __init__(
+        self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
+    ) -> None:
+        super().__init__(dbt_path=dbt_path)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
@@ -59,7 +59,9 @@ class DocumentationTask(BaseTask):
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
-    def change_model_description(self, content: Dict[str, Any], model_name: str) -> Dict[str, Any]:
+    def change_model_description(
+        self, content: Dict[str, Any], model_name: str, is_already_documented: bool = False
+    ) -> Dict[str, Any]:
         """Updates the model description from a schema.yaml.
 
         Args:
@@ -69,11 +71,14 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: Schema.yml content updated.
         """
+        message = f"Do you want to write a description for {model_name}"
+        if is_already_documented:
+            message = f"Do you want to change the model description of {model_name}"
         model_doc_payload: List[Mapping[str, Any]] = [
             {
                 "type": "confirm",
                 "name": "wants_to_document_model",
-                "message": f"Do you want to change the model description of {model_name}",
+                "message": message,
                 "default": True,
             },
             {
@@ -88,32 +93,6 @@ class DocumentationTask(BaseTask):
                 if model["name"] == model_name:
                     model["description"] = user_input["model_description"]
         return content
-
-    def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
-        """
-        Method to find a model name in the dbt project.
-
-            - If we find the sql of the model but there is no schema we return the Path
-            and False (to create the schema).
-            - If we find the sql of the model and there is schema we return the Path and True.
-
-        Args:
-            model_name (str): model name to find in the dbt project.
-
-        Returns:
-            Tuple[Optional[Path], bool]: Optional path of the sql model if found
-            and boolean indicating whether the schema.yml exists.
-        """
-        for root, _, files in os.walk(self.repository_path):
-            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
-                for file in files:
-                    if file == f"{model_name}.sql":
-                        path_file = Path(os.path.join(root, "schema.yml"))
-                        if path_file.is_file():
-                            return path_file, True
-                        else:
-                            return path_file, False
-        return None, False
 
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]
@@ -141,8 +120,8 @@ class DocumentationTask(BaseTask):
             )
         if schema_exists:
             content = open_yaml(path)
-        content = self.process_model(content, model_name, columns_sql)
-        content = self.change_model_description(content, model_name)
+        content, is_already_documented = self.process_model(content, model_name, columns_sql)
+        content = self.change_model_description(content, model_name, is_already_documented)
         save_yaml(path, content)
 
         not_documented_columns = self.get_not_documented_columns(content, model_name)
@@ -213,18 +192,37 @@ class DocumentationTask(BaseTask):
             columns (Dict[str, str]): Dict of columns with the column name as the key
             and the column description to populate schema.yml as the value.
         """
+        allowed_question_types_map = {
+            "undocumented_columns": "undocumented columns",
+            "documented_columns": "documented columns",
+        }
+        assert (
+            question_type in allowed_question_types_map.keys()
+        ), f"question_type must be one of those: {list(allowed_question_types_map.keys())}"
+
+        # set up pagination messaging
         columns_names = list(columns.keys())
-        for i in range(0, len(columns_names), NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
+        number_of_colums_to_document = len(columns_names)
+        is_paginated = number_of_colums_to_document > NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+        if is_paginated:
+            logger.info(
+                f"There are {number_of_colums_to_document} columns to document in total we will show them to you "
+                f"{NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION} at a time."
+            )
+
+        # go through columns to document
+        for i in range(0, number_of_colums_to_document, NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
+            is_first_page = True if final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION else False
 
             choices_undocumented = columns_names[i:final_index]
             choices_documented = {}
-            # The choices variable need to have the descripions for documented columns.
+            # Feed the current description into the choices messahe.
             if question_type == "documented_columns":
                 choices_documented = {key: columns[key] for key in choices_undocumented}
             choices = choices_documented if choices_documented else choices_undocumented
 
-            undocumented_columns_payload: List[Mapping[str, Any]] = [
+            payload: List[Mapping[str, Any]] = [
                 {
                     "type": "checkbox",
                     "name": "cols_to_document",
@@ -234,9 +232,11 @@ class DocumentationTask(BaseTask):
             ]
             user_input = UserInputCollector(
                 question_type,
-                undocumented_columns_payload,
+                payload,
                 ask_for_tests=self._sugar_config.config["always_enforce_tests"],
                 ask_for_tags=self._sugar_config.config["always_add_tags"],
+                is_paginated=is_paginated,
+                is_first_page=is_first_page,
             ).collect()
             self.column_update_payload.update(user_input)
 
@@ -282,7 +282,7 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: with the content of the schema.yml with the model created.
         """
-        logger.info(f"The model '{model_name}' has not been docummented yet. Creating a new entry.")
+        logger.info(f"The model '{model_name}' has not been documented yet. Creating a new entry.")
         columns = []
         for column_sql in columns_sql:
             description = self.get_column_description_from_dbt_definitions(column_sql)
@@ -300,7 +300,7 @@ class DocumentationTask(BaseTask):
 
     def process_model(
         self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], bool]:
         """Method to update/create a model entry in the schema.yml.
 
         Args:
@@ -309,6 +309,8 @@ class DocumentationTask(BaseTask):
         """
         if self.is_model_in_schema_content(content, model_name) and content:
             content = self.update_model(content, model_name, columns_sql)
+            is_already_documented = True
         else:
             content = self.create_new_model(content, model_name, columns_sql)
-        return content
+            is_already_documented = False
+        return content, is_already_documented

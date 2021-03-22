@@ -12,6 +12,7 @@ from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
+from dbt_sugar.core.task.audit import AuditTask
 from dbt_sugar.core.task.doc import DocumentationTask
 from dbt_sugar.core.ui.traceback_manager import DbtSugarTracebackManager
 from dbt_sugar.core.utils import check_and_compare_version
@@ -132,6 +133,20 @@ document_sub_parser.add_argument(
     default=True,
 )
 
+# document task parser
+audit_sub_parser = sub_parsers.add_parser(
+    "audit", parents=[base_subparser], help="Runs audit task."
+)
+audit_sub_parser.set_defaults(cls=AuditTask, which="audit")
+audit_sub_parser.add_argument(
+    "-m",
+    "--model",
+    help="Name of the dbt model to document",
+    type=str,
+    default=None,
+    required=False,
+)
+
 # task handler
 
 
@@ -173,7 +188,9 @@ def handle(
         log_manager.set_debug()
 
     if flag_parser.task == "doc":
-        task: DocumentationTask = DocumentationTask(flag_parser, dbt_profile, sugar_config)
+        task: DocumentationTask = DocumentationTask(
+            flag_parser, dbt_profile, sugar_config, dbt_project._project_dir
+        )
         # TODO: We actually need to change the behaviour of DocumentationTask to provide an interactive
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.
@@ -182,6 +199,10 @@ def handle(
             logger.info(f"Would run {task}")
             return 0
         return task.run()
+
+    if flag_parser.task == "audit":
+        audit_task: AuditTask = AuditTask(flag_parser, dbt_project._project_dir)
+        return audit_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
 

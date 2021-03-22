@@ -1,6 +1,6 @@
 """Document Task module."""
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress
@@ -59,7 +59,9 @@ class DocumentationTask(BaseTask):
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
-    def change_model_description(self, content: Dict[str, Any], model_name: str) -> Dict[str, Any]:
+    def change_model_description(
+        self, content: Dict[str, Any], model_name: str, is_already_documented: bool = False
+    ) -> Dict[str, Any]:
         """Updates the model description from a schema.yaml.
 
         Args:
@@ -69,11 +71,14 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: Schema.yml content updated.
         """
+        message = f"Do you want to write a description for {model_name}"
+        if is_already_documented:
+            message = f"Do you want to change the model description of {model_name}"
         model_doc_payload: List[Mapping[str, Any]] = [
             {
                 "type": "confirm",
                 "name": "wants_to_document_model",
-                "message": f"Do you want to change the model description of {model_name}",
+                "message": message,
                 "default": True,
             },
             {
@@ -115,8 +120,8 @@ class DocumentationTask(BaseTask):
             )
         if schema_exists:
             content = open_yaml(path)
-        content = self.process_model(content, model_name, columns_sql)
-        content = self.change_model_description(content, model_name)
+        content, is_already_documented = self.process_model(content, model_name, columns_sql)
+        content = self.change_model_description(content, model_name, is_already_documented)
         save_yaml(path, content)
 
         not_documented_columns = self.get_not_documented_columns(content, model_name)
@@ -256,7 +261,7 @@ class DocumentationTask(BaseTask):
         Returns:
             Dict[str, Any]: with the content of the schema.yml with the model created.
         """
-        logger.info(f"The model '{model_name}' has not been docummented yet. Creating a new entry.")
+        logger.info(f"The model '{model_name}' has not been documented yet. Creating a new entry.")
         columns = []
         for column_sql in columns_sql:
             description = self.get_column_description_from_dbt_definitions(column_sql)
@@ -274,7 +279,7 @@ class DocumentationTask(BaseTask):
 
     def process_model(
         self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], bool]:
         """Method to update/create a model entry in the schema.yml.
 
         Args:
@@ -283,6 +288,8 @@ class DocumentationTask(BaseTask):
         """
         if self.is_model_in_schema_content(content, model_name) and content:
             content = self.update_model(content, model_name, columns_sql)
+            is_already_documented = True
         else:
             content = self.create_new_model(content, model_name, columns_sql)
-        return content
+            is_already_documented = False
+        return content, is_already_documented

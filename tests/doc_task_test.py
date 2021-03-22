@@ -463,9 +463,9 @@ def test_get_not_documented_columns(content, model_name, result):
 
 
 @pytest.mark.parametrize(
-    "content, model_name, result",
+    "content, model_name, is_already_documented, result",
     [
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -476,6 +476,7 @@ def test_get_not_documented_columns(content, model_name, result):
                 ]
             },
             "testmodel",
+            True,
             {
                 "models": [
                     {
@@ -485,8 +486,9 @@ def test_get_not_documented_columns(content, model_name, result):
                     }
                 ]
             },
+            id="model already in schema.yml with no columns",
         ),
-        (
+        pytest.param(
             {
                 "models": [
                     {
@@ -496,6 +498,7 @@ def test_get_not_documented_columns(content, model_name, result):
                 ]
             },
             "testmodel",
+            False,
             {
                 "models": [
                     {
@@ -505,10 +508,11 @@ def test_get_not_documented_columns(content, model_name, result):
                     }
                 ]
             },
+            id="model not already present in schema.yml",
         ),
     ],
 )
-def test_change_model_description(mocker, content, model_name, result):
+def test_change_model_description(mocker, content, model_name, is_already_documented, result):
     doc_task = __init_descriptions()
     mocker.patch(
         "questionary.prompt",
@@ -517,7 +521,7 @@ def test_change_model_description(mocker, content, model_name, result):
             "model_description": "New description for the model.",
         },
     )
-    assert doc_task.change_model_description(content, model_name) == result
+    assert doc_task.change_model_description(content, model_name, is_already_documented) == result
 
 
 def test_document_columns(mocker):

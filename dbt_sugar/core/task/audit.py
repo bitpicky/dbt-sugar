@@ -52,7 +52,7 @@ class AuditTask(BaseTask):
         self.get_model_test_coverage()
 
     def derive_project_coverage(self) -> None:
-        """Method to get the coverage from a DBT project."""
+        """Method to get the coverage from a dbt project."""
         self.get_project_column_description_coverage()
         self.get_project_test_coverage()
 

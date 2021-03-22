@@ -1,7 +1,7 @@
 """User Input Collector API."""
 
 import copy
-from typing import Any, Dict, List, Mapping, Sequence, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
 import questionary
 from pydantic import BaseModel, validator
@@ -112,6 +112,8 @@ class UserInputCollector:
         question_payload: Sequence[Mapping[str, Any]],
         ask_for_tests: bool = True,
         ask_for_tags: bool = True,
+        is_paginated: bool = False,
+        is_first_page: Optional[bool] = None,
     ) -> None:
         """Constructor for UserInpurCollector.
 
@@ -156,6 +158,12 @@ class UserInputCollector:
         self._is_valid_question_payload = False
         self._ask_for_tests = ask_for_tests
         self._ask_for_tags = ask_for_tags
+        if is_paginated:
+            assert isinstance(
+                is_first_page, bool
+            ), "When using a paginated flow is_first_page cannot be None"
+        self._is_paginated = is_paginated
+        self._is_first_page = is_first_page
 
     def _validate_question_payload(self) -> None:
         assert isinstance(self._question_payload, list), "Question payload must be a list of dicts."
@@ -279,6 +287,13 @@ class UserInputCollector:
                 break
         return results
 
+    def _set_quantifier_word(self) -> str:
+        if self._is_first_page and self._is_paginated:
+            return "first"
+        if not self._is_paginated:
+            return "model's"
+        return "next"
+
     def _document_undocumented_cols(
         self,
         question_payload: Sequence[Mapping[str, Any]],
@@ -286,11 +301,12 @@ class UserInputCollector:
 
         results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
         columns_to_document = question_payload[0].get("choices", list())
+        quantifier_word = self._set_quantifier_word()
         # check if user wants to document all columns
         document_all_cols = questionary.confirm(
             message=(
-                f"There are {len(columns_to_document)} undocumented columns. "
-                "Do you want to document them all?"
+                f"Do you want to document all of the {quantifier_word} {len(columns_to_document)} "
+                "undocumented columns?"
             ),
             auto_enter=True,
         ).unsafe_ask()

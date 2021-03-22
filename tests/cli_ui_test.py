@@ -63,7 +63,7 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
 
 
 @pytest.mark.parametrize(
-    "question_payload, questionary_outputs, expected_results",
+    "question_payload, pagination_dict, questionary_outputs, expected_results",
     [
         pytest.param(
             [
@@ -74,6 +74,7 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
                     "message": "Select the columns you want to document.",
                 },
             ],
+            {"is_paginated": False, "is_first_page": True},
             {
                 "confirm_return": True,
                 "prompt_return": {"col_a": "Custom desc", "col_b": "Custom desc"},
@@ -93,6 +94,7 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
                     "message": "Select the columns you want to document.",
                 },
             ],
+            {"is_paginated": False, "is_first_page": True},
             {
                 "confirm_return": False,
                 "prompt_return": {"cols_to_document": ["col_a"]},
@@ -100,10 +102,27 @@ def test__document_model(mocker, question_payload, questionary_outputs, expected
             {"col_a": {"description": "Custom desc"}},
             id="document_only_some_columns",
         ),
+        pytest.param(
+            [
+                {
+                    "type": "checkbox",
+                    "name": "cols_to_document",
+                    "choices": ["col_a", "col_b"],
+                    "message": "Select the columns you want to document.",
+                },
+            ],
+            {"is_paginated": True, "is_first_page": True},
+            {
+                "confirm_return": False,
+                "prompt_return": {"cols_to_document": ["col_a"]},
+            },
+            {"col_a": {"description": "Custom desc"}},
+            id="paginated document_only_some_columns",
+        ),
     ],
 )
 def test__document_undocumented_columns(
-    mocker, question_payload, questionary_outputs, expected_results
+    mocker, question_payload, pagination_dict, questionary_outputs, expected_results
 ):
     from dbt_sugar.core.ui.cli_ui import UserInputCollector
 
@@ -117,6 +136,8 @@ def test__document_undocumented_columns(
         question_payload=question_payload,
         ask_for_tests=False,
         ask_for_tags=False,
+        is_paginated=pagination_dict["is_paginated"],
+        is_first_page=pagination_dict["is_first_page"],
     )._document_undocumented_cols(question_payload=question_payload)
     assert results == expected_results
 

@@ -6,18 +6,18 @@ models:
       on a customer's orders
     columns:
       - name: customer_id
-        description: Identifier of a customer. PK of the dim_company model
+        description: PK
         tests:
           - unique
           - not_null
-      - name: first_name
-        description: Customer's first name. PII.
-      - name: last_name
-        description: Customer's last name. PII.
       - name: email
         description: Customer's email address. PII.
+      - name: first_name
+        description: Customer's first name. PII.
       - name: first_order
         description: Date (UTC) of a customer's first order
+      - name: last_name
+        description: Customer's last name. PII.
       - name: most_recent_order
         description: Date (UTC) of a customer's most recent order
       - name: number_of_orders

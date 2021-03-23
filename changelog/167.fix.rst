@@ -1,0 +1,1 @@
+When creating or modifying a model entry in schema.ymls we now ensure and guarantee that the model ``name`` and ``description`` keys are always first. Column names and descriptions are sorted alphabetically by column name however to make the ``schema.yml`` easier on th eyes.

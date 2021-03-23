@@ -105,7 +105,7 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Test Coverage", columns=["untested columns", "% coverage"], data=data
+            title="Test Coverage", columns=["Untested Columns", r"% coverage"], data=data
         )
 
     def get_model_column_description_coverage(self) -> None:
@@ -138,14 +138,12 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Documentation Coverage", columns=["undocument columns", "% coverage"], data=data
+            title="Documentation Coverage", columns=["Undocument Columns", r"% coverage"], data=data
         )
 
     def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:
         """
-        This method to transform a list into a dictionary with the data
-
-        as the keys and the total as the last element value.
+        Transforms a list into a dictionary (key: column, value: coverahe) total is appended at the end.
 
         Args:
             data (List): list of data to modify.
@@ -154,9 +152,10 @@ class AuditTask(BaseTask):
             Dict[str, str]: with a dictionary with the data as keys and
             the total as a value but only for the last element in the list.
         """
-        return {
-            (column): (str(total) if i == (len(data) - 1) else "") for i, column in enumerate(data)
-        }
+        reshaped_data = {column: "" for column in data}
+        reshaped_data[""] = ""
+        reshaped_data["Total"] = total
+        return reshaped_data
 
     def create_table(self, title: str, columns: List[str], data: Dict[str, str]) -> None:
         """

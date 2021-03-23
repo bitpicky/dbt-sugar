@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 keywords = ["data engineering", "dbt", 'ETL', "data modelling"]
-# documentation =
+documentation = "https://bitpicky.gitbook.io/dbt-sugar/"
 repository = "https://github.com/bitpicky/dbt-sugar"
 # homepage =
 

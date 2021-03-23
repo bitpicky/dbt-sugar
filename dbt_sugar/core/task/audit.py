@@ -143,7 +143,7 @@ class AuditTask(BaseTask):
 
     def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:
         """
-        Transforms a list into a dictionary (key: column, value: coverahe) total is appended at the end.
+        Transforms a list into a dictionary (key: column, value: coverahe) total is at the end.
 
         Args:
             data (List): list of data to modify.

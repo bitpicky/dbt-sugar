@@ -1,4 +1,5 @@
 """Document Task module."""
+import copy
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
@@ -209,7 +210,8 @@ class DocumentationTask(BaseTask):
             )
             for column in self.column_update_payload.keys():
                 tests = self.column_update_payload[column].get("tests", [])
-                for test in tests:
+                tests_ = copy.deepcopy(tests)
+                for test in tests_:
                     has_passed = self.connector.run_test(
                         test,
                         schema,

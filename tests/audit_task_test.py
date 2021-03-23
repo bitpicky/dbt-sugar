@@ -79,7 +79,7 @@ def test_get_project_total_test_coverage(dbt_definitions, result):
 )
 def test_calculate_coverage_percentage(failures, total, result):
     audit_task = __init_descriptions()
-    assert audit_task.calculate_coverage_percentage(number_failures=failures, total=total) == result
+    assert audit_task.calculate_coverage_percentage(misses=failures, total=total) == result
 
 
 @pytest.mark.parametrize(
@@ -163,7 +163,7 @@ def test_get_model_test_coverage(mocker, dbt_tests, model_name, call_input):
             [
                 call(
                     columns=["Model Name", "% coverage"],
-                    data={"dim_company": "40.0", "stg_customers": "100.0", "": "", "TOTAL": "50.0"},
+                    data={"dim_company": "40.0", "stg_customers": "100.0", "": "", "Total": "50.0"},
                     title="Test Coverage",
                 )
             ],

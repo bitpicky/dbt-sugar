@@ -57,7 +57,7 @@ dbt-sugar="dbt_sugar.core.main:main"
 
 
 [tool.towncrier]
-package = "dbt-sugar"
+package = "dbt_sugar"
 package_dir = "dbt_sugar/"
 directory = "changelog/"
 filename = "changelog/CHANGELOG.rst"

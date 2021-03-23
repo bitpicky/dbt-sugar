@@ -24,7 +24,7 @@ def __init_descriptions():
 
     audit_task = AuditTask(flag_parser, FIXTURE_DIR)
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
-    audit_task.repository_path = "tests/test_dbt_project/"
+    audit_task.repository_path = Path("tests/test_dbt_project/")
     return audit_task
 
 
@@ -79,7 +79,7 @@ def test_get_project_total_test_coverage(dbt_definitions, result):
 )
 def test_calculate_coverage_percentage(failures, total, result):
     audit_task = __init_descriptions()
-    assert audit_task.calculate_coverage_percentage(number_failures=failures, total=total) == result
+    assert audit_task.calculate_coverage_percentage(misses=failures, total=total) == result
 
 
 @pytest.mark.parametrize(
@@ -94,13 +94,13 @@ def test_calculate_coverage_percentage(failures, total, result):
         pytest.param(
             ["column_A"],
             "10.0",
-            {"column_A": "10.0"},
+            {"column_A": "", "": "", "Total": "10.0"},
             id="check_results_with_one_data_element",
         ),
         pytest.param(
             ["column_A", "column_B"],
             "10.0",
-            {"column_A": "", "column_B": "10.0"},
+            {"column_A": "", "column_B": "", "": "", "Total": "10.0"},
             id="check_results_with_more_than_one_data_element",
         ),
     ],
@@ -127,8 +127,8 @@ def test_print_nicely_the_data(data, total, result):
             "dim_company",
             [
                 call(
-                    columns=["untested columns", "% coverage"],
-                    data={"age": "40.0", "id": "", "name": ""},
+                    columns=["Untested Columns", "% coverage"],
+                    data={"age": "", "id": "", "name": "", "": "", "Total": "40.0"},
                     title="Test Coverage",
                 )
             ],
@@ -163,7 +163,7 @@ def test_get_model_test_coverage(mocker, dbt_tests, model_name, call_input):
             [
                 call(
                     columns=["Model Name", "% coverage"],
-                    data={"dim_company": "40.0", "stg_customers": "100.0", "": "", "TOTAL": "50.0"},
+                    data={"dim_company": "40.0", "stg_customers": "100.0", "": "", "Total": "50.0"},
                     title="Test Coverage",
                 )
             ],
@@ -207,8 +207,8 @@ def test_get_project_test_coverage(mocker, dbt_tests, call_input):
             "dim_company",
             [
                 call(
-                    columns=["undocument columns", "% coverage"],
-                    data={"id": "", "name": "", "age": "", "address": "20.0"},
+                    columns=["Undocument Columns", "% coverage"],
+                    data={"id": "", "name": "", "age": "", "address": "", "": "", "Total": "20.0"},
                     title="Documentation Coverage",
                 )
             ],

@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Any, Dict, List
 
+from rich import box
 from rich.console import Console
 from rich.table import Table
 
@@ -56,6 +57,23 @@ class AuditTask(BaseTask):
         self.get_project_column_description_coverage()
         self.get_project_test_coverage()
 
+    def calculate_coverage_percentage(self, misses: int, total: int) -> str:
+        """
+        Method to calculate the percentage of coverage.
+
+        Args:
+            number_failures (int): With the number of failures.
+            total (int): With the number of total cases.
+
+        Returns:
+            str: with the calculation of the percentage.
+        """
+        if total == 0:
+            return "0.0"
+
+        percentage_failure = round((1 - (misses / total)) * 100, 1)
+        return str(percentage_failure)
+
     def get_model_test_coverage(self) -> None:
         """Method to get the tests coverage from a specific model."""
         # Init variables
@@ -67,8 +85,8 @@ class AuditTask(BaseTask):
 
         if not columns:
             logger.info(
-                f"""There is not documentation for the model '{self.model_name}',
-                you might need to run `dbt-sugar doc` first."""
+                f"There is not documentation for the model '{self.model_name}' "
+                "you might need to run `dbt-sugar doc` first."
             )
             return
 
@@ -79,7 +97,7 @@ class AuditTask(BaseTask):
                 untested_columns.append(column["name"])
 
         percentage_not_tested_columns = self.calculate_coverage_percentage(
-            number_failures=model_columns_without_tests, total=model_number_columns
+            misses=model_columns_without_tests, total=model_number_columns
         )
 
         data = self.print_nicely_the_data(
@@ -87,7 +105,7 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Test Coverage", columns=["untested columns", "% coverage"], data=data
+            title="Test Coverage", columns=["Untested Columns", r"% coverage"], data=data
         )
 
     def get_model_column_description_coverage(self) -> None:
@@ -111,7 +129,7 @@ class AuditTask(BaseTask):
             return
 
         percentage_not_documented_columns = self.calculate_coverage_percentage(
-            number_failures=number_not_documented_columns,
+            misses=number_not_documented_columns,
             total=number_columns,
         )
 
@@ -120,14 +138,12 @@ class AuditTask(BaseTask):
         )
 
         self.create_table(
-            title="Documentation Coverage", columns=["undocument columns", "% coverage"], data=data
+            title="Documentation Coverage", columns=["Undocument Columns", r"% coverage"], data=data
         )
 
     def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:
         """
-        This method to transform a list into a dictionary with the data
-
-        as the keys and the total as the last element value.
+        Transforms a list into a dictionary (key: column, value: coverahe) total is at the end.
 
         Args:
             data (List): list of data to modify.
@@ -136,9 +152,12 @@ class AuditTask(BaseTask):
             Dict[str, str]: with a dictionary with the data as keys and
             the total as a value but only for the last element in the list.
         """
-        return {
-            (column): (str(total) if i == (len(data) - 1) else "") for i, column in enumerate(data)
-        }
+        if data:
+            reshaped_data = {column: "" for column in data}
+            reshaped_data[""] = ""
+            reshaped_data["Total"] = total
+            return reshaped_data
+        return {}
 
     def create_table(self, title: str, columns: List[str], data: Dict[str, str]) -> None:
         """
@@ -149,18 +168,18 @@ class AuditTask(BaseTask):
             columns (List[str]): List of columns that the table is going to have.
             data (Dict[str, str]): with the rows that we want to print.
         """
-        table = Table(title)
+        table = Table(title=title, box=box.SIMPLE)
         for column in columns:
             table.add_column(column, justify="right", style="bright_yellow", no_wrap=True)
 
         for model, percentage in data.items():
-            table.add_row("", model, percentage)
+            table.add_row(model, percentage)
 
         console = Console()
         console.print(table)
 
     def get_project_test_coverage(self) -> None:
-        """Method to get the model tests coverage per model in a DBT project."""
+        """Method to get the model tests coverage per model in a dbt project."""
         print_statistics = {}
         total_number_columns = 0
         number_columns_without_tests = 0
@@ -180,17 +199,17 @@ class AuditTask(BaseTask):
                     model_columns_without_tests += 1
 
             print_statistics[model_name] = self.calculate_coverage_percentage(
-                number_failures=model_columns_without_tests, total=model_number_columns
+                misses=model_columns_without_tests, total=model_number_columns
             )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = self.calculate_coverage_percentage(
-            number_failures=number_columns_without_tests, total=total_number_columns
+        print_statistics["Total"] = self.calculate_coverage_percentage(
+            misses=number_columns_without_tests, total=total_number_columns
         )
 
         self.create_table(
             title="Test Coverage",
-            columns=["Model Name", "% coverage"],
+            columns=["Model Name", r"% coverage"],
             data=print_statistics,
         )
 
@@ -215,35 +234,18 @@ class AuditTask(BaseTask):
             )
 
             print_statistics[model_name] = self.calculate_coverage_percentage(
-                number_failures=number_not_documented_columns,
+                misses=number_not_documented_columns,
                 total=(number_documented_columns + number_not_documented_columns),
             )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = self.get_project_total_test_coverage()
+        print_statistics["Total"] = self.get_project_total_test_coverage()
 
         self.create_table(
             title="Documentation Coverage",
-            columns=["Model Name", "% coverage"],
+            columns=["Model Name", r"% coverage"],
             data=print_statistics,
         )
-
-    def calculate_coverage_percentage(self, number_failures: int, total: int) -> str:
-        """
-        Method to calculate the percentage of coverage.
-
-        Args:
-            number_failures (int): With the number of failures.
-            total (int): With the number of total cases.
-
-        Returns:
-            str: with the calculation of the percentage.
-        """
-        if total == 0:
-            return "0.0"
-
-        percentage_failure = round((1 - (number_failures / total)) * 100, 2)
-        return str(percentage_failure)
 
     def get_project_total_test_coverage(self) -> str:
         """
@@ -261,6 +263,6 @@ class AuditTask(BaseTask):
             number_of_columns += 1
 
         return self.calculate_coverage_percentage(
-            number_failures=number_not_documented_columns,
+            misses=number_not_documented_columns,
             total=number_of_columns,
         )

@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Any, Dict, List
 
+from rich import box
 from rich.console import Console
 from rich.table import Table
 
@@ -67,8 +68,8 @@ class AuditTask(BaseTask):
 
         if not columns:
             logger.info(
-                f"""There is not documentation for the model '{self.model_name}',
-                you might need to run `dbt-sugar doc` first."""
+                f"There is not documentation for the model '{self.model_name}' "
+                "you might need to run `dbt-sugar doc` first."
             )
             return
 
@@ -149,18 +150,18 @@ class AuditTask(BaseTask):
             columns (List[str]): List of columns that the table is going to have.
             data (Dict[str, str]): with the rows that we want to print.
         """
-        table = Table(title)
+        table = Table(title=title, box=box.SIMPLE)
         for column in columns:
             table.add_column(column, justify="right", style="bright_yellow", no_wrap=True)
 
         for model, percentage in data.items():
-            table.add_row("", model, percentage)
+            table.add_row(model, percentage)
 
         console = Console()
         console.print(table)
 
     def get_project_test_coverage(self) -> None:
-        """Method to get the model tests coverage per model in a DBT project."""
+        """Method to get the model tests coverage per model in a dbt project."""
         print_statistics = {}
         total_number_columns = 0
         number_columns_without_tests = 0

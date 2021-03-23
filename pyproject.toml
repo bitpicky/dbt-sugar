@@ -32,6 +32,7 @@ questionary = "^1.9.0"
 yamlloader = "^1.0.0"
 pyfiglet = "^0.8.post1"
 rich = "^9.13.0"
+psycopg2 = "^2.8.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"

@@ -57,6 +57,23 @@ class AuditTask(BaseTask):
         self.get_project_column_description_coverage()
         self.get_project_test_coverage()
 
+    def calculate_coverage_percentage(self, misses: int, total: int) -> str:
+        """
+        Method to calculate the percentage of coverage.
+
+        Args:
+            number_failures (int): With the number of failures.
+            total (int): With the number of total cases.
+
+        Returns:
+            str: with the calculation of the percentage.
+        """
+        if total == 0:
+            return "0.0"
+
+        percentage_failure = round((1 - (misses / total)) * 100, 1)
+        return str(percentage_failure)
+
     def get_model_test_coverage(self) -> None:
         """Method to get the tests coverage from a specific model."""
         # Init variables
@@ -80,7 +97,7 @@ class AuditTask(BaseTask):
                 untested_columns.append(column["name"])
 
         percentage_not_tested_columns = self.calculate_coverage_percentage(
-            number_failures=model_columns_without_tests, total=model_number_columns
+            misses=model_columns_without_tests, total=model_number_columns
         )
 
         data = self.print_nicely_the_data(
@@ -112,7 +129,7 @@ class AuditTask(BaseTask):
             return
 
         percentage_not_documented_columns = self.calculate_coverage_percentage(
-            number_failures=number_not_documented_columns,
+            misses=number_not_documented_columns,
             total=number_columns,
         )
 
@@ -181,17 +198,17 @@ class AuditTask(BaseTask):
                     model_columns_without_tests += 1
 
             print_statistics[model_name] = self.calculate_coverage_percentage(
-                number_failures=model_columns_without_tests, total=model_number_columns
+                misses=model_columns_without_tests, total=model_number_columns
             )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = self.calculate_coverage_percentage(
-            number_failures=number_columns_without_tests, total=total_number_columns
+        print_statistics["Total"] = self.calculate_coverage_percentage(
+            misses=number_columns_without_tests, total=total_number_columns
         )
 
         self.create_table(
             title="Test Coverage",
-            columns=["Model Name", "% coverage"],
+            columns=["Model Name", r"% coverage"],
             data=print_statistics,
         )
 
@@ -216,35 +233,18 @@ class AuditTask(BaseTask):
             )
 
             print_statistics[model_name] = self.calculate_coverage_percentage(
-                number_failures=number_not_documented_columns,
+                misses=number_not_documented_columns,
                 total=(number_documented_columns + number_not_documented_columns),
             )
 
         print_statistics[""] = ""
-        print_statistics["TOTAL"] = self.get_project_total_test_coverage()
+        print_statistics["Total"] = self.get_project_total_test_coverage()
 
         self.create_table(
             title="Documentation Coverage",
-            columns=["Model Name", "% coverage"],
+            columns=["Model Name", r"% coverage"],
             data=print_statistics,
         )
-
-    def calculate_coverage_percentage(self, number_failures: int, total: int) -> str:
-        """
-        Method to calculate the percentage of coverage.
-
-        Args:
-            number_failures (int): With the number of failures.
-            total (int): With the number of total cases.
-
-        Returns:
-            str: with the calculation of the percentage.
-        """
-        if total == 0:
-            return "0.0"
-
-        percentage_failure = round((1 - (number_failures / total)) * 100, 2)
-        return str(percentage_failure)
 
     def get_project_total_test_coverage(self) -> str:
         """
@@ -262,6 +262,6 @@ class AuditTask(BaseTask):
             number_of_columns += 1
 
         return self.calculate_coverage_percentage(
-            number_failures=number_not_documented_columns,
+            misses=number_not_documented_columns,
             total=number_of_columns,
         )

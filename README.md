@@ -10,8 +10,6 @@
 
 [![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
 
-:warning: **We're actively working on this tool and aim to have an MVP very very soon!**
-
 If you want to help out and join the party feel free to:
 
 - [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun

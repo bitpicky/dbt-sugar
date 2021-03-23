@@ -152,10 +152,12 @@ class AuditTask(BaseTask):
             Dict[str, str]: with a dictionary with the data as keys and
             the total as a value but only for the last element in the list.
         """
-        reshaped_data = {column: "" for column in data}
-        reshaped_data[""] = ""
-        reshaped_data["Total"] = total
-        return reshaped_data
+        if data:
+            reshaped_data = {column: "" for column in data}
+            reshaped_data[""] = ""
+            reshaped_data["Total"] = total
+            return reshaped_data
+        return {}
 
     def create_table(self, title: str, columns: List[str], data: Dict[str, str]) -> None:
         """

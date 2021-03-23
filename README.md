@@ -8,12 +8,12 @@
 [![codecov](https://codecov.io/gh/bitpicky/dbt-sugar/branch/main/graph/badge.svg?token=JB0E0LZDW1)](https://codecov.io/gh/bitpicky/dbt-sugar)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1e6a887de605ef8e0eca/maintainability)](https://codeclimate.com/github/bitpicky/dbt-sugar/maintainability)
 
-[![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/bUk4MVTcqW)
+[![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/cQB49ejbCA)
 
 If you want to help out and join the party feel free to:
 
 - [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun
-- join us on [Discord](https://discord.gg/bUk4MVTcqW) :sparkles: and
+- join us on [Discord](https://discord.gg/cQB49ejbCA) :sparkles: and
 - check the [ROADMAP.md](ROADMAP.md) to see what's in the plans.
 
 # dbt-sugar :candy:

@@ -18,7 +18,7 @@ class DbtSugarTracebackManager:
         """
         stack_depth: int = 1
         if flags.verbose:
-            stack_depth = 4
+            stack_depth = 10
 
         pretty_errors.configure(
             separator_character="*",
@@ -32,6 +32,6 @@ class DbtSugarTracebackManager:
             display_locals=True,
             stack_depth=stack_depth,
             trace_lines_before=4,
-            trace_lines_after=0,
+            trace_lines_after=4,
             display_arrow=True,
         )

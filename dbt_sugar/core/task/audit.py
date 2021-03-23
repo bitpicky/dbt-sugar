@@ -85,8 +85,8 @@ class AuditTask(BaseTask):
 
         if not columns:
             logger.info(
-                f"There is not documentation for the model '{self.model_name}' "
-                "you might need to run `dbt-sugar doc` first."
+                f"There is no documentation entry for '{self.model_name}' in your schema.yml files. "
+                "You might need to run `dbt-sugar doc` first."
             )
             return
 

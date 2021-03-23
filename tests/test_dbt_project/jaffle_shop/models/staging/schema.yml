@@ -6,7 +6,7 @@ models:
         tests:
           - unique
           - not_null
-        description: Unique identifier of the customer who made the purchase. Links to the dim_customer table.
+        description: PK
   - name: stg_orders
     columns:
       - name: order_id

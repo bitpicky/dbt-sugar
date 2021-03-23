@@ -110,7 +110,7 @@ class DocumentationTask(BaseTask):
         ordered_dict = OrderedDict(model)
         ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
-        return dict(ordered_dict)
+        return ordered_dict
 
     def order_schema_yml(self, content_yml: Dict[str, Any]):
         """

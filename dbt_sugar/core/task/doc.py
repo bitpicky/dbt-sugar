@@ -126,17 +126,22 @@ class DocumentationTask(BaseTask):
             content_yml (Dict[str, Any]): schema yml content with the content ordered.
         """
         for i, model in enumerate(content_yml.get("models", {})):
-            # Adding name and description in the first positions of a model.
+            # Ensure model name and description outer keys are in first position
             content_yml["models"][i] = self.move_name_and_description_to_first_position(
                 content_yml["models"][i]
             )
 
-            # Sorting columns names in alphabetical order.
+            # Sort columns names in alphabetical order inside the model.
             if model.get("columns", None):
                 content_yml["models"][i]["columns"] = sorted(
                     model["columns"],
                     key=lambda k: k["name"].lower(),
                 )
+                # ensure name and description are in first position for each column entry.
+                content_yml["models"][i]["columns"] = [
+                    self.move_name_and_description_to_first_position(column_dict)
+                    for column_dict in content_yml["models"][i]["columns"]
+                ]
         # Sorting models names in alphabetical order.
         content_yml["models"] = sorted(content_yml["models"], key=lambda k: k["name"].lower())
         return content_yml

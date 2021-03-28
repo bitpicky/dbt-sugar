@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from pathlib import Path, PosixPath
 from unittest.mock import call
 
@@ -570,8 +571,12 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
     assert schema == schema_exists
 
 
+DUMMY_MODEL_DESC = "dummy model description"
+DUMMY_COLUMN_DESC = "dummy column description"
+
+
 @pytest.mark.parametrize(
-    "content, result",
+    "content, expectation",
     [
         pytest.param(
             {
@@ -579,9 +584,9 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                 "models": [
                     {
                         "name": "dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [
-                            {"name": "id", "description": "dsadasd"},
+                            {"name": "id", "description": DUMMY_COLUMN_DESC},
                             {"name": "name", "description": "No description for this column."},
                             {"name": "age", "description": "No description for this column."},
                             {
@@ -599,7 +604,7 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                 "models": [
                     {
                         "name": "dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [
                             {
                                 "name": "address",
@@ -607,14 +612,14 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                                 "tests": ["not_null"],
                             },
                             {"name": "age", "description": "No description for this column."},
-                            {"name": "id", "description": "dsadasd"},
+                            {"name": "id", "description": DUMMY_COLUMN_DESC},
                             {"name": "name", "description": "No description for this column."},
                             {"name": "salary", "description": "hey.", "tests": ["unique"]},
                         ],
                     }
                 ],
             },
-            id="reordering_columns",
+            id="reorder model columns alpha",
         ),
         pytest.param(
             {
@@ -622,12 +627,12 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                 "models": [
                     {
                         "name": "dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [],
                     },
                     {
                         "name": "a_dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [],
                     },
                 ],
@@ -637,17 +642,17 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                 "models": [
                     {
                         "name": "a_dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [],
                     },
                     {
                         "name": "dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [],
                     },
                 ],
             },
-            id="reordering_models_names",
+            id="sort models by name",
         ),
         pytest.param(
             {
@@ -666,7 +671,7 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                             },
                             {"name": "salary", "description": "hey.", "tests": ["unique"]},
                         ],
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                     }
                 ],
             },
@@ -675,7 +680,7 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                 "models": [
                     {
                         "name": "dim_company",
-                        "description": "asdads",
+                        "description": DUMMY_MODEL_DESC,
                         "columns": [
                             {
                                 "name": "address",
@@ -690,13 +695,105 @@ def test_find_model_in_dbt(model_name, path_model, schema_exists):
                     }
                 ],
             },
-            id="reordering_description_field",
+            id="put model description after model name",
+        ),
+        pytest.param(
+            {
+                "version": 2,
+                "models": [
+                    {
+                        "columns": [
+                            {"name": "id", "description": "dsadasd"},
+                            {"name": "name", "description": "No description for this column."},
+                            {"name": "age", "description": "No description for this column."},
+                            {
+                                "name": "address",
+                                "description": "No description for this column.",
+                                "tests": ["not_null"],
+                            },
+                            {"name": "salary", "description": "hey.", "tests": ["unique"]},
+                        ],
+                        "description": DUMMY_MODEL_DESC,
+                        "name": "dim_company",
+                    }
+                ],
+            },
+            {
+                "version": 2,
+                "models": [
+                    {
+                        "name": "dim_company",
+                        "description": DUMMY_MODEL_DESC,
+                        "columns": [
+                            {
+                                "name": "address",
+                                "description": "No description for this column.",
+                                "tests": ["not_null"],
+                            },
+                            {"name": "age", "description": "No description for this column."},
+                            {"name": "id", "description": "dsadasd"},
+                            {"name": "name", "description": "No description for this column."},
+                            {"name": "salary", "description": "hey.", "tests": ["unique"]},
+                        ],
+                    }
+                ],
+            },
+            id="put model name and description first",
+        ),
+        pytest.param(
+            {
+                "version": 2,
+                "models": [
+                    {
+                        "name": "dim_company",
+                        "description": DUMMY_MODEL_DESC,
+                        "columns": [
+                            {
+                                "name": "address",
+                                "description": "No description for this column.",
+                                "tests": ["not_null"],
+                            },
+                            {"description": "No description for this column.", "name": "age"},
+                            {"description": DUMMY_COLUMN_DESC, "name": "name"},
+                        ],
+                    }
+                ],
+            },
+            OrderedDict(
+                {
+                    "version": 2,
+                    "models": [
+                        {
+                            "name": "dim_company",
+                            "description": "dummy model description",
+                            "columns": [
+                                OrderedDict(
+                                    {
+                                        "name": "address",
+                                        "description": "No description for this column.",
+                                        "tests": ["not_null"],
+                                    }
+                                ),
+                                OrderedDict(
+                                    {
+                                        "name": "age",
+                                        "description": "No description for this column.",
+                                    }
+                                ),
+                                OrderedDict({"name": "name", "description": DUMMY_COLUMN_DESC}),
+                            ],
+                        }
+                    ],
+                }
+            ),
+            id="ensure colum name is first",
         ),
     ],
 )
-def test_order_schema_yml(content, result):
+def test_order_schema_yml(dicts_are_same, content, expectation):
     doc_task = __init_descriptions()
-    assert doc_task.order_schema_yml(content) == result
+    ordered_content = doc_task.order_schema_yml(content)
+    assert dicts_are_same(ordered_content, expectation)
 
 
 @pytest.mark.parametrize(

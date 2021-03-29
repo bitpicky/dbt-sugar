@@ -13,6 +13,8 @@
 [![Downloads](https://pepy.tech/badge/dbt-sugar)](https://pepy.tech/project/dbt-sugar)
 [![Discord](https://img.shields.io/discord/752101657218908281?label=discord)](https://discord.gg/cQB49ejbCA)
 
+Documentation on [gitbook](https://bitpicky.gitbook.io/dbt-sugar/)
+
 If you want to help out and join the party feel free to:
 
 - [create an issue](https://github.com/bitpicky/dbt-sugar/issues) or more fun

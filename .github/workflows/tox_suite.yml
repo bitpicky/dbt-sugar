@@ -11,7 +11,7 @@ jobs:
         platform: [ubuntu-latest, macos-11.0]
         python-version: [3.6, 3.7, 3.8, 3.9]
         exclude:
-          - os: macos-11.0
+          - platform: macos-11.0
             python-version: 3.6
         # - os: macos-11.0
         # python-version: 3.7

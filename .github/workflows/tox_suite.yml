@@ -8,14 +8,14 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        platform: [ubuntu-latest, macos-11.0]
+        platform: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
         exclude:
-          - platform: macos-11.0
+          - platform: macos-latest
             python-version: 3.6
-          - platform: macos-11.0
+          - platform: macos-latest
             python-version: 3.7
-          - platform: macos-11.0
+          - platform: macos-latest
             python-version: 3.8
 
     steps:

@@ -3,7 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-![python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue)
+![python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8C%203.9-blue)
 
 ![Build](https://github.com/bitpicky/dbt-sugar/actions/workflows/main_ci.yml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bitpicky/dbt-sugar/main.svg)](https://results.pre-commit.ci/latest/github/bitpicky/dbt-sugar/main)

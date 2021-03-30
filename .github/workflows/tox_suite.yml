@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install docker
+        run: |
+          brew install docker-machine docker
+
       - name: Deploy PG docker
         run: docker-compose -f ./tests/docker_postgres/docker-compose.yml up -d
 

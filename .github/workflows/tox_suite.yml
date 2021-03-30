@@ -23,7 +23,7 @@ jobs:
 
       - name: Install docker
         run: |
-          brew install docker-machine docker
+          brew install docker-compose
 
       - name: Deploy PG docker
         run: docker-compose -f ./tests/docker_postgres/docker-compose.yml up -d

@@ -1,6 +1,6 @@
 name: "jaffle_shop"
 version: "0.1"
-profile: "jaffle_shop"
+profile: "dbt_sugar_test"
 config-version: 2
 
 source-paths: ["models"]

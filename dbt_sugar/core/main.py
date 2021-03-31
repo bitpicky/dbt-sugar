@@ -66,7 +66,7 @@ base_subparser.add_argument(
     "--config-path", help="Full path to config.yml file if not using default."
 )
 base_subparser.add_argument(
-    "--profiles-dir", help="Alternative path to the dbt profiles.yml file.", type=str, default=str()
+    "--profiles-dir", help="Alternative path to the dbt profiles.yml file.", type=str
 )
 
 # Task-specific argument sub parsers

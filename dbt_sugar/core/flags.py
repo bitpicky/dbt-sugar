@@ -2,7 +2,7 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 
 class FlagParser:
@@ -26,7 +26,7 @@ class FlagParser:
         self.log_level: str = "info"
         self.syrup: str = str()
         self.config_path: Path = Path(str())
-        self.profiles_dir: Path = Path(str())
+        self.profiles_dir: Optional[Path] = None
         self.is_dry_run: bool = False
         self.ask_for_tests: bool = True
         self.ask_for_tags: bool = True

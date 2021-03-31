@@ -14,7 +14,7 @@ from dbt_sugar.core.exceptions import (
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
-DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt", "profiles").with_suffix(".yml")
+DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt")
 
 
 class PostgresDbtProfilesModel(BaseModel):

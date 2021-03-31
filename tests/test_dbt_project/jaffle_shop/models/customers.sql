@@ -4,15 +4,43 @@ with customers as (
 
 ),
 
+orders as (
+
+    select * from {{ ref('stg_orders') }}
+
+),
+
+payments as (
+
+    select * from {{ ref('stg_payments') }}
+
+),
+
 customer_orders as (
 
-    select * from {{ ref('customer_orders') }}
+        select
+        customer_id,
+
+        min(order_date) as first_order,
+        max(order_date) as most_recent_order,
+        count(order_id) as number_of_orders
+    from orders
+
+    group by 1
 
 ),
 
 customer_payments as (
 
-    select * from {{ ref('customer_payments') }}
+    select
+        orders.customer_id,
+        sum(amount) as total_amount
+
+    from payments
+
+    left join orders using (order_id)
+
+    group by 1
 
 ),
 

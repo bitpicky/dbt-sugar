@@ -1,7 +1,8 @@
-config-version: 2
 name: "jaffle_shop"
 version: "0.1"
 profile: "dbt_sugar_test"
+config-version: 2
+
 source-paths: ["models"]
 analysis-paths: ["analysis"]
 test-paths: ["tests"]
@@ -19,4 +20,3 @@ models:
     materialized: table
     staging:
       materialized: view
-      tags: ["staging", "hourly"]

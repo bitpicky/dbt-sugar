@@ -1,1 +1,0 @@
-The concept of ``sugar_cane`` is renamed to ``syrup`` to avoid historically loaded interpretations.

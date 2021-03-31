@@ -1,1 +1,0 @@
-``dbt-sugar`` parses the profile information directly from dbt's ``~/.dbt/profiles.yml`` it will need to know which dbt project we want to document as well as the target from which to pull database credentials and schemas.

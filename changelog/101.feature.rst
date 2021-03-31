@@ -1,3 +1,0 @@
-Users can control whether dbt-sugar should ask to add tests or tags  via the following CLI arguments:
-- via CLI arguments on each run:  ``--ask-for-tests/--no-ask-for-tests`` and ``--ask-for-tags/--no-ask-for-tags`` or
-- globally per ``syrup`` in the ``sugar_config.yml`` via the following arguments: ``always_enforce_tests`` and ``always_add_tags``

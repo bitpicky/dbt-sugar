@@ -1,2 +1,0 @@
-``dbt-sugar`` now offers documentation UI flow for **already documented columns**. The user is prompted to answer a "yes/no" to whether they want to document already documented columns. If they choose to do so they are presented with a list of columns to choose from. Each column also shows the current description.
-<INSERT GIF OF FLOW WHEN GENERATING CHANGELOG>

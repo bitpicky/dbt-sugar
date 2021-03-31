@@ -1,4 +1,0 @@
-Columns part of the yaml is now explicitly ordered to ensure the following:
-- name and descriptions come first even inside of the columns list
-- models names and description also always comes first
-- models and columns are sorted alphabetically across the schema.yml

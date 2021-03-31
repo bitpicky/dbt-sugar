@@ -1,1 +1,0 @@
-Fixes a bug where ``dbt-sugar`` was looking for the ``profiles.yml`` file in the current working directory. This was because we were defaulting the ``profiles_dir`` to ``Path(str())`` which makes ``pathlib`` resolve to the current working directory. Resolves `#177 <https://github.com/bitpicky/dbt-sugar/issues/177>`_

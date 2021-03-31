@@ -1,5 +1,0 @@
-``dbt-sugar`` requires a ``sugar_config.yml`` file which makes the following information available at run time:
-- ``sugar_canes``: a (list of) dicts called ``dbt_projects`` which points to a user's dbt project name and path of where to find those projects. An ``exclude_tables`` list can optionally be provided if users want to exclude some tables from ``dbt-sugar``'s analysis scope.
-- ``defaults``: a dict of pointing to
-  - a default ``sugar_cane`` to run (if not provided, users need to pass the following CLI arguments ``--sugar-cane <cane_name>``
-  - a default ``target`` pointing to a target from the ``~/.dbt/profiles.yml`` file in order to know which db to talk to and have access to its credentials and object destinations.

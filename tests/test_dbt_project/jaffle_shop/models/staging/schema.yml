@@ -1,4 +1,5 @@
 version: 2
+
 models:
   - name: stg_customers
     columns:
@@ -6,26 +7,19 @@ models:
         tests:
           - unique
           - not_null
-        description: PK
+
   - name: stg_orders
     columns:
       - name: order_id
         tests:
           - unique
           - not_null
-        description: Unique order identifier increasing integer
       - name: status
         tests:
           - accepted_values:
               values:
-                - placed
-                - shipped
-                - completed
-                - return_pending
-                - returned
-        description:
-          Orders can be in different statuses such as pending, refunded, confirmed etc. This column
-          contains this piece of information.
+                ["placed", "shipped", "completed", "return_pending", "returned"]
+
   - name: stg_payments
     columns:
       - name: payment_id
@@ -35,8 +29,4 @@ models:
       - name: payment_method
         tests:
           - accepted_values:
-              values:
-                - credit_card
-                - coupon
-                - bank_transfer
-                - gift_card
+              values: ["credit_card", "coupon", "bank_transfer", "gift_card"]

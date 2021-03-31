@@ -1,4 +1,0 @@
-``dbt-sugar`` Doc task that allows the users to Document a model, this task will:
-- Check that the model exists in the DBT repository and where it is (to create the documentation in the same path).
-- Take the model columns from the database.
-- Create/Update the model in the schema.yml with the columns that we have taken in the previous step and the descriptions from the others columns documented (if is a new column name the description will be "No description for this column").

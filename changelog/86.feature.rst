@@ -1,1 +1,0 @@
-dbt-sugar will now ask users (and allow them) to add tags to their schema.yml files. PR for the backend flow `#85 <https://github.com/bitpicky/dbt-sugar/pull/85>`_.

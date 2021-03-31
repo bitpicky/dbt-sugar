@@ -1,4 +1,0 @@
-``dbt-sugar`` now offers the following UI/Front-End Flow:
-- model-level description writing
-- column-level description witing (only undocumented columns for now)
-  - user can choose to document **all undocumented columns in one go** or **select a subset of columns to document**

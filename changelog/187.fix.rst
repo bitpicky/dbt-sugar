@@ -1,0 +1,1 @@
+The folder ``dbt_modules`` is now excluded from dbt-sugar's search path

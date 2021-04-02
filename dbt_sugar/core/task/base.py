@@ -9,7 +9,7 @@ from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 
 COLUMN_NOT_DOCUMENTED = "No description for this column."
 MODEL_NOT_DOCUMENTED = "No description for this model."
-EXCLUDE_TARGET_FILES_PATTERN = r"\/target\/"
+EXCLUDE_TARGET_FILES_PATTERN = r"\/target\/|\/dbt_modules\/"
 
 
 class BaseTask(abc.ABC):

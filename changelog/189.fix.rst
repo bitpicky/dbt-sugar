@@ -1,4 +1,6 @@
-dbt-sugar now uses the user-provided list to exlude any number of tables from its scope.
-  - If a user asks to document a model that is part of the exclude list the app will waise a ``ValueError`` and tell users why
-  - Any model excluded from dbt-sugar's scope will also not be included in any of the ``dbt-sugar audit`` coverage statistics.
-  🚧 **BREAKING-CHANGE**: ``excluded_tables`` has been renamed to ``excluded_models`` to be consisten with dbt terminology. Users are advised to update their ``sugar_config.yml`` if they already used the ``excluded_tables`` config variable.
+dbt-sugar now uses the user-provided list to exclude any number of tables from its scope.
+
+- If a user asks to document a model that is part of the exclude list the app will raise a ``ValueError`` and tell users why
+- Any model excluded from dbt-sugar's scope will also not be included in any of the ``dbt-sugar audit`` coverage statistics.
+
+🚧 **BREAKING-CHANGE**: ``excluded_tables`` has been renamed to ``excluded_models`` to be consistent with dbt terminology. Users are advised to update their ``sugar_config.yml`` if they already used the ``excluded_tables`` config variable.

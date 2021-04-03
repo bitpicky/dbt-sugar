@@ -21,6 +21,7 @@ class DbtProjectsModel(BaseModel):
 
     name: str
     path: str
+    excluded_folders: Optional[Union[List[str], str]]
     excluded_tables: Optional[Union[List[str], str]]
 
 
@@ -83,6 +84,16 @@ class DbtSugarConfig:
             config_dict = self._integrate_cli_flags(self.config_model.dict())
             return config_dict
         raise AttributeError(f"{type(self).__name__} does not have a parsed config.")
+
+    # ! REGRESSION
+    @property
+    def dbt_project_info(self):
+        """Convenience function to ensure only one dbt project is unders scope
+
+        This was introduced as part of an intentional regresssion because we're not ready
+        to support multiple dbt projects yet.
+        """
+        return self.config.get("dbt_projects", list())[0]
 
     def load_and_validate_config_yaml(self) -> None:
         yaml_dict = open_yaml(self._config_path)

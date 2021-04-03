@@ -168,11 +168,9 @@ def handle(
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
 
-    # TODO: Revise the index access here when we can support multiple dbt projects properly.
-    # ! REGRESSION
     dbt_project = DbtProject(
-        sugar_config.config.get("dbt_projects", list())[0].get("name", str()),
-        sugar_config.config.get("dbt_projects", list())[0].get("path", str()),
+        sugar_config.dbt_project_info.get("name", str()),
+        sugar_config.dbt_project_info.get("path", str()),
     )
     dbt_project.read_project()
 
@@ -201,7 +199,9 @@ def handle(
         return task.run()
 
     if flag_parser.task == "audit":
-        audit_task: AuditTask = AuditTask(flag_parser, dbt_project._project_dir)
+        audit_task: AuditTask = AuditTask(
+            flag_parser, dbt_project._project_dir, sugar_config=sugar_config
+        )
         return audit_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")

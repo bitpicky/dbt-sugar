@@ -6,6 +6,8 @@ syrups:
     dbt_projects:
       - name: dbt_sugar_test
         path: "./tests/test_dbt_project/dbt_sugar_test"
+        excluded_folders:
+          - folder_to_exclude
         excluded_tables:
           - table_a
   - name: syrup_2

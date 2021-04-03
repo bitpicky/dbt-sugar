@@ -3,6 +3,7 @@ from unittest.mock import call
 
 import pytest
 
+from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.main import parser
 from dbt_sugar.core.task.audit import AuditTask
@@ -21,8 +22,9 @@ def __init_descriptions():
             str(config_filepath),
         ]
     )
-
-    audit_task = AuditTask(flag_parser, FIXTURE_DIR)
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+    audit_task = AuditTask(flag_parser, FIXTURE_DIR, sugar_config=sugar_config)
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     audit_task.repository_path = Path("tests/test_dbt_project/")
     return audit_task

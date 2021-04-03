@@ -54,7 +54,7 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
             {
                 "name": "dbt_sugar_test",
                 "path": "./tests/test_dbt_project/dbt_sugar_test",
-                "excluded_tables": ["table_a"],
+                "excluded_models": ["table_a"],
                 "excluded_folders": ["folder_to_exclude"],
             },
         ],
@@ -124,7 +124,7 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
                     {
                         "name": "dbt_sugar_test",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                     }
                 ],
             },
@@ -138,12 +138,12 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
                     {
                         "name": "dbt_sugar_test",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                     },
                     {
                         "name": "dbt_sugar_test_2",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                     },
                 ],
             },
@@ -187,7 +187,7 @@ def test_assert_only_one_dbt_project_in_scope(
                     {
                         "name": "dbt_sugar_test",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                         "excluded_folders": ["folder_to_exclude"],
                     }
                 ],
@@ -204,7 +204,7 @@ def test_assert_only_one_dbt_project_in_scope(
                     {
                         "name": "dbt_sugar_test",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                         "excluded_folders": ["folder_to_exclude"],
                     }
                 ],
@@ -221,7 +221,7 @@ def test_assert_only_one_dbt_project_in_scope(
                     {
                         "name": "dbt_sugar_test",
                         "path": "./tests/test_dbt_project/dbt_sugar_test",
-                        "excluded_tables": ["table_a"],
+                        "excluded_models": ["table_a"],
                         "excluded_folders": ["folder_to_exclude"],
                     }
                 ],

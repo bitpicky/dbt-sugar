@@ -5,13 +5,13 @@ syrups:
     dbt_projects:
       - name: dwh
         path: path
-        excluded_tables:
+        excluded_models:
           - table_a
   - name: syrup_2
     dbt_projects:
       - name: dwh
         path: path
-        excluded_tables:
+        excluded_models:
           - table_a
       - name: prediction
         path: path

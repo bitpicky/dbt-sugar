@@ -25,7 +25,7 @@ class BaseTask(abc.ABC):
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
-        self.save_all_descriptions()
+        self.build_descriptions_dictionary()
 
     def setup_paths_exclusion(self) -> str:
         """Appends excluded_folders to the default folder exclusion patten."""
@@ -236,8 +236,13 @@ class BaseTask(abc.ABC):
             return filtered_models
         return models
 
-    def save_descriptions_from_schema(self, content: Dict[str, Any], path_schema: Path) -> None:
-        """Save the columns descriptions from a schema.yml into the global descriptions dictionary.
+    def load_descriptions_from_a_schema_file(
+        self, content: Dict[str, Any], path_schema: Path
+    ) -> None:
+        """Load the columns descriptions from a schema.yml into the global descriptions cache.
+
+        This cache is used so that we can homogenise descriptions across models and import
+        already documented ones.
 
         Args:
             content (Dict[str, Any]): content of the schema.yaml.
@@ -252,9 +257,8 @@ class BaseTask(abc.ABC):
                 self.update_description_in_dbt_descriptions(column["name"], column_description)
                 self.update_test_in_dbt_tests(model["name"], column)
 
-    # TODO: Rename this functio to be less misleading
-    def save_all_descriptions(self) -> None:
-        """Save the columns descriptions from all the dbt project."""
+    def build_descriptions_dictionary(self) -> None:
+        """Load the columns descriptions from all schema files in a dbt project."""
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
                 # TODO: We're going to have to think about not just reading files named schema
@@ -262,7 +266,7 @@ class BaseTask(abc.ABC):
                 for file in files:
                     path_file = Path(os.path.join(root, file))
                     content = open_yaml(path_file)
-                    self.save_descriptions_from_schema(content, path_file)
+                    self.load_descriptions_from_a_schema_file(content, path_file)
 
     def is_model_in_schema_content(self, content, model_name) -> bool:
         """Method to check if a model exists in a schema.yaml content.

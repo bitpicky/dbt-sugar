@@ -4,6 +4,7 @@ from unittest.mock import call
 
 import pytest
 
+from dbt_sugar.core.clients.dbt import DbtProfile, DbtProject
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.main import parser
@@ -250,7 +251,7 @@ def test_remove_excluded_models(content, excluded_models, expectation):
     # pretty ugly monkeypatch for the dbt_project_info property
     class _DbtSugarConfig(DbtSugarConfig):
         info = sugar_config.dbt_project_info
-        info["excluded_tables"] = excluded_models
+        info["excluded_models"] = excluded_models
         dbt_project_info = info
 
     sugar_config.__class__ = _DbtSugarConfig
@@ -261,6 +262,56 @@ def test_remove_excluded_models(content, excluded_models, expectation):
 
     filtered_models = doc_task.remove_excluded_models(content)
     assert filtered_models == expectation
+
+
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_run_excluded_model(datafiles):
+    flag_parser = FlagParser(parser)
+    config_filepath = Path(datafiles).joinpath("sugar_config.yml")
+
+    flag_parser.consume_cli_arguments(
+        test_cli_args=[
+            "doc",
+            "-m",
+            "excluded_model",
+            "--config-path",
+            str(config_filepath),
+            "--syrup",
+            "syrup_1",
+        ]
+    )
+
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    # pretty ugly monkeypatch for the dbt_project_info property
+    class _DbtSugarConfig(DbtSugarConfig):
+        info = sugar_config.dbt_project_info
+        info["excluded_models"] = ["excluded_model"]
+        dbt_project_info = info
+
+    sugar_config.__class__ = _DbtSugarConfig
+
+    dbt_project = DbtProject(
+        sugar_config.dbt_project_info.get("name", ""),
+        sugar_config.dbt_project_info.get("path", str()),
+    )
+    dbt_project.read_project()
+
+    dbt_profile = DbtProfile(
+        flag_parser,
+        profile_name=dbt_project.profile_name,
+        target_name=flag_parser.target,
+        profiles_dir=Path(datafiles),
+    )
+    dbt_profile.read_profile()
+
+    doc_task = DocumentationTask(flag_parser, dbt_profile, sugar_config, FIXTURE_DIR)
+    doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
+    doc_task.repository_path = "tests/test_dbt_project/"
+
+    with pytest.raises(ValueError):
+        doc_task.run()
 
 
 @pytest.mark.parametrize(

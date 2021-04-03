@@ -22,7 +22,7 @@ class DbtProjectsModel(BaseModel):
     name: str
     path: str
     excluded_folders: Optional[Union[List[str], str]] = []
-    excluded_tables: Optional[Union[List[str], str]] = []
+    excluded_models: Optional[Union[List[str], str]] = []
 
 
 class SyrupModel(BaseModel):

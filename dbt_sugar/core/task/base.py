@@ -224,13 +224,13 @@ class BaseTask(abc.ABC):
         self.dbt_definitions[column_name] = column_description
 
     def remove_excluded_models(self, content: Dict[str, Any]):
-        """Removes models that are excluded_tables from the models dict"""
+        """Removes models that are excluded_models from the models dict"""
         models = content.get("models", [])
-        if self._sugar_config.dbt_project_info.get("excluded_tables"):
+        if self._sugar_config.dbt_project_info.get("excluded_models"):
             filtered_models = [
                 model_dict
                 for model_dict in models
-                if not model_dict["name"] in self._sugar_config.dbt_project_info["excluded_tables"]
+                if not model_dict["name"] in self._sugar_config.dbt_project_info["excluded_models"]
             ]
 
             return filtered_models

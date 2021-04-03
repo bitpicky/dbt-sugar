@@ -8,7 +8,7 @@ syrups:
         path: "./tests/test_dbt_project/dbt_sugar_test"
         excluded_folders:
           - folder_to_exclude
-        excluded_tables:
+        excluded_models:
           - table_a
   - name: syrup_2
     dbt_projects:
@@ -22,7 +22,7 @@ syrups:
     dbt_projects:
       - name: jaffle_shop
         path: "./test_dbt_project/jaffle_shop"
-        #excluded_tables:
+        #excluded_models:
         #- orders
   # TODO: Remove this when we have dealt with this regression.
   # ! REGRESSION
@@ -30,7 +30,7 @@ syrups:
   # dbt_projects:
   # - name: dwh
   # path: path
-  # excluded_tables:
+  # excluded_models:
   # - table_a
   # - name: prediction
   # path: path

@@ -168,12 +168,9 @@ def handle(
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
 
-    # TODO: Revise the index access here when we can support multiple dbt projects properly.
-    # ! REGRESSION
-    dbt_project_from_first_index = sugar_config.config.get("dbt_projects", list())[0]
     dbt_project = DbtProject(
-        dbt_project_from_first_index.get("name", str()),
-        dbt_project_from_first_index.get("path", str()),
+        sugar_config.dbt_project_info.get("name", str()),
+        sugar_config.dbt_project_info.get("path", str()),
     )
     dbt_project.read_project()
 

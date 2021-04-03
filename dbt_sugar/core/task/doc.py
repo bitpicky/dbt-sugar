@@ -56,6 +56,13 @@ class DocumentationTask(BaseTask):
             )
 
         self.connector = connector(dbt_credentials)
+        print(self._sugar_config.dbt_project_info)
+        if model in self._sugar_config.dbt_project_info.get("excluded_tables", []):
+            logger.warning(
+                f"You decided to exclude '{model}' from dbt-sugar's scope. "
+                "If you want to document it you will need to remove it from the excluded_tables list"
+            )
+            return 1
         columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)

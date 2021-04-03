@@ -35,11 +35,11 @@ class DocumentationTask(BaseTask):
     def __init__(
         self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
     ) -> None:
-        super().__init__(dbt_path=dbt_path)
+        super().__init__(dbt_path=dbt_path, sugar_config=config)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
-        self._sugar_config = config
+        # self._sugar_config = config
 
     def run(self) -> int:
         """Main script to run the command doc"""

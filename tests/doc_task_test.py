@@ -837,3 +837,12 @@ def test_order_schema_yml(dicts_are_same, content, expectation):
 def test_move_name_and_description_to_first_position(content, result):
     doc_task = __init_descriptions()
     assert doc_task.move_name_and_description_to_first_position(content) == result
+
+
+def test_setup_paths_and_models_exclusion():
+    doc_task = __init_descriptions()
+    print(doc_task._sugar_config)
+    assert (
+        doc_task._excluded_folders_from_search_pattern
+        == r"\/target\/|\/dbt_modules\/|\/folder_to_exclude\/"
+    )

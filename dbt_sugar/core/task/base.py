@@ -6,21 +6,40 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
+from dbt_sugar.core.config.config import DbtSugarConfig
 
 COLUMN_NOT_DOCUMENTED = "No description for this column."
 MODEL_NOT_DOCUMENTED = "No description for this model."
-EXCLUDE_TARGET_FILES_PATTERN = r"\/target\/|\/dbt_modules\/"
+DEFAULT_EXCLUDED_FOLDERS_PATTERN = r"\/target\/|\/dbt_modules\/"
 
 
 class BaseTask(abc.ABC):
     """Sets up basic API for task-like classes."""
 
-    def __init__(self, dbt_path: Path) -> None:
+    def __init__(self, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
         self.repository_path = dbt_path
+        self._sugar_config = sugar_config
+
+        # populated by class methods
+        self._excluded_folders_from_search_pattern: str = self.setup_paths_exclusion()
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.save_all_descriptions()
+
+    def setup_paths_exclusion(self) -> str:
+        """Appends excluded_folders to the default folder exclusion patten."""
+        if self._sugar_config.dbt_project_info["excluded_folders"]:
+            excluded_folders_from_search_pattern: str = r"\/|\/".join(
+                self._sugar_config.dbt_project_info["excluded_folders"]
+            )
+            excluded_folders_from_search_pattern = (
+                fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
+            )
+            return excluded_folders_from_search_pattern
+        else:
+            excluded_folders_from_search_pattern = DEFAULT_EXCLUDED_FOLDERS_PATTERN
+            return excluded_folders_from_search_pattern
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
         """Searches for the description of a column in all the descriptions in DBT.
@@ -167,7 +186,7 @@ class BaseTask(abc.ABC):
             the description to update.
         """
         for root, _, files in os.walk(self.repository_path):
-            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
                 files = [f for f in files if f == "schema.yml"]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
@@ -223,7 +242,7 @@ class BaseTask(abc.ABC):
     def save_all_descriptions(self) -> None:
         """Save the columns descriptions from all the dbt project."""
         for root, _, files in os.walk(self.repository_path):
-            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
                 files = [f for f in files if f == "schema.yml"]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
@@ -264,7 +283,7 @@ class BaseTask(abc.ABC):
             and boolean indicating whether the schema.yml exists.
         """
         for root, _, files in os.walk(self.repository_path):
-            if not re.search(EXCLUDE_TARGET_FILES_PATTERN, root):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
                 for file in files:
                     if file == f"{model_name}.sql":
                         path_file = Path(os.path.join(root, "schema.yml"))

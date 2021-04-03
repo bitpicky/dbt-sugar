@@ -223,6 +223,19 @@ class BaseTask(abc.ABC):
             column_description = COLUMN_NOT_DOCUMENTED
         self.dbt_definitions[column_name] = column_description
 
+    def remove_excluded_models(self, content: Dict[str, Any]):
+        """Removes models that are excluded_tables from the models dict"""
+        models = content.get("models", [])
+        if self._sugar_config.dbt_project_info.get("excluded_tables"):
+            filtered_models = [
+                model_dict
+                for model_dict in models
+                if not model_dict["name"] in self._sugar_config.dbt_project_info["excluded_tables"]
+            ]
+
+            return filtered_models
+        return models
+
     def save_descriptions_from_schema(self, content: Dict[str, Any], path_schema: Path) -> None:
         """Save the columns descriptions from a schema.yml into the global descriptions dictionary.
 
@@ -231,18 +244,20 @@ class BaseTask(abc.ABC):
         """
         if not content:
             return
-
-        for model in content.get("models", []):
+        models = self.remove_excluded_models(content)
+        for model in models:
             self.all_dbt_models[model["name"]] = path_schema
             for column in model.get("columns", []):
                 column_description = column.get("description", None)
                 self.update_description_in_dbt_descriptions(column["name"], column_description)
                 self.update_test_in_dbt_tests(model["name"], column)
 
+    # TODO: Rename this functio to be less misleading
     def save_all_descriptions(self) -> None:
         """Save the columns descriptions from all the dbt project."""
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
+                # TODO: We're going to have to think about not just reading files named schema
                 files = [f for f in files if f == "schema.yml"]
                 for file in files:
                     path_file = Path(os.path.join(root, file))

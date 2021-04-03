@@ -178,6 +178,92 @@ def test_save_descriptions_from_schema(content, column, description):
 
 
 @pytest.mark.parametrize(
+    "content, excluded_models, expectation",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "test_model",
+                        "columns": [],
+                    },
+                    {
+                        "name": "excluded_model",
+                        "columns": [],
+                    },
+                ]
+            },
+            ["excluded_model"],
+            [
+                {
+                    "name": "test_model",
+                    "columns": [],
+                },
+            ],
+            id="content with model to exclude",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "test_model",
+                        "columns": [],
+                    },
+                    {
+                        "name": "excluded_model",
+                        "columns": [],
+                    },
+                ]
+            },
+            [],
+            [
+                {
+                    "name": "test_model",
+                    "columns": [],
+                },
+                {
+                    "name": "excluded_model",
+                    "columns": [],
+                },
+            ],
+            id="content with no model to exclude",
+        ),
+    ],
+)
+def test_remove_excluded_models(content, excluded_models, expectation):
+    flag_parser = FlagParser(parser)
+    config_filepath = Path(FIXTURE_DIR).joinpath("sugar_config.yml")
+
+    flag_parser.consume_cli_arguments(
+        test_cli_args=[
+            "doc",
+            "-m",
+            "test",
+            "--config-path",
+            str(config_filepath),
+        ]
+    )
+
+    sugar_config = DbtSugarConfig(flag_parser)
+    sugar_config.load_config()
+
+    # pretty ugly monkeypatch for the dbt_project_info property
+    class _DbtSugarConfig(DbtSugarConfig):
+        info = sugar_config.dbt_project_info
+        info["excluded_tables"] = excluded_models
+        dbt_project_info = info
+
+    sugar_config.__class__ = _DbtSugarConfig
+
+    doc_task = DocumentationTask(None, None, sugar_config, FIXTURE_DIR)
+    doc_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
+    doc_task.repository_path = "tests/test_dbt_project/"
+
+    filtered_models = doc_task.remove_excluded_models(content)
+    assert filtered_models == expectation
+
+
+@pytest.mark.parametrize(
     "content, model_name, result",
     [
         (

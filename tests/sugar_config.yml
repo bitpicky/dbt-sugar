@@ -22,6 +22,8 @@ syrups:
     dbt_projects:
       - name: jaffle_shop
         path: "./test_dbt_project/jaffle_shop"
+        #excluded_tables:
+        #- orders
   # TODO: Remove this when we have dealt with this regression.
   # ! REGRESSION
   # - name: syrup_3

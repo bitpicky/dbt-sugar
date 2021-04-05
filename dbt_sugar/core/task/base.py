@@ -131,7 +131,7 @@ class BaseTask(abc.ABC):
             the description, tags and tests to update.
         """
         content = open_yaml(path_file)
-        for model in content["models"]:
+        for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     column_name = column["name"]
@@ -169,7 +169,7 @@ class BaseTask(abc.ABC):
             the description to update.
         """
         content = open_yaml(path_file)
-        for model in content["models"]:
+        for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update.keys():

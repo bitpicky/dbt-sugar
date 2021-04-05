@@ -2,7 +2,7 @@
 import copy
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress
@@ -168,7 +168,9 @@ class DocumentationTask(BaseTask):
             int: with the status of the execution. 1 for fail, and 0 for ok!
         """
         content = None
-        schema_file_path, schema_exists = self.find_model_schema_file(model_name)
+        schema_file_path, schema_exists, is_already_documented = self.find_model_schema_file(
+            model_name
+        )
 
         if not schema_file_path:
             raise FileNotFoundError(
@@ -176,10 +178,9 @@ class DocumentationTask(BaseTask):
             )
         if schema_exists:
             content = open_yaml(schema_file_path)
-            print(f"content after opening found file\n{content}")
 
-        content, is_already_documented = self.create_or_update_model_entry(
-            schema_exists, content, model_name, columns_sql
+        content = self.create_or_update_model_entry(
+            is_already_documented, content, model_name, columns_sql
         )
         try:
             content = self.update_model_description(content, model_name, is_already_documented)
@@ -192,7 +193,8 @@ class DocumentationTask(BaseTask):
         except KeyboardInterrupt:
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
-
+        print(f"content about to be saved {content}")
+        print(f"column_update_payload: {self.column_update_payload}")
         save_yaml(schema_file_path, self.order_schema_yml(content))
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(
@@ -371,7 +373,7 @@ class DocumentationTask(BaseTask):
         content: Optional[Dict[str, Any]],
         model_name: str,
         columns_sql: List[str],
-    ) -> Tuple[Dict[str, Any], bool]:
+    ) -> Dict[str, Any]:
         """Method to update/create a model entry in the schema.yml.
 
         Args:
@@ -382,4 +384,4 @@ class DocumentationTask(BaseTask):
             content = self.update_model(content, model_name, columns_sql)
         else:
             content = self.create_new_model(content, model_name, columns_sql)
-        return content, is_already_documented
+        return content

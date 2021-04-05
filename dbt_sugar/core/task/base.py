@@ -131,7 +131,7 @@ class BaseTask(abc.ABC):
             the description, tags and tests to update.
         """
         content = open_yaml(path_file)
-        for model in content["models"]:
+        for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     column_name = column["name"]
@@ -169,7 +169,7 @@ class BaseTask(abc.ABC):
             the description to update.
         """
         content = open_yaml(path_file)
-        for model in content["models"]:
+        for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update.keys():
@@ -309,16 +309,16 @@ class BaseTask(abc.ABC):
                 return True
         return False
 
-    def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool]:
+    def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool, bool]:
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
                 schema_file_path = None
                 model_file_found = False
                 schema_file_exists = False
+                is_already_documented = False
                 for file in files:
                     # check the model file exists and if it does return the path
                     # of the schema.yml it's in.
-                    logger.debug(f"Searching '{model_name}' in '{file}'")
                     if file == f"{model_name}.sql":
                         model_file_found = True
                         logger.debug(f"Found sql file for '{model_name}'")
@@ -330,15 +330,20 @@ class BaseTask(abc.ABC):
                             f"'{model_name}' was not contained in a schema file. Creating one at {root}"
                         )
                         schema_file_path = Path(os.path.join(root, "schema.yml"))
+                        # check whether there is a schema file already present
                         schema_file_exists = False
-                        return schema_file_path, schema_file_exists
+                        if schema_file_path.exists():
+                            schema_file_exists = True
+                        return schema_file_path, schema_file_exists, is_already_documented
+
                     if schema_file_path and model_file_found:
                         logger.debug(
                             f"'{model_name}' found in '{schema_file_path}' we'll update entry."
                         )
+                        is_already_documented = True
                         schema_file_exists = True
-                        return schema_file_path, schema_file_exists
-        return None, False
+                        return schema_file_path, schema_file_exists, is_already_documented
+        return None, False, False
 
     def is_exluded_model(self, model_name: str) -> bool:
         if model_name in self._sugar_config.dbt_project_info.get("excluded_models", []):

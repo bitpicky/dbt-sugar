@@ -711,9 +711,9 @@ def test_document_columns(mocker):
 )
 def test_find_model_schema_file(model_name, path_model, schema_exists):
     doc_task = __init_descriptions()
-    path_file, schema = doc_task.find_model_schema_file(model_name)
+    path_file, schema_exists, _ = doc_task.find_model_schema_file(model_name)
     assert path_file == path_model
-    assert schema == schema_exists
+    assert schema_exists == schema_exists
 
 
 DUMMY_MODEL_DESC = "dummy model description"

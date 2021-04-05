@@ -35,7 +35,7 @@ class AuditTask(BaseTask):
         if self.model_name:
             _ = self.is_exluded_model(self.model_name)
             logger.info(f"Running audit of model [bold magenta]{self.model_name}.[/bold magenta]\n")
-            path_file, schema_exists = self.find_model_schema_file(self.model_name)
+            path_file, schema_exists, _ = self.find_model_schema_file(self.model_name)
             if not path_file:
                 logger.info(f"Could not find {self.model_name} in the project at {self.dbt_path}")
                 return 1

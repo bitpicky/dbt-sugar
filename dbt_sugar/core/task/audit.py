@@ -43,7 +43,6 @@ class AuditTask(BaseTask):
                 logger.info("The model is not documented.")
                 return 1
             self.model_content = open_yaml(path_file)
-            logger.debug(f"Content for '{self.model_name}' - audit_task: {self.model_content} ")
             self.derive_model_coverage()
         else:
             logger.info(f"Running audit of dbt project in {self.dbt_path}.\n")

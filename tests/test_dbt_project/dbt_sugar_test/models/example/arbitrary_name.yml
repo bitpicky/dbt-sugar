@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: my_second_dbt_model
+    description: dummy description for my second dbt model

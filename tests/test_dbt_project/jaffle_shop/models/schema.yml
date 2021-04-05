@@ -1,26 +1,48 @@
 version: 2
 models:
   - name: customers
-    description:
-      This table has basic information about a customer, as well as some derived facts based
-      on a customer's orders
+    description: The new test description
     columns:
       - name: customer_id
-        description: This is a unique identifier for a customer
+        description: This is a unique identifier for a customer.
         tests:
           - unique
           - not_null
-      - name: email
-        description: Customer's email address. PII.
-      - name: first_name
-        description: Customer's first name. PII.
+        tags:
+          - PK
+      - name: customer_lifetime_value
+        description: No description for this column.
       - name: first_order
-        description: Date (UTC) of a customer's first order
-      - name: last_name
-        description: Customer's last name. PII.
+        description: No description for this column.
       - name: most_recent_order
-        description: Date (UTC) of a customer's most recent order
+        description: No description for this column.
       - name: number_of_orders
-        description: Count of the number of orders a customer has placed
-      - name: total_order_amount
-        description: Total value (AUD) of a customer's orders
+        description: Cumulative number of orders this customer has made since their joining of the platform.
+  - name: orders
+    description: Facts about orders
+    columns:
+      - name: amount
+        description: Total amout of the order irrespective of payment method.
+        tests:
+          - not_null
+      - name: bank_transfer_amount
+        description: No description for this column.
+      - name: coupon_amount
+        description: No description for this column.
+      - name: credit_card_amount
+        description: No description for this column.
+      - name: customer_id
+        description: This is a unique identifier for a customer.
+      - name: gift_card_amount
+        description: No description for this column.
+      - name: order_date
+        description: Date when the order was made
+      - name: order_id
+        description: Unique ID for an order
+        tests:
+          - unique
+          - not_null
+        tags:
+          - PK
+      - name: status
+        description: Status the order is in.

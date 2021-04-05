@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 COLUMN_NOT_DOCUMENTED = "No description for this column."
@@ -18,9 +19,10 @@ DEFAULT_EXCLUDED_YML_FILES = r"dbt_project.yml|packages.yml"
 class BaseTask(abc.ABC):
     """Sets up basic API for task-like classes."""
 
-    def __init__(self, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
+    def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
         self.repository_path = dbt_path
         self._sugar_config = sugar_config
+        self._flags = flags
 
         # populated by class methods
         self._excluded_folders_from_search_pattern: str = self.setup_paths_exclusion()
@@ -28,9 +30,6 @@ class BaseTask(abc.ABC):
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
-        print(f"all_dbt_models\n {self.all_dbt_models}")
-        print(f"dbt_definitions\n {self.dbt_definitions}")
-        print(f"dbt_tests\n {self.dbt_tests}")
 
     def setup_paths_exclusion(self) -> str:
         """Appends excluded_folders to the default folder exclusion patten."""
@@ -280,14 +279,12 @@ class BaseTask(abc.ABC):
         """
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
-                # TODO: We're going to have to think about not just reading files named schema
                 files = [
                     f
                     for f in files
                     if f.lower().endswith(".yml")
                     and not re.search(DEFAULT_EXCLUDED_YML_FILES, f.lower())
                 ]
-                # == "schema.yml"]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
                     content = open_yaml(path_file)
@@ -311,48 +308,6 @@ class BaseTask(abc.ABC):
             if model["name"] == model_name:
                 return True
         return False
-
-    # FIXME: In fact this should be named check if there is a schema file
-    # because by this point we actually arlready know if the model exists since we have
-    # built the dictionary in the init of this class.
-    def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
-        """
-        Method to find a model name in the dbt project files.
-
-            - If we find the sql of the model but there is no schema we return the Path
-            and False (to create the schema).
-            - If we find the sql of the model and there is schema we return the Path and True.
-
-        Args:
-            model_name (str): model name to find in the dbt project.
-
-        Returns:
-            Tuple[Optional[Path], bool]: Optional path of the sql model if found
-            and boolean indicating whether the schema.yml exists.
-        """
-        for root, _, files in os.walk(self.repository_path):
-            if not re.search(self._excluded_folders_from_search_pattern, root):
-                for file in files:
-                    if file == f"{model_name}.sql":
-                        path_file = Path(os.path.join(root, "schema.yml"))
-                        yaml_files_in_model_directory = list(
-                            Path(os.path.join(root)).glob(r"*.yml")
-                        )
-                        if yaml_files_in_model_directory:
-                            # if path_file.is_file():
-
-                            # TODO:
-                            # I feel we might want to get the path info for where files are somewhere wlse
-                            # in a way what we should be doing is:
-                            # - is the model in dbt
-                            # - are there any model descriptor yamls?
-                            # - if so cool we know, if not we will have to create a schema.yml in that path
-                            # - if there is any yaml, we will prefer to grab the path of where to modify things
-                            # from the dict that we build in the __init__() of this class.
-                            return path_file, True
-                        else:
-                            return path_file, False
-        return None, False
 
     def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool]:
         for root, _, files in os.walk(self.repository_path):
@@ -384,6 +339,15 @@ class BaseTask(abc.ABC):
                         schema_file_exists = True
                         return schema_file_path, schema_file_exists
         return None, False
+
+    def is_exluded_model(self, model_name: str) -> bool:
+        if model_name in self._sugar_config.dbt_project_info.get("excluded_models", []):
+            raise ValueError(
+                f"You decided to exclude '{model_name}' from dbt-sugar's scope. "
+                f"You run `{self._flags.task}` on it you will need to remove "
+                "it from the excluded_models list in the sugar_config.yml"
+            )
+        return True
 
     @abc.abstractmethod
     def run(self) -> int:

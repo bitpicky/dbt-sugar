@@ -24,7 +24,7 @@ class AuditTask(BaseTask):
 
     def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
         self.dbt_path = dbt_path
-        super().__init__(dbt_path=self.dbt_path, sugar_config=sugar_config)
+        super().__init__(flags=flags, dbt_path=self.dbt_path, sugar_config=sugar_config)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self.model_name = self._flags.model
@@ -33,8 +33,9 @@ class AuditTask(BaseTask):
     def run(self) -> int:
         """Main script to run the command doc"""
         if self.model_name:
+            _ = self.is_exluded_model(self.model_name)
             logger.info(f"Running audit of model [bold magenta]{self.model_name}.[/bold magenta]\n")
-            path_file, schema_exists = self.find_model_in_dbt(self.model_name)
+            path_file, schema_exists = self.find_model_schema_file(self.model_name)
             if not path_file:
                 logger.info(f"Could not find {self.model_name} in the project at {self.dbt_path}")
                 return 1
@@ -42,6 +43,7 @@ class AuditTask(BaseTask):
                 logger.info("The model is not documented.")
                 return 1
             self.model_content = open_yaml(path_file)
+            logger.debug(f"Content for '{self.model_name}' - audit_task: {self.model_content} ")
             self.derive_model_coverage()
         else:
             logger.info(f"Running audit of dbt project in {self.dbt_path}.\n")
@@ -133,13 +135,18 @@ class AuditTask(BaseTask):
             misses=number_not_documented_columns,
             total=number_columns,
         )
+        logger.debug(
+            f"percentage_not_documented_columns for '{self.model_name}': {percentage_not_documented_columns}"
+        )
 
         data = self.print_nicely_the_data(
             data=list(not_documented_columns), total=percentage_not_documented_columns
         )
 
         self.create_table(
-            title="Documentation Coverage", columns=["Undocument Columns", r"% coverage"], data=data
+            title="Documentation Coverage",
+            columns=["Undocumented Columns", r"% coverage"],
+            data=data,
         )
 
     def print_nicely_the_data(self, data: List[str], total: str) -> Dict[str, str]:
@@ -155,6 +162,12 @@ class AuditTask(BaseTask):
         """
         if data:
             reshaped_data = {column: "" for column in data}
+            reshaped_data[""] = ""
+            reshaped_data["Total"] = total
+            return reshaped_data
+        if not data and total == "100.0":
+            reshaped_data = {}
+            reshaped_data["None"] = ""
             reshaped_data[""] = ""
             reshaped_data["Total"] = total
             return reshaped_data

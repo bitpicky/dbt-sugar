@@ -9,7 +9,7 @@ syrups:
         excluded_folders:
           - folder_to_exclude
         excluded_models:
-          - table_a
+          - my_first_dbt_model_excluded
   - name: syrup_2
     dbt_projects:
       - name: dwh

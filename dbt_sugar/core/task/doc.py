@@ -35,7 +35,7 @@ class DocumentationTask(BaseTask):
     def __init__(
         self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
     ) -> None:
-        super().__init__(dbt_path=dbt_path, sugar_config=config)
+        super().__init__(flags=flags, dbt_path=dbt_path, sugar_config=config)
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
@@ -58,11 +58,7 @@ class DocumentationTask(BaseTask):
         self.connector = connector(dbt_credentials)
 
         # exit early if model is in the excluded_models list
-        if model in self._sugar_config.dbt_project_info.get("excluded_models", []):
-            raise ValueError(
-                f"You decided to exclude '{model}' from dbt-sugar's scope. "
-                "If you want to document it you will need to remove it from the excluded_models list"
-            )
+        _ = self.is_exluded_model(model)
         columns_sql = self.connector.get_columns_from_table(model, schema)
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)
@@ -172,7 +168,6 @@ class DocumentationTask(BaseTask):
             int: with the status of the execution. 1 for fail, and 0 for ok!
         """
         content = None
-        # schema_file_path, schema_exists = self.find_model_in_dbt(model_name)
         schema_file_path, schema_exists = self.find_model_schema_file(model_name)
 
         if not schema_file_path:
@@ -383,11 +378,8 @@ class DocumentationTask(BaseTask):
             model_name (str): Name of the model for which to create or update entry in schema.yml.
             columns_sql (List[str]): List of columns names found in the database for this model.
         """
-        # if self.is_model_in_schema_content(content, model_name) and content:
         if is_already_documented and content:
             content = self.update_model(content, model_name, columns_sql)
-            # is_already_documented = True
         else:
             content = self.create_new_model(content, model_name, columns_sql)
-            # is_already_documented = False
         return content, is_already_documented

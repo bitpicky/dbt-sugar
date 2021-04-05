@@ -650,7 +650,7 @@ def test_get_not_documented_columns(content, model_name, result):
         ),
     ],
 )
-def test_change_model_description(mocker, content, model_name, is_already_documented, result):
+def test_update_model_description(mocker, content, model_name, is_already_documented, result):
     doc_task = __init_descriptions()
     mocker.patch(
         "questionary.prompt",
@@ -659,7 +659,7 @@ def test_change_model_description(mocker, content, model_name, is_already_docume
             "model_description": "New description for the model.",
         },
     )
-    assert doc_task.change_model_description(content, model_name, is_already_documented) == result
+    assert doc_task.update_model_description(content, model_name, is_already_documented) == result
 
 
 def test_document_columns(mocker):
@@ -699,11 +699,19 @@ def test_document_columns(mocker):
             id="find_model",
         ),
         pytest.param("model_does_not_exists", None, False, id="find_model_does_not_exists"),
+        pytest.param(
+            "my_second_dbt_model",
+            Path(
+                "tests/test_dbt_project/dbt_sugar_test/models/example/arbitrary_name.yml"
+            ).resolve(),
+            True,
+            id="find_model",
+        ),
     ],
 )
-def test_find_model_in_dbt(model_name, path_model, schema_exists):
+def test_find_model_schema_file(model_name, path_model, schema_exists):
     doc_task = __init_descriptions()
-    path_file, schema = doc_task.find_model_in_dbt(model_name)
+    path_file, schema = doc_task.find_model_schema_file(model_name)
     assert path_file == path_model
     assert schema == schema_exists
 

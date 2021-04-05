@@ -80,7 +80,6 @@ class DbtSugarConfig:
     @property
     def config(self):
         if self.config_model:
-            logger.debug(f"Config model dict: {self.config_model.dict()}")
             config_dict = self._integrate_cli_flags(self.config_model.dict())
             return config_dict
         raise AttributeError(f"{type(self).__name__} does not have a parsed config.")
@@ -199,3 +198,4 @@ class DbtSugarConfig:
         self.retain_syrup()
         self.assert_only_one_dbt_project_in_scope()
         _ = self.assert_dbt_projects_exist()
+        logger.debug(f"Config model dict: {self.config_model.dict()}")

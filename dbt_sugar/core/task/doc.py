@@ -68,7 +68,7 @@ class DocumentationTask(BaseTask):
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
-    def change_model_description(
+    def update_model_description(
         self, content: Dict[str, Any], model_name: str, is_already_documented: bool = False
     ) -> Dict[str, Any]:
         """Updates the model description from a schema.yaml.
@@ -172,17 +172,22 @@ class DocumentationTask(BaseTask):
             int: with the status of the execution. 1 for fail, and 0 for ok!
         """
         content = None
-        path, schema_exists = self.find_model_in_dbt(model_name)
-        if not path:
+        # schema_file_path, schema_exists = self.find_model_in_dbt(model_name)
+        schema_file_path, schema_exists = self.find_model_schema_file(model_name)
+
+        if not schema_file_path:
             raise FileNotFoundError(
                 f"Model: '{model_name}' could not be found in your dbt project."
             )
         if schema_exists:
-            content = open_yaml(path)
+            content = open_yaml(schema_file_path)
+            print(f"content after opening found file\n{content}")
 
-        content, is_already_documented = self.process_model(content, model_name, columns_sql)
+        content, is_already_documented = self.create_or_update_model_entry(
+            schema_exists, content, model_name, columns_sql
+        )
         try:
-            content = self.change_model_description(content, model_name, is_already_documented)
+            content = self.update_model_description(content, model_name, is_already_documented)
 
             not_documented_columns = self.get_not_documented_columns(content, model_name)
             self.document_columns(not_documented_columns, "undocumented_columns")
@@ -193,9 +198,11 @@ class DocumentationTask(BaseTask):
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
 
-        save_yaml(path, self.order_schema_yml(content))
+        save_yaml(schema_file_path, self.order_schema_yml(content))
         self.check_tests(schema, model_name)
-        self.update_model_description_test_tags(path, model_name, self.column_update_payload)
+        self.update_model_description_test_tags(
+            schema_file_path, model_name, self.column_update_payload
+        )
         # Method to update the descriptions in all the schemas.yml
         self.update_column_descriptions(self.column_update_payload)
 
@@ -306,14 +313,14 @@ class DocumentationTask(BaseTask):
             self.column_update_payload.update(user_input)
 
     def update_model(
-        self, content: Dict[str, Any], model_name: str, columns_sql: List[str]
+        self, content: Dict[str, Any], model_name: str, columns_on_db: List[str]
     ) -> Dict[str, Any]:
         """Method to update the columns from a model in a schema.yaml content.
 
         Args:
             content (Dict[str, Any]): content of the schema.yaml.
             model_name (str): model name to update.
-            columns_sql (List[str]): List of columns that the model have in the database.
+            columns_on_db (List[str]): List of columns that the model has in the database.
 
         Returns:
             Dict[str, Any]: with the content of the schema.yml with the model updated.
@@ -321,8 +328,8 @@ class DocumentationTask(BaseTask):
         logger.info(f"The model '{model_name}' already exists, updating its documentation.")
         for model in content.get("models", []):
             if model["name"] == model_name:
-                for column in columns_sql:
-                    # Checking that the model have the columns attribute.
+                for column in columns_on_db:
+                    # Check whether the model has columns already documented in schema yaml
                     if not model.get("columns", None):
                         model["columns"] = []
 
@@ -363,8 +370,12 @@ class DocumentationTask(BaseTask):
             content["models"].append(model)
         return content
 
-    def process_model(
-        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
+    def create_or_update_model_entry(
+        self,
+        is_already_documented: bool,
+        content: Optional[Dict[str, Any]],
+        model_name: str,
+        columns_sql: List[str],
     ) -> Tuple[Dict[str, Any], bool]:
         """Method to update/create a model entry in the schema.yml.
 
@@ -372,10 +383,11 @@ class DocumentationTask(BaseTask):
             model_name (str): Name of the model for which to create or update entry in schema.yml.
             columns_sql (List[str]): List of columns names found in the database for this model.
         """
-        if self.is_model_in_schema_content(content, model_name) and content:
+        # if self.is_model_in_schema_content(content, model_name) and content:
+        if is_already_documented and content:
             content = self.update_model(content, model_name, columns_sql)
-            is_already_documented = True
+            # is_already_documented = True
         else:
             content = self.create_new_model(content, model_name, columns_sql)
-            is_already_documented = False
+            # is_already_documented = False
         return content, is_already_documented

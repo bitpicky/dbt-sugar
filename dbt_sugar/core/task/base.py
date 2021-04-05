@@ -7,10 +7,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 COLUMN_NOT_DOCUMENTED = "No description for this column."
 MODEL_NOT_DOCUMENTED = "No description for this model."
 DEFAULT_EXCLUDED_FOLDERS_PATTERN = r"\/target\/|\/dbt_modules\/"
+DEFAULT_EXCLUDED_YML_FILES = r"dbt_project.yml|packages.yml"
 
 
 class BaseTask(abc.ABC):
@@ -26,6 +28,9 @@ class BaseTask(abc.ABC):
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
+        print(f"all_dbt_models\n {self.all_dbt_models}")
+        print(f"dbt_definitions\n {self.dbt_definitions}")
+        print(f"dbt_tests\n {self.dbt_tests}")
 
     def setup_paths_exclusion(self) -> str:
         """Appends excluded_folders to the default folder exclusion patten."""
@@ -187,7 +192,12 @@ class BaseTask(abc.ABC):
         """
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
-                files = [f for f in files if f == "schema.yml"]
+                files = [
+                    f
+                    for f in files
+                    if f.lower().endswith(".yml")
+                    and not re.search(DEFAULT_EXCLUDED_YML_FILES, f.lower())
+                ]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
                     self.update_column_description_from_schema(
@@ -223,10 +233,12 @@ class BaseTask(abc.ABC):
             column_description = COLUMN_NOT_DOCUMENTED
         self.dbt_definitions[column_name] = column_description
 
-    def remove_excluded_models(self, content: Dict[str, Any]):
+    def remove_excluded_models(self, content: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
         """Removes models that are excluded_models from the models dict"""
         models = content.get("models", [])
-        if self._sugar_config.dbt_project_info.get("excluded_models"):
+        # if self._sugar_config.dbt_project_info.get("excluded_models"):
+        logger.debug(models)
+        if models:
             filtered_models = [
                 model_dict
                 for model_dict in models
@@ -234,7 +246,7 @@ class BaseTask(abc.ABC):
             ]
 
             return filtered_models
-        return models
+        return None
 
     def load_descriptions_from_a_schema_file(
         self, content: Dict[str, Any], path_schema: Path
@@ -250,6 +262,8 @@ class BaseTask(abc.ABC):
         if not content:
             return
         models = self.remove_excluded_models(content)
+        if not models:
+            return
         for model in models:
             self.all_dbt_models[model["name"]] = path_schema
             for column in model.get("columns", []):
@@ -258,14 +272,26 @@ class BaseTask(abc.ABC):
                 self.update_test_in_dbt_tests(model["name"], column)
 
     def build_descriptions_dictionary(self) -> None:
-        """Load the columns descriptions from all schema files in a dbt project."""
+        """Load the columns descriptions from all schema files in a dbt project.
+
+        This is purely responsble for building the knowledge of all possible definitions.
+        In other words it is independent from the documentation orchestration.
+        This happens in the `doc` task
+        """
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
                 # TODO: We're going to have to think about not just reading files named schema
-                files = [f for f in files if f == "schema.yml"]
+                files = [
+                    f
+                    for f in files
+                    if f.lower().endswith(".yml")
+                    and not re.search(DEFAULT_EXCLUDED_YML_FILES, f.lower())
+                ]
+                # == "schema.yml"]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
                     content = open_yaml(path_file)
+                    logger.debug(path_file)
                     self.load_descriptions_from_a_schema_file(content, path_file)
 
     def is_model_in_schema_content(self, content, model_name) -> bool:
@@ -286,9 +312,12 @@ class BaseTask(abc.ABC):
                 return True
         return False
 
+    # FIXME: In fact this should be named check if there is a schema file
+    # because by this point we actually arlready know if the model exists since we have
+    # built the dictionary in the init of this class.
     def find_model_in_dbt(self, model_name: str) -> Tuple[Optional[Path], bool]:
         """
-        Method to find a model name in the dbt project.
+        Method to find a model name in the dbt project files.
 
             - If we find the sql of the model but there is no schema we return the Path
             and False (to create the schema).
@@ -306,10 +335,54 @@ class BaseTask(abc.ABC):
                 for file in files:
                     if file == f"{model_name}.sql":
                         path_file = Path(os.path.join(root, "schema.yml"))
-                        if path_file.is_file():
+                        yaml_files_in_model_directory = list(
+                            Path(os.path.join(root)).glob(r"*.yml")
+                        )
+                        if yaml_files_in_model_directory:
+                            # if path_file.is_file():
+
+                            # TODO:
+                            # I feel we might want to get the path info for where files are somewhere wlse
+                            # in a way what we should be doing is:
+                            # - is the model in dbt
+                            # - are there any model descriptor yamls?
+                            # - if so cool we know, if not we will have to create a schema.yml in that path
+                            # - if there is any yaml, we will prefer to grab the path of where to modify things
+                            # from the dict that we build in the __init__() of this class.
                             return path_file, True
                         else:
                             return path_file, False
+        return None, False
+
+    def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool]:
+        for root, _, files in os.walk(self.repository_path):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
+                schema_file_path = None
+                model_file_found = False
+                schema_file_exists = False
+                for file in files:
+                    # check the model file exists and if it does return the path
+                    # of the schema.yml it's in.
+                    logger.debug(f"Searching '{model_name}' in '{file}'")
+                    if file == f"{model_name}.sql":
+                        model_file_found = True
+                        logger.debug(f"Found sql file for '{model_name}'")
+                        schema_file_path = self.all_dbt_models.get(model_name, None)
+                    # if it's not in a schema file, then it's not documented and we
+                    # need to create a schema.yml "dummy" to place it in.
+                    if not schema_file_path and model_file_found:
+                        logger.debug(
+                            f"'{model_name}' was not contained in a schema file. Creating one at {root}"
+                        )
+                        schema_file_path = Path(os.path.join(root, "schema.yml"))
+                        schema_file_exists = False
+                        return schema_file_path, schema_file_exists
+                    if schema_file_path and model_file_found:
+                        logger.debug(
+                            f"'{model_name}' found in '{schema_file_path}' we'll update entry."
+                        )
+                        schema_file_exists = True
+                        return schema_file_path, schema_file_exists
         return None, False
 
     @abc.abstractmethod

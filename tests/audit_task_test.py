@@ -209,7 +209,7 @@ def test_get_project_test_coverage(mocker, dbt_tests, call_input):
             "dim_company",
             [
                 call(
-                    columns=["Undocument Columns", "% coverage"],
+                    columns=["Undocumented Columns", "% coverage"],
                     data={"id": "", "name": "", "age": "", "address": "", "": "", "Total": "20.0"},
                     title="Documentation Coverage",
                 )

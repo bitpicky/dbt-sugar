@@ -10,7 +10,7 @@ towncrier --version <inert_version_name> --draft
 ```
 
 - `cd changelog/`, news fragments that are left should be deleted.
-- copy paste the generated changelog into the **official** document [`CHANGELOG.rst](CHANGELOG.rst)
+- copy paste the generated changelog into the **official** document [`CHANGELOG.rst`](CHANGELOG.rst)
 - I usually reformat it, add **external contributors** using `@username` as it's not easy to do so automatically so that GitHub automatically links those users.
 - bump the version using `bumpversion`. Generally a good idea to run `--dry-run` first to make sure nothing funny happens. I've had surprises with bumpversion doing weird things before.
 

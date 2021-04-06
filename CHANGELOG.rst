@@ -1,4 +1,31 @@
-dbt-sugar 0.0.0-b.0 (2021-03-31)
+dbt-sugar v.0.0.0-rc.0 (2021-04-06)
+===================================
+
+Bug Fixes
+---------
+
+- `#187 <https://github.com/bastienboutonnet/sheetwork/issues/187>`_: The folder ``dbt_modules`` is now excluded from dbt-sugar's search path
+
+
+- `#189 <https://github.com/bastienboutonnet/sheetwork/issues/189>`_: dbt-sugar now uses the user-provided list to exclude any number of tables from its scope.
+
+  - If a user asks to document a model that is part of the exclude list the app will raise a ``ValueError`` and tell users why
+  - Any model excluded from dbt-sugar's scope will also not be included in any of the ``dbt-sugar audit`` coverage statistics.
+
+  🚧 **BREAKING-CHANGE**: ``excluded_tables`` has been renamed to ``excluded_models`` to be consistent with dbt terminology. Users are advised to update their ``sugar_config.yml`` if they already used the ``excluded_tables`` config variable.
+
+
+
+Features
+--------
+
+- `#188 <https://github.com/bastienboutonnet/sheetwork/issues/188>`_: Users can now exclude folders from the search scope of ``dbt-sugar`` by providing a list of folder names to exclude in the ``sugar_config.yml`` via the ``excluded_folders:`` config argument. ``dbt-sugar`` will not look for models contained in any of these folders for both the ``audit`` and ``doc`` tasks (as well as all other new tasks in this tool unless explicitly mentioned in future releaeses).
+
+
+- `#193 <https://github.com/bastienboutonnet/sheetwork/issues/193>`_: dbt sugar now supports arbitrarily named model property files (schema.yml). This means just like in `dbt core <https://docs.getdbt.com/reference/model-properties>`_ , users can name their model property files any way they like.
+
+
+  dbt-sugar 0.0.0-b.0 (2021-03-31)
 ================================
 
 Bug Fixes

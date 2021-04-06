@@ -1,1 +1,0 @@
-dbt sugar now supports arbitrarily named model property files (schema.yml). This means just like in `dbt core <https://docs.getdbt.com/reference/model-properties>`_ , users can name their model property files any way they like.

@@ -986,8 +986,147 @@ def test_move_name_and_description_to_first_position(content, result):
 
 def test_setup_paths_and_models_exclusion():
     doc_task = __init_descriptions()
-    print(doc_task._sugar_config)
     assert (
         doc_task._excluded_folders_from_search_pattern
         == r"\/target\/|\/dbt_modules\/|\/folder_to_exclude\/"
     )
+
+
+@pytest.mark.parametrize(
+    "content, model_name, column_name, result",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["not_null", "unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique", "not_null"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented in reverse order",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id"}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="primary key tests are not presented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="only one primary key test is implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            None,
+            id="the primary key does not exists",
+        ),
+    ],
+)
+def test_has_tests_primary_key_are_implemented(content, model_name, column_name, result):
+    doc_task = __init_descriptions()
+    assert (
+        doc_task.has_tests_primary_key_are_implemented(content, model_name, column_name) == result
+    )
+
+
+@pytest.mark.parametrize(
+    "content, result",
+    [
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                    unique_key='id' ,
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            "id",
+            id="check reading the primary key",
+        ),
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                    unique_key = 'id' ,
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            "id",
+            id="check reading the primary key with spaces",
+        ),
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            None,
+            id="check case of not primary key presented",
+        ),
+    ],
+)
+def test_get_primary_key_from_sql(mocker, content, result):
+    doc_task = __init_descriptions()
+    read_file = mocker.patch("dbt_sugar.core.task.doc.DocumentationTask.read_file")
+    read_file.return_value = content
+    assert doc_task.get_primary_key_from_sql("path") == result

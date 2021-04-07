@@ -1,5 +1,6 @@
 """Document Task module."""
 import copy
+import re
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
@@ -149,6 +150,60 @@ class DocumentationTask(BaseTask):
         content_yml["models"] = sorted(content_yml["models"], key=lambda k: k["name"].lower())
         return content_yml
 
+    def get_primary_key_from_sql(self, sql_file_path: Path) -> Optional[str]:
+        """
+        Method to get the primary key from the SQL file.
+
+        Args:
+            sql_file_path (Path): SQL model path.
+
+        Returns:
+            Optional[str]: With the primary key, None if is not implemented.
+        """
+        sql_content = self.read_file(sql_file_path)
+        unique_key = re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content)
+        if unique_key:
+            return unique_key.group(1)
+        return None
+
+    def add_primary_key_tests(
+        self,
+        schema_file_path: Path,
+        schema_content: Dict[str, Any],
+        model_name: str,
+    ) -> None:
+        """Method to add the primary key tests.
+
+        Args:
+            schema_file_path (Path): to the schema.yml.
+            schema_content (Dict[str, Any]): content of the schema.yml.
+            model_name (str): model name to get the primary key from.
+        """
+        model_file_path = schema_file_path.parents[0].joinpath(f"{model_name}.sql")
+        primary_key_column = self.get_primary_key_from_sql(model_file_path)
+
+        if not primary_key_column:
+            logger.info("Could not find the primary key in the SQL file.")
+            return
+
+        has_primary_key_tests = self.has_tests_primary_key_are_implemented(
+            content=schema_content, model_name=model_name, column_name=primary_key_column
+        )
+
+        if not has_primary_key_tests:
+            logger.info(
+                f"""\nAutomatic Process: We have detected that column '{primary_key_column}'
+                is a primary key, adding unique and not null tests to the column.\n"""
+            )
+            primary_key_tests = ["unique", "not_null"]
+            if primary_key_column not in self.column_update_payload.keys():
+                self.column_update_payload[primary_key_column] = {"tests": primary_key_tests}
+            else:
+                tests = self.column_update_payload[primary_key_column].get("tests", [])
+                self.column_update_payload[primary_key_column][
+                    "tests"
+                ] = self.combine_two_list_without_duplicates(primary_key_tests, tests)
+
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]
     ) -> int:
@@ -196,6 +251,9 @@ class DocumentationTask(BaseTask):
         print(f"content about to be saved {content}")
         print(f"column_update_payload: {self.column_update_payload}")
         save_yaml(schema_file_path, self.order_schema_yml(content))
+        self.add_primary_key_tests(
+            schema_file_path=schema_file_path, schema_content=content, model_name=model_name
+        )
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(
             schema_file_path, model_name, self.column_update_payload

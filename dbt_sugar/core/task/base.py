@@ -74,6 +74,31 @@ class BaseTask(abc.ABC):
                         documented_columns[column["name"]] = column["description"]
         return documented_columns
 
+    def has_tests_primary_key_are_implemented(
+        self, content: Dict[str, Any], model_name: str, column_name: str
+    ) -> Optional[bool]:
+        """Method to check that the column with the primary key have the unique and not_null tests.
+
+        Args:
+            content (Dict[str, Any]): content of the schema.yml.
+            model_name (str): model name to check.
+            column_name (str): column name with the primary key.
+
+        Returns:
+            Optional[bool]: True if the column have unique and not_null tests,
+                False if is missing one of them, None if the column don't exists.
+        """
+        for model in content.get("models", []):
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    if column.get("name", "") == column_name:
+                        column_tests = column.get("tests", [])
+                        if "unique" in column_tests and "not_null" in column_tests:
+                            return True
+                        else:
+                            return False
+        return None
+
     def get_not_documented_columns(
         self, content: Dict[str, Any], model_name: str
     ) -> Dict[str, str]:
@@ -94,9 +119,7 @@ class BaseTask(abc.ABC):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
-    def __combine_two_list_without_duplicates(
-        self, list1: List[Any], list2: List[Any]
-    ) -> List[Any]:
+    def combine_two_list_without_duplicates(self, list1: List[Any], list2: List[Any]) -> List[Any]:
         """
         Method to combine two list without duplicates.
 
@@ -146,14 +169,14 @@ class BaseTask(abc.ABC):
                         # Update the tests without duplicating them.
                         tests = dict_column_description_to_update[column_name].get("tests")
                         if tests:
-                            column["tests"] = self.__combine_two_list_without_duplicates(
+                            column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 
                         # Update the tags without duplicating them.
                         tags = dict_column_description_to_update[column_name].get("tags")
                         if tags:
-                            column["tags"] = self.__combine_two_list_without_duplicates(
+                            column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
                             )
         save_yaml(path_file, content)
@@ -246,6 +269,22 @@ class BaseTask(abc.ABC):
 
             return filtered_models
         return None
+
+    def read_file(self, path: Path) -> str:
+        """
+        Method to read a file.
+
+        Args:
+            path (Path): with the path's name.
+
+        Returns:
+            str: content of the file.
+        """
+        content = ""
+        if Path(path).exists():
+            with open(path, "r") as reader:
+                content = reader.read()
+        return content
 
     def load_descriptions_from_a_schema_file(
         self, content: Dict[str, Any], path_schema: Path

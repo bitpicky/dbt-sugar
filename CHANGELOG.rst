@@ -25,7 +25,7 @@ Features
 - `#193 <https://github.com/bastienboutonnet/sheetwork/issues/193>`_: dbt sugar now supports arbitrarily named model property files (schema.yml). This means just like in `dbt core <https://docs.getdbt.com/reference/model-properties>`_ , users can name their model property files any way they like.
 
 
-  dbt-sugar 0.0.0-b.0 (2021-03-31)
+dbt-sugar 0.0.0-b.0 (2021-03-31)
 ================================
 
 Bug Fixes

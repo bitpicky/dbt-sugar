@@ -35,5 +35,6 @@ class SnowflakeConnector(BaseConnector):
             password=connection_params.get("password", str()),
             database=connection_params.get("database", str()),
             account=connection_params.get("account", str()),
+            warehouse=connection_params.get("warehouse", str()),
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)

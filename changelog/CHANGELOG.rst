@@ -1,3 +1,12 @@
+dbt-sugar v0.0.0-rc.1 (2021-04-10)
+==================================
+
+Bug Fixes
+---------
+
+- `#205 <https://github.com/bastienboutonnet/sheetwork/issues/205>`_: The snowflake_connector now passes the expected `warehouse` parameter when creating a connection. This fixes an issue reported by `@sphinks <https://github.com/sphinks>`_.
+
+
 dbt-sugar v.0.0.0-rc.0 (2021-04-06)
 ===================================
 

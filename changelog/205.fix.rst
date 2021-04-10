@@ -1,1 +1,0 @@
-The snowflake_connector now passes the expected `warehouse` parameter when creating a connection. This fixes an issue reported by `@sphinks <https://github.com/sphinks>`_.

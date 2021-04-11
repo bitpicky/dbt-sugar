@@ -56,6 +56,15 @@ This leads to you writing commit messages such as `implement my awesome feature`
 
 We'll squash your PR at merge time.
 
+#### Shout out your hardwork in the changelog!
+
+In this project we use `towncrier` to generate our changelog. When you make a PR, no-one better than you should be able to describe your code change! Towncrier works with news fragments. For each PR that proposes changes that need to be talked about in the changelog you should create a news fragment file in the following way:
+
+1. `cd changelog/`
+2. using your editor of choice create a file following the format below. Make sure to pick the category (feature, fix or misc) wisely:
+   `<issue_or_pr_number>.<feature/fix/misc>.md`
+3. save it and you're done. The release manager will take care of aggregating the changelog at release time
+
 #### Fork it, let's go! 🥁
 
 Fork the repo and get going. If you're not too experienced with forks, feel free to shoot us a DM on [Discord](https://discord.gg/cQB49ejbCA) and join the `#dbt-sugar-dev` channek. Here's a quick guide though:
@@ -85,7 +94,7 @@ For official guidelines check the [GitHub documentation](https://docs.github.com
    Say, you want to update or pull the original repo you can add the original repo as another remote called `upstream` (actually you can name if whatever you want but usually that's how people name this) to your config like so:
 
    ```bash
-   git remote add upstream https://github.com/bastienboutonnet/dbt-sugar.git
+   git remote add upstream https://github.com/bitpicky/dbt-sugar.git
    ```
 
 ### Python Stuff

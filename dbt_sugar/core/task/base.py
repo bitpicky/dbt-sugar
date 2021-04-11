@@ -149,6 +149,8 @@ class BaseTask(abc.ABC):
                         tests = dict_column_description_to_update[column_name].get("tests")
                         if tests:
                             tests = yaml.safe_load(tests)
+                            if not isinstance(tests, list):
+                                tests = [tests]
                             column["tests"] = self.__combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )

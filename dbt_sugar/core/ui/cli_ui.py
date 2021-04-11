@@ -242,11 +242,17 @@ class UserInputCollector:
                     message="Would you like to add any tests?"
                 ).unsafe_ask()
                 if wants_to_add_tests:
-                    tests = self.collect_rich_user_input()
-                    # tests = questionary.checkbox(
-                    # message="Please select one or more tests from the list below",
-                    # choices=AVAILABLE_TESTS,
-                    # ).unsafe_ask()
+                    wants_to_pop_editor = questionary.confirm(
+                        message="Do you want to add a complex or custom tests? If, so we'll open a test editor for "
+                        f"you, otherwise you can choose from the following builtins: {AVAILABLE_TESTS}"
+                    ).unsafe_ask()
+                    if wants_to_pop_editor:
+                        tests = self.collect_rich_user_input()
+                    else:
+                        tests = questionary.checkbox(
+                            message="Please select one or more tests from the list below",
+                            choices=AVAILABLE_TESTS,
+                        ).unsafe_ask()
                     if tests:
                         results[column]["tests"] = tests
 

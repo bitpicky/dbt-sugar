@@ -190,6 +190,11 @@ class UserInputCollector:
         self._is_valid_question_payload = True
 
     def collect_rich_user_input(self) -> str:
+        """Uses click to open up a text editor to collect rich user input.
+
+        Returns:
+            str: string version of the text input which will then be loaded.
+        """
         tests = click.edit(extension=".yml")
         tests = tests.replace("\t", "  ")
         return tests

@@ -46,3 +46,11 @@ models:
           - PK
       - name: status
         description: Status the order is in.
+        tests:
+          - list_of_vals:
+              - a
+              - b
+          - accepted_values:
+              - a
+              - b
+          - unique

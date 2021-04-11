@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import yaml
+
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
@@ -146,6 +148,7 @@ class BaseTask(abc.ABC):
                         # Update the tests without duplicating them.
                         tests = dict_column_description_to_update[column_name].get("tests")
                         if tests:
+                            tests = yaml.safe_load(tests)
                             column["tests"] = self.__combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )

@@ -194,7 +194,10 @@ class DocumentationTask(BaseTask):
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
         save_yaml(schema_file_path, self.order_schema_yml(content))
-        self.check_tests(schema, model_name)
+
+        # TODO: Hook it up into the new check_tests function which uses subprocess
+        # self.check_tests(schema, model_name)
+
         self.update_model_description_test_tags(
             schema_file_path, model_name, self.column_update_payload
         )

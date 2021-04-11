@@ -3,6 +3,7 @@
 import copy
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
+import click
 import questionary
 from pydantic import BaseModel, validator
 
@@ -188,6 +189,11 @@ class UserInputCollector:
 
         self._is_valid_question_payload = True
 
+    def collect_rich_user_input(self) -> str:
+        tests = click.edit(extension=".yml")
+        tests = tests.replace("\t", "  ")
+        return tests
+
     def _iterate_through_columns(
         self, cols: List[str]
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
@@ -236,10 +242,11 @@ class UserInputCollector:
                     message="Would you like to add any tests?"
                 ).unsafe_ask()
                 if wants_to_add_tests:
-                    tests = questionary.checkbox(
-                        message="Please select one or more tests from the list below",
-                        choices=AVAILABLE_TESTS,
-                    ).unsafe_ask()
+                    tests = self.collect_rich_user_input()
+                    # tests = questionary.checkbox(
+                    # message="Please select one or more tests from the list below",
+                    # choices=AVAILABLE_TESTS,
+                    # ).unsafe_ask()
                     if tests:
                         results[column]["tests"] = tests
 

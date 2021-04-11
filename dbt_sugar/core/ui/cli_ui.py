@@ -175,7 +175,7 @@ class UserInputCollector:
             for payload_element_index, payload_element in enumerate(self._question_payload):
                 if payload_element_index == 0:
                     ConfirmModelDoc(**payload_element)
-                if payload_element_index == 1:
+                elif payload_element_index == 1:
                     DescriptionTextInput(**payload_element)
 
         elif self._question_type == "undocumented_columns":
@@ -298,8 +298,8 @@ class UserInputCollector:
 
             if not results.get("model_description"):
                 # we return an empty dict if user decided to not enter a description in the end.
-                results = dict()
-            if collect_model_description is False:
+                results = {}
+            if not collect_model_description:
                 # if the user doesnt want to document the model we exit early even if the payload
                 # has a second entry which would trigger the description collection
                 break
@@ -330,14 +330,12 @@ class UserInputCollector:
         ).unsafe_ask()
 
         if document_all_cols:
-            results = self._iterate_through_columns(cols=columns_to_document)
-        else:
-            # get the list of columns from user
-            columns_to_document = questionary.prompt(question_payload)
-            results = self._iterate_through_columns(
+            return self._iterate_through_columns(cols=columns_to_document)
+        # get the list of columns from user
+        columns_to_document = questionary.prompt(question_payload)
+        return self._iterate_through_columns(
                 cols=columns_to_document["cols_to_document"],
             )
-        return results
 
     def _document_already_documented_cols(
         self,
@@ -347,13 +345,15 @@ class UserInputCollector:
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
 
         # massage the question payload
-        choices = []
-        for col, desc in mutable_payload[0].get("choices", dict()).items():
-            choices.append(f"{col} | {desc}")
+        choices = [
+            f"{col} | {desc}"
+            for col, desc in mutable_payload[0].get("choices", dict()).items()
+        ]
+
         mutable_payload[0].update({"choices": choices})
 
         # ask user if they want to see any of the documented columns?
-        results = dict()
+        results = {}
         document_any_columns = questionary.confirm(
             message="Do you want to document any of the already documented columns in this model?",
             auto_enter=True,

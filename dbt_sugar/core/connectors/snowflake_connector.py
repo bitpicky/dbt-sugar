@@ -3,7 +3,7 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
-from typing import Dict
+from typing import Any, Dict, List, Optional, Tuple
 
 import sqlalchemy
 from snowflake.sqlalchemy import URL
@@ -38,3 +38,23 @@ class SnowflakeConnector(BaseConnector):
             warehouse=connection_params.get("warehouse", str()),
         )
         self.engine = sqlalchemy.create_engine(self.connection_url)
+
+    def get_columns_from_table(
+        self, target_table: str, target_schema: str, use_describe: bool = False
+    ) -> Optional[List[Tuple[Any]]]:
+
+        # if user wants to use describe (more preformant but with caveat) method
+        # we re-implement column describe since snowflake.sqlalchemy is shit.
+        if use_describe:
+            # do some basic escaping to prevent "little bobby drop table" scenario
+            target_schema = target_schema.split(";")[0]
+            target_table = target_table.split(";")[0]
+
+            connection = self.engine.connect()
+            results = connection.execute(f"describe table {target_schema}.{target_table};")
+            results = results.fetchall()
+            columns = [row["name"] for row in results]
+            return columns
+
+        # else we just return the base method which will user snowflake.sqlalchemy's impl
+        return super().get_columns_from_table(target_table, target_schema)

@@ -48,21 +48,6 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.main import parser
 
-    expectation = {
-        "name": "syrup_1",
-        "dbt_projects": [
-            {
-                "name": "dbt_sugar_test",
-                "path": "./tests/test_dbt_project/dbt_sugar_test",
-                "excluded_models": ["my_first_dbt_model_excluded"],
-                "excluded_folders": ["folder_to_exclude"],
-            },
-        ],
-        "always_add_tags": True,
-        "always_enforce_tests": True,
-        "use_describe_snowflake": False,
-    }
-
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
     if has_no_default_syrup:
         config_filepath = Path(datafiles).joinpath("sugar_config_missing_default.yml")
@@ -111,6 +96,21 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
             config.load_config()
     else:
         config.load_config()
+        expectation = {
+            "name": "syrup_1",
+            "dbt_projects": [
+                {
+                    "name": "dbt_sugar_test",
+                    "path": "./tests/test_dbt_project/dbt_sugar_test",
+                    "excluded_models": ["my_first_dbt_model_excluded"],
+                    "excluded_folders": ["folder_to_exclude"],
+                },
+            ],
+            "always_add_tags": True,
+            "always_enforce_tests": True,
+            "use_describe_snowflake": False,
+        }
+
         assert config.config == expectation
         assert config._config_file_found_nearby is True
 

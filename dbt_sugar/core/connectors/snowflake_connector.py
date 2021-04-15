@@ -9,6 +9,7 @@ import sqlalchemy
 from snowflake.sqlalchemy import URL
 
 from dbt_sugar.core.connectors.base import BaseConnector
+from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 
 class SnowflakeConnector(BaseConnector):
@@ -46,6 +47,10 @@ class SnowflakeConnector(BaseConnector):
         # if user wants to use describe (more preformant but with caveat) method
         # we re-implement column describe since snowflake.sqlalchemy is shit.
         if use_describe:
+            logger.info(
+                "Using [red]experimental[/red] `describe table` feature instead of official "
+                "`get_columns` from `snowflake.sqlalchemy`."
+            )
             # do some basic escaping to prevent "little bobby drop table" scenario
             target_schema = target_schema.split(";")[0]
             target_table = target_table.split(";")[0]
@@ -53,8 +58,7 @@ class SnowflakeConnector(BaseConnector):
             connection = self.engine.connect()
             results = connection.execute(f"describe table {target_schema}.{target_table};")
             results = results.fetchall()
-            columns = [row["name"] for row in results]
-            return columns
+            return [row["name"] for row in results]
 
         # else we just return the base method which will user snowflake.sqlalchemy's impl
         return super().get_columns_from_table(target_table, target_schema)

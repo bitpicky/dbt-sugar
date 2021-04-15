@@ -32,6 +32,7 @@ class SyrupModel(BaseModel):
     dbt_projects: List[DbtProjectsModel]
     always_enforce_tests: Optional[bool] = True
     always_add_tags: Optional[bool] = True
+    use_describe_snowflake: Optional[bool] = False
 
 
 class DefaultsModel(BaseModel):

@@ -39,7 +39,7 @@ class DocumentationTask(BaseTask):
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
-        # self._sugar_config = config
+        self._sugar_config = config
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -59,7 +59,9 @@ class DocumentationTask(BaseTask):
 
         # exit early if model is in the excluded_models list
         _ = self.is_exluded_model(model)
-        columns_sql = self.connector.get_columns_from_table(model, schema)
+        columns_sql = self.connector.get_columns_from_table(
+            model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
+        )
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1

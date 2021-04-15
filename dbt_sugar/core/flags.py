@@ -32,6 +32,7 @@ class FlagParser:
         self.ask_for_tags: bool = True
         self.target: str = str()
         self.verbose: bool = False
+        self.use_describe_snowflake: bool = False
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
         if test_cli_args:
@@ -61,6 +62,7 @@ class FlagParser:
             # we reverse the flag so that we don't have double negatives later in the code
             self.ask_for_tests = self.args.ask_for_tests
             self.ask_for_tags = self.args.ask_for_tags
+            self.use_describe_snowflake = self.args.use_describe_snowflake
 
         if self.task == "audit":
             self.model = self.args.model

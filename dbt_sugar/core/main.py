@@ -133,6 +133,16 @@ document_sub_parser.add_argument(
     default=True,
 )
 
+document_sub_parser.add_argument(
+    "--use-describe-snowflake",
+    help=(
+        "When passed dbt doc will use `describe table` the faster but experimental query "
+        "to retrive columns from the database."
+    ),
+    action="store_true",
+    default=False,
+)
+
 # document task parser
 audit_sub_parser = sub_parsers.add_parser(
     "audit", parents=[base_subparser], help="Runs audit task."

@@ -145,7 +145,6 @@ class DbtSugarConfig:
                 "path": resolved_dbt_project_path,
             }
 
-
         bogus_projects = {
             project: details["path"]
             for project, details in project_existance.items()
@@ -172,7 +171,7 @@ class DbtSugarConfig:
             while folder_iteration < self._max_folder_iterations:
                 if filename.exists():
                     sugar_config_dir = filename
-                    logger.debug(f'{sugar_config_dir} exists and was retreived.')
+                    logger.debug(f"{sugar_config_dir} exists and was retreived.")
                     self._config_path = sugar_config_dir
                     self._config_file_found_nearby = True
                     break

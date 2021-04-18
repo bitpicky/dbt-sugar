@@ -58,7 +58,7 @@ class SnowflakeConnector(BaseConnector):
             connection = self.engine.connect()
             results = connection.execute(f"describe table {target_schema}.{target_table};")
             results = results.fetchall()
-            return [row["name"] for row in results]
+            return [row["name"].lower() for row in results]
 
         # else we just return the base method which will user snowflake.sqlalchemy's impl
         return super().get_columns_from_table(target_table, target_schema)

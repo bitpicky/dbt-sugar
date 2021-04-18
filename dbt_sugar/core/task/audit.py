@@ -113,14 +113,14 @@ class AuditTask(BaseTask):
     def get_model_column_description_coverage(self) -> None:
         """Method to get the descriptions coverage from a specific model."""
         not_documented_columns = self.get_not_documented_columns(
-            content=self.model_content,
+            schema_content=self.model_content,
             model_name=self.model_name,
         ).keys()
 
         number_not_documented_columns = len(not_documented_columns)
         number_documented_columns = len(
             self.get_documented_columns(
-                content=self.model_content,
+                schema_content=self.model_content,
                 model_name=self.model_name,
             )
         )
@@ -230,18 +230,18 @@ class AuditTask(BaseTask):
         """Method to get the model descriptions coverage per model in a dbt project."""
         print_statistics = {}
         for model_name, path in self.all_dbt_models.items():
-            content = open_yaml(path)
+            schema_content = open_yaml(path)
 
             number_documented_columns = len(
                 self.get_documented_columns(
-                    content=content,
+                    schema_content=schema_content,
                     model_name=model_name,
                 )
             )
 
             number_not_documented_columns = len(
                 self.get_not_documented_columns(
-                    content=content,
+                    schema_content=schema_content,
                     model_name=model_name,
                 )
             )

@@ -25,6 +25,7 @@ DB_CONNECTORS = {
     "postgres": PostgresConnector,
     "snowflake": SnowflakeConnector,
 }
+PRIMARY_KEYS_TESTS = ["unique", "not_null"]
 
 
 class DocumentationTask(BaseTask):
@@ -152,13 +153,13 @@ class DocumentationTask(BaseTask):
 
     def get_primary_key_from_sql(self, sql_file_path: Path) -> Optional[str]:
         """
-        Method to get the primary key from the SQL file.
+        Gets the primary key info from a dbt model's config block.
 
         Args:
-            sql_file_path (Path): SQL model path.
+            sql_file_path (Path): full path including file name of a dbt .sql file.
 
         Returns:
-            Optional[str]: With the primary key, None if is not implemented.
+            Optional[str]: name of the primary key column. None if no primary key is specified in the config block.
         """
         sql_content = self.read_file(sql_file_path)
         unique_key = re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content)
@@ -172,37 +173,41 @@ class DocumentationTask(BaseTask):
         schema_content: Dict[str, Any],
         model_name: str,
     ) -> None:
-        """Method to add the primary key tests.
+        """
+        Adds the primary key tests (unique, not_null) to the primary key column.
 
         Args:
-            schema_file_path (Path): to the schema.yml.
+            schema_file_path (Path): full path name (including file name) pointing to
+                the yml descriptor in which the model to add the primary key tests to is documented.
             schema_content (Dict[str, Any]): content of the schema.yml.
-            model_name (str): model name to get the primary key from.
+            model_name (str): Name of the model on which to add primary key tests.
         """
         model_file_path = schema_file_path.parents[0].joinpath(f"{model_name}.sql")
         primary_key_column = self.get_primary_key_from_sql(model_file_path)
 
         if not primary_key_column:
-            logger.info("Could not find the primary key in the SQL file.")
+            logger.info(
+                f"""The model {model_name} do not have a primary key identified in the config block.
+                Note: you could use this to make dbt-sugar enforce unique and not null tests for you automatically."""
+            )
             return
 
-        has_primary_key_tests = self.has_tests_primary_key_are_implemented(
-            content=schema_content, model_name=model_name, column_name=primary_key_column
+        has_primary_key_tests = self.column_has_primary_key_tests(
+            schema_content=schema_content, model_name=model_name, column_name=primary_key_column
         )
 
-        if not has_primary_key_tests:
+        if has_primary_key_tests is False:
             logger.info(
                 f"""\nAutomatic Process: We have detected that column '{primary_key_column}'
-                is a primary key, adding unique and not null tests to the column.\n"""
+                is a primary key, 'unique' and 'not_null' tests will be added for you.\n"""
             )
-            primary_key_tests = ["unique", "not_null"]
             if primary_key_column not in self.column_update_payload.keys():
-                self.column_update_payload[primary_key_column] = {"tests": primary_key_tests}
+                self.column_update_payload[primary_key_column] = {"tests": PRIMARY_KEYS_TESTS}
             else:
                 tests = self.column_update_payload[primary_key_column].get("tests", [])
                 self.column_update_payload[primary_key_column][
                     "tests"
-                ] = self.combine_two_list_without_duplicates(primary_key_tests, tests)
+                ] = self.combine_two_list_without_duplicates(PRIMARY_KEYS_TESTS, tests)
 
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]

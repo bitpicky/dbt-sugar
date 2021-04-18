@@ -56,7 +56,9 @@ class BaseTask(abc.ABC):
         """
         return self.dbt_definitions.get(column_name, COLUMN_NOT_DOCUMENTED)
 
-    def get_documented_columns(self, content: Dict[str, Any], model_name: str) -> Dict[str, str]:
+    def get_documented_columns(
+        self, schema_content: Dict[str, Any], model_name: str
+    ) -> Dict[str, str]:
         """Method to get the documented columns from a model in a schema.yml.
 
         Args:
@@ -67,20 +69,20 @@ class BaseTask(abc.ABC):
             Dict[str, str]: with the columns names and descriptions documented.
         """
         documented_columns = {}
-        for model in content.get("models", []):
+        for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     if column.get("description", COLUMN_NOT_DOCUMENTED) != COLUMN_NOT_DOCUMENTED:
                         documented_columns[column["name"]] = column["description"]
         return documented_columns
 
-    def has_tests_primary_key_are_implemented(
-        self, content: Dict[str, Any], model_name: str, column_name: str
+    def column_has_primary_key_tests(
+        self, schema_content: Dict[str, Any], model_name: str, column_name: str
     ) -> Optional[bool]:
         """Method to check that the column with the primary key have the unique and not_null tests.
 
         Args:
-            content (Dict[str, Any]): content of the schema.yml.
+            schema_content (Dict[str, Any]): content of the schema.yml.
             model_name (str): model name to check.
             column_name (str): column name with the primary key.
 
@@ -88,7 +90,7 @@ class BaseTask(abc.ABC):
             Optional[bool]: True if the column have unique and not_null tests,
                 False if is missing one of them, None if the column don't exists.
         """
-        for model in content.get("models", []):
+        for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     if column.get("name", "") == column_name:
@@ -100,19 +102,19 @@ class BaseTask(abc.ABC):
         return None
 
     def get_not_documented_columns(
-        self, content: Dict[str, Any], model_name: str
+        self, schema_content: Dict[str, Any], model_name: str
     ) -> Dict[str, str]:
         """Method to get the undocumented columns from a model in a schema.yml.
 
         Args:
-            content (Dict[str, Any]): content of the schema.yml.
+            schema_content (Dict[str, Any]): content of the schema.yml.
             model_name (str): model name to get the columns from.
 
         Returns:
             Dict[str, str]: with the columns names and descriptions undocumented.
         """
         not_documented_columns = {}
-        for model in content.get("models", []):
+        for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     if column.get("description", COLUMN_NOT_DOCUMENTED) == COLUMN_NOT_DOCUMENTED:
@@ -270,19 +272,19 @@ class BaseTask(abc.ABC):
             return filtered_models
         return None
 
-    def read_file(self, path: Path) -> str:
+    def read_file(self, filename_path: Path) -> str:
         """
         Method to read a file.
 
         Args:
-            path (Path): with the path's name.
+            filename_path (Path): full path to the file we want to read.
 
         Returns:
             str: content of the file.
         """
         content = ""
-        if Path(path).exists():
-            with open(path, "r") as reader:
+        if Path(filename_path).exists():
+            with open(filename_path, "r") as reader:
                 content = reader.read()
         return content
 

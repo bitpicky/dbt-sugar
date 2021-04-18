@@ -1038,7 +1038,7 @@ def test_setup_paths_and_models_exclusion():
             "testmodel",
             "id",
             False,
-            id="primary key tests are not presented",
+            id="primary key tests are not implemented",
         ),
         pytest.param(
             {
@@ -1068,15 +1068,13 @@ def test_setup_paths_and_models_exclusion():
             "testmodel",
             "id",
             None,
-            id="the primary key does not exists",
+            id="primary key not documented in schema.yml",
         ),
     ],
 )
-def test_has_tests_primary_key_are_implemented(content, model_name, column_name, result):
+def test_column_has_primary_key_tests(content, model_name, column_name, result):
     doc_task = __init_descriptions()
-    assert (
-        doc_task.has_tests_primary_key_are_implemented(content, model_name, column_name) == result
-    )
+    assert doc_task.column_has_primary_key_tests(content, model_name, column_name) == result
 
 
 @pytest.mark.parametrize(

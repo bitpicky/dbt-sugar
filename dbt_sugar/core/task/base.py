@@ -37,13 +37,10 @@ class BaseTask(abc.ABC):
             excluded_folders_from_search_pattern: str = r"\/|\/".join(
                 self._sugar_config.dbt_project_info["excluded_folders"]
             )
-            excluded_folders_from_search_pattern = (
-                fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
-            )
-            return excluded_folders_from_search_pattern
+            return fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
+
         else:
-            excluded_folders_from_search_pattern = DEFAULT_EXCLUDED_FOLDERS_PATTERN
-            return excluded_folders_from_search_pattern
+            return DEFAULT_EXCLUDED_FOLDERS_PATTERN
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
         """Searches for the description of a column in all the descriptions in DBT.
@@ -95,10 +92,7 @@ class BaseTask(abc.ABC):
                 for column in model.get("columns", []):
                     if column.get("name", "") == column_name:
                         column_tests = column.get("tests", [])
-                        if "unique" in column_tests and "not_null" in column_tests:
-                            return True
-                        else:
-                            return False
+                        return "unique" in column_tests and "not_null" in column_tests
         return None
 
     def get_not_documented_columns(
@@ -160,7 +154,7 @@ class BaseTask(abc.ABC):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     column_name = column["name"]
-                    if column_name in dict_column_description_to_update.keys():
+                    if column_name in dict_column_description_to_update:
                         # Update the description
                         description = dict_column_description_to_update[column_name].get(
                             "description"
@@ -197,7 +191,7 @@ class BaseTask(abc.ABC):
         for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
-                if column_name in dict_column_description_to_update.keys():
+                if column_name in dict_column_description_to_update:
                     new_desctiption = dict_column_description_to_update[column_name].get(
                         "description"
                     )
@@ -263,13 +257,13 @@ class BaseTask(abc.ABC):
         # if self._sugar_config.dbt_project_info.get("excluded_models"):
         logger.debug(models)
         if models:
-            filtered_models = [
+            return [
                 model_dict
                 for model_dict in models
-                if not model_dict["name"] in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"]
+                not in self._sugar_config.dbt_project_info["excluded_models"]
             ]
 
-            return filtered_models
         return None
 
     def read_file(self, filename_path: Path) -> str:
@@ -364,10 +358,7 @@ class BaseTask(abc.ABC):
         if not content:
             return False
 
-        for model in content.get("models", []):
-            if model["name"] == model_name:
-                return True
-        return False
+        return any(model["name"] == model_name for model in content.get("models", []))
 
     def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool, bool]:
         for root, _, files in os.walk(self.repository_path):

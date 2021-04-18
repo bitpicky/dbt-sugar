@@ -169,7 +169,6 @@ class DocumentationTask(BaseTask):
 
     def add_primary_key_tests(
         self,
-        schema_file_path: Path,
         schema_content: Dict[str, Any],
         model_name: str,
     ) -> None:
@@ -177,14 +176,14 @@ class DocumentationTask(BaseTask):
         Adds the primary key tests (unique, not_null) to the primary key column.
 
         Args:
-            schema_file_path (Path): full path name (including file name) pointing to
-                the yml descriptor in which the model to add the primary key tests to is documented.
             schema_content (Dict[str, Any]): content of the schema.yml.
             model_name (str): Name of the model on which to add primary key tests.
         """
-        model_file_path = schema_file_path.parents[0].joinpath(f"{model_name}.sql")
-        primary_key_column = self.get_primary_key_from_sql(model_file_path)
+        model_file_path = self.get_file_path_from_sql_model(model_name=model_name)
+        if not model_file_path:
+            return
 
+        primary_key_column = self.get_primary_key_from_sql(model_file_path)
         if not primary_key_column:
             logger.info(
                 f"""The model {model_name} do not have a primary key identified in the config block.
@@ -256,9 +255,7 @@ class DocumentationTask(BaseTask):
         print(f"content about to be saved {content}")
         print(f"column_update_payload: {self.column_update_payload}")
         save_yaml(schema_file_path, self.order_schema_yml(content))
-        self.add_primary_key_tests(
-            schema_file_path=schema_file_path, schema_content=content, model_name=model_name
-        )
+        self.add_primary_key_tests(schema_content=content, model_name=model_name)
         self.check_tests(schema, model_name)
         self.update_model_description_test_tags(
             schema_file_path, model_name, self.column_update_payload

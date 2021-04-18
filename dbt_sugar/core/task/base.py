@@ -311,6 +311,25 @@ class BaseTask(abc.ABC):
                 self.update_description_in_dbt_descriptions(column["name"], column_description)
                 self.update_test_in_dbt_tests(model["name"], column)
 
+    def get_file_path_from_sql_model(self, model_name: str) -> Optional[Path]:
+        """Get the complete file path from a model name.
+
+        Args:
+            model_name (str): with the model name to find.
+
+        Returns:
+            Optional[Path]: Path of the SQL file, None if the file doens't exists.
+        """
+        for root, _, files in os.walk(self.repository_path):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
+                for file_name in files:
+                    file_name = file_name.lower()
+                    if file_name == f"{model_name}.sql" and not re.search(
+                        DEFAULT_EXCLUDED_YML_FILES, file_name
+                    ):
+                        return Path(os.path.join(root, file_name))
+        return None
+
     def build_descriptions_dictionary(self) -> None:
         """Load the columns descriptions from all schema files in a dbt project.
 

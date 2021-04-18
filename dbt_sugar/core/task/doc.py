@@ -329,7 +329,6 @@ class DocumentationTask(BaseTask):
             question_type in allowed_question_types_map
         ), f"question_type must be one of those: {list(allowed_question_types_map.keys())}"
 
-
         # set up pagination messaging
         columns_names = list(columns.keys())
         number_of_colums_to_document = len(columns_names)

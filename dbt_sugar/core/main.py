@@ -72,7 +72,7 @@ base_subparser.add_argument(
 # Task-specific argument sub parsers
 sub_parsers = parser.add_subparsers(title="Available dbt-sugar commands", dest="command")
 
-# document task parser
+# DOC task parser
 document_sub_parser = sub_parsers.add_parser(
     "doc", parents=[base_subparser], help="Runs documentation and test enforement task."
 )
@@ -101,7 +101,6 @@ document_sub_parser.add_argument(
     type=str,
     default=str(),
 )
-# document_sub_parser.add_argument(
 
 document_sub_parser.add_argument(
     "--no-ask-tests",
@@ -143,7 +142,7 @@ document_sub_parser.add_argument(
     default=False,
 )
 
-# document task parser
+# ##### AUDIT Task
 audit_sub_parser = sub_parsers.add_parser(
     "audit", parents=[base_subparser], help="Runs audit task."
 )
@@ -157,9 +156,16 @@ audit_sub_parser.add_argument(
     required=False,
 )
 
+
+# ##### BOOTSTRAP Task Arg parser
+bootstrap_sub_parser = sub_parsers.add_parser(
+    "bootstrap",
+    parents=[base_subparser],
+    help="Runs the bootstrap task, which creates model descriptor files for all your models.",
+)
+
+
 # task handler
-
-
 def handle(
     parser: argparse.ArgumentParser,
     test_cli_args: List[str] = list(),

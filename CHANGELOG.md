@@ -1,3 +1,7 @@
+# dbt-sugar [0.0.0] - 2021-04-18
+
+No significant changes.
+
 # dbt-sugar v0.0.0-rc.2 (2021-04-10)
 
 ## Bug Fixes

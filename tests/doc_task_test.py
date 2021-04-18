@@ -1078,6 +1078,26 @@ def test_column_has_primary_key_tests(content, model_name, column_name, result):
 
 
 @pytest.mark.parametrize(
+    "model_name, result",
+    [
+        pytest.param(
+            "my_second_dbt_model",
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/my_second_dbt_model.sql"),
+            id="check if find the SQL file.",
+        ),
+        pytest.param(
+            "no_existing_model",
+            None,
+            id="check if a model doesn't have an sql file.",
+        ),
+    ],
+)
+def test_get_file_path_from_sql_model(model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_file_path_from_sql_model(model_name) == result
+
+
+@pytest.mark.parametrize(
     "content, result",
     [
         pytest.param(

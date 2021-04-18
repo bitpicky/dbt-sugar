@@ -39,7 +39,7 @@ class DocumentationTask(BaseTask):
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
-        # self._sugar_config = config
+        self._sugar_config = config
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -59,7 +59,9 @@ class DocumentationTask(BaseTask):
 
         # exit early if model is in the excluded_models list
         _ = self.is_exluded_model(model)
-        columns_sql = self.connector.get_columns_from_table(model, schema)
+        columns_sql = self.connector.get_columns_from_table(
+            model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
+        )
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
@@ -264,7 +266,7 @@ class DocumentationTask(BaseTask):
             "documented_columns": "documented columns",
         }
         assert (
-            question_type in allowed_question_types_map.keys()
+            question_type in allowed_question_types_map
         ), f"question_type must be one of those: {list(allowed_question_types_map.keys())}"
 
         # set up pagination messaging
@@ -280,14 +282,14 @@ class DocumentationTask(BaseTask):
         # go through columns to document
         for i in range(0, number_of_colums_to_document, NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
-            is_first_page = True if final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION else False
+            is_first_page = final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
 
             choices_undocumented = columns_names[i:final_index]
             choices_documented = {}
             # Feed the current description into the choices messahe.
             if question_type == "documented_columns":
                 choices_documented = {key: columns[key] for key in choices_undocumented}
-            choices = choices_documented if choices_documented else choices_undocumented
+            choices = choices_documented or choices_undocumented
 
             payload: List[Mapping[str, Any]] = [
                 {

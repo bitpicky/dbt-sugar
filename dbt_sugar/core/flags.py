@@ -32,12 +32,10 @@ class FlagParser:
         self.ask_for_tags: bool = True
         self.target: str = str()
         self.verbose: bool = False
+        self.use_describe_snowflake: bool = False
 
     def consume_cli_arguments(self, test_cli_args: List[str] = list()) -> None:
-        if test_cli_args:
-            _cli_args = test_cli_args
-        else:
-            _cli_args = sys.argv[1:]
+        _cli_args = test_cli_args or sys.argv[1:]
         self.args = self.cli_parser.parse_args(_cli_args)
 
         self.task = self.args.command
@@ -53,7 +51,9 @@ class FlagParser:
                 self.config_path = Path(self.args.config_path).expanduser()
 
         # task specific args consumption
-        if self.task == "doc":
+        if self.task == "audit":
+            self.model = self.args.model
+        elif self.task == "doc":
             self.model = self.args.model
             self.schema = self.args.schema
             self.is_dry_run = self.args.dry_run
@@ -61,6 +61,4 @@ class FlagParser:
             # we reverse the flag so that we don't have double negatives later in the code
             self.ask_for_tests = self.args.ask_for_tests
             self.ask_for_tags = self.args.ask_for_tags
-
-        if self.task == "audit":
-            self.model = self.args.model
+            self.use_describe_snowflake = self.args.use_describe_snowflake

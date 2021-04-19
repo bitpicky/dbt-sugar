@@ -37,13 +37,10 @@ class BaseTask(abc.ABC):
             excluded_folders_from_search_pattern: str = r"\/|\/".join(
                 self._sugar_config.dbt_project_info["excluded_folders"]
             )
-            excluded_folders_from_search_pattern = (
-                fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
-            )
-            return excluded_folders_from_search_pattern
+            return fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
+
         else:
-            excluded_folders_from_search_pattern = DEFAULT_EXCLUDED_FOLDERS_PATTERN
-            return excluded_folders_from_search_pattern
+            return DEFAULT_EXCLUDED_FOLDERS_PATTERN
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
         """Searches for the description of a column in all the descriptions in DBT.
@@ -56,7 +53,9 @@ class BaseTask(abc.ABC):
         """
         return self.dbt_definitions.get(column_name, COLUMN_NOT_DOCUMENTED)
 
-    def get_documented_columns(self, content: Dict[str, Any], model_name: str) -> Dict[str, str]:
+    def get_documented_columns(
+        self, schema_content: Dict[str, Any], model_name: str
+    ) -> Dict[str, str]:
         """Method to get the documented columns from a model in a schema.yml.
 
         Args:
@@ -67,36 +66,56 @@ class BaseTask(abc.ABC):
             Dict[str, str]: with the columns names and descriptions documented.
         """
         documented_columns = {}
-        for model in content.get("models", []):
+        for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     if column.get("description", COLUMN_NOT_DOCUMENTED) != COLUMN_NOT_DOCUMENTED:
                         documented_columns[column["name"]] = column["description"]
         return documented_columns
 
+    def column_has_primary_key_tests(
+        self, schema_content: Dict[str, Any], model_name: str, column_name: str
+    ) -> Optional[bool]:
+        """Method to check that the column with the primary key have the unique and not_null tests.
+
+        Args:
+            schema_content (Dict[str, Any]): content of the schema.yml.
+            model_name (str): model name to check.
+            column_name (str): column name with the primary key.
+
+        Returns:
+            Optional[bool]: True if the column have unique and not_null tests,
+                False if is missing one of them, None if the column don't exists.
+        """
+        for model in schema_content.get("models", []):
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    if column.get("name", "") == column_name:
+                        column_tests = column.get("tests", [])
+                        return "unique" in column_tests and "not_null" in column_tests
+        return None
+
     def get_not_documented_columns(
-        self, content: Dict[str, Any], model_name: str
+        self, schema_content: Dict[str, Any], model_name: str
     ) -> Dict[str, str]:
         """Method to get the undocumented columns from a model in a schema.yml.
 
         Args:
-            content (Dict[str, Any]): content of the schema.yml.
+            schema_content (Dict[str, Any]): content of the schema.yml.
             model_name (str): model name to get the columns from.
 
         Returns:
             Dict[str, str]: with the columns names and descriptions undocumented.
         """
         not_documented_columns = {}
-        for model in content.get("models", []):
+        for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     if column.get("description", COLUMN_NOT_DOCUMENTED) == COLUMN_NOT_DOCUMENTED:
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
-    def __combine_two_list_without_duplicates(
-        self, list1: List[Any], list2: List[Any]
-    ) -> List[Any]:
+    def combine_two_list_without_duplicates(self, list1: List[Any], list2: List[Any]) -> List[Any]:
         """
         Method to combine two list without duplicates.
 
@@ -135,7 +154,7 @@ class BaseTask(abc.ABC):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
                     column_name = column["name"]
-                    if column_name in dict_column_description_to_update.keys():
+                    if column_name in dict_column_description_to_update:
                         # Update the description
                         description = dict_column_description_to_update[column_name].get(
                             "description"
@@ -146,14 +165,14 @@ class BaseTask(abc.ABC):
                         # Update the tests without duplicating them.
                         tests = dict_column_description_to_update[column_name].get("tests")
                         if tests:
-                            column["tests"] = self.__combine_two_list_without_duplicates(
+                            column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 
                         # Update the tags without duplicating them.
                         tags = dict_column_description_to_update[column_name].get("tags")
                         if tags:
-                            column["tags"] = self.__combine_two_list_without_duplicates(
+                            column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
                             )
         save_yaml(path_file, content)
@@ -172,7 +191,7 @@ class BaseTask(abc.ABC):
         for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
-                if column_name in dict_column_description_to_update.keys():
+                if column_name in dict_column_description_to_update:
                     new_desctiption = dict_column_description_to_update[column_name].get(
                         "description"
                     )
@@ -238,14 +257,29 @@ class BaseTask(abc.ABC):
         # if self._sugar_config.dbt_project_info.get("excluded_models"):
         logger.debug(models)
         if models:
-            filtered_models = [
+            return [
                 model_dict
                 for model_dict in models
-                if not model_dict["name"] in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"] not in self._sugar_config.dbt_project_info["excluded_models"]
             ]
 
-            return filtered_models
         return None
+
+    def read_file(self, filename_path: Path) -> str:
+        """
+        Method to read a file.
+
+        Args:
+            filename_path (Path): full path to the file we want to read.
+
+        Returns:
+            str: content of the file.
+        """
+        content = ""
+        if Path(filename_path).exists():
+            with open(filename_path, "r") as reader:
+                content = reader.read()
+        return content
 
     def load_descriptions_from_a_schema_file(
         self, content: Dict[str, Any], path_schema: Path
@@ -269,6 +303,25 @@ class BaseTask(abc.ABC):
                 column_description = column.get("description", None)
                 self.update_description_in_dbt_descriptions(column["name"], column_description)
                 self.update_test_in_dbt_tests(model["name"], column)
+
+    def get_file_path_from_sql_model(self, model_name: str) -> Optional[Path]:
+        """Get the complete file path from a model name.
+
+        Args:
+            model_name (str): with the model name to find.
+
+        Returns:
+            Optional[Path]: Path of the SQL file, None if the file doens't exists.
+        """
+        for root, _, files in os.walk(self.repository_path):
+            if not re.search(self._excluded_folders_from_search_pattern, root):
+                for file_name in files:
+                    file_name = file_name.lower()
+                    if file_name == f"{model_name}.sql" and not re.search(
+                        DEFAULT_EXCLUDED_YML_FILES, file_name
+                    ):
+                        return Path(os.path.join(root, file_name))
+        return None
 
     def build_descriptions_dictionary(self) -> None:
         """Load the columns descriptions from all schema files in a dbt project.
@@ -304,10 +357,7 @@ class BaseTask(abc.ABC):
         if not content:
             return False
 
-        for model in content.get("models", []):
-            if model["name"] == model_name:
-                return True
-        return False
+        return any(model["name"] == model_name for model in content.get("models", []))
 
     def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool, bool]:
         for root, _, files in os.walk(self.repository_path):

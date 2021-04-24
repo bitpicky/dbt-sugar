@@ -4,7 +4,7 @@ Module base connector.
 Only use this class implemented by a child connector.
 """
 from abc import ABC
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import sqlalchemy
 
@@ -31,7 +31,7 @@ class BaseConnector(ABC):
 
     def get_columns_from_table(
         self, target_table: str, target_schema: str, use_describe: bool = False
-    ) -> Optional[List[Tuple[Any]]]:
+    ) -> Sequence[str]:
         """
         Method that creates cursor to run a query.
 

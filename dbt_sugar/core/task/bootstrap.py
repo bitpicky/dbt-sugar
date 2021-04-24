@@ -4,8 +4,9 @@
 import os
 import re
 from pathlib import Path
-from typing import Mapping, Union
+from typing import Dict, Sequence, Union
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.task.base import BaseTask
@@ -20,19 +21,25 @@ class BootstrapTask(BaseTask):
     that have not yet been documented.
     """
 
-    def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
+    def __init__(
+        self,
+        flags: FlagParser,
+        dbt_path: Path,
+        sugar_config: DbtSugarConfig,
+        dbt_profile: DbtProfile,
+    ) -> None:
         # we specifically run the super init because we need to populate the cache
         # of all dbt models, where they live etc
-        super().__init__(flags, dbt_path, sugar_config)
+        super().__init__(flags, dbt_path, sugar_config, dbt_profile)
+        self.dbt_models_dict: Dict[str, Dict[str, Union[Path, str, Sequence[str]]]] = {}
+        self._dbt_profile = dbt_profile
+        self.schema = self._dbt_profile.profile.get("target_schema", "")
 
-    def build_all_models_dict(self) -> Mapping[str, Mapping[str, Union[str, Path]]]:
+    def build_all_models_dict(self) -> None:
         """Walk through all .sql files and load their info (name, path etc) into a dict."""
-        models = {}
         for root, _, files in os.walk(self.repository_path):
-            print(root)
-            print(files)
             if not re.search(self._excluded_folders_from_search_pattern, root):
-                models.update(
+                self.dbt_models_dict.update(
                     {
                         f.replace(".sql", ""): {"path": Path(root, f)}
                         for f in files
@@ -41,13 +48,31 @@ class BootstrapTask(BaseTask):
                         not in self._sugar_config.dbt_project_info.get("excluded_models", [])
                     }
                 )
-        return models
+
+    def check_colums_in_db(self):
+        connector = self.get_connector()
+        for model, model_info in self.dbt_models_dict.items():
+            model_info["columns"] = connector.get_columns_from_table(
+                model,
+                self.schema,
+                use_describe=self._sugar_config.dbt_project_info.get(
+                    "use_describe_snowflake", False
+                ),
+            )
+
+    def add_model_descriptor_path(self):
+        for model, model_info in self.dbt_models_dict.items():
+            model_info["model_descriptor_path"] = self.find_model_schema_file(model_name=model)
 
     def run(self) -> int:
-        # collect all models in the dbt project
-        # iterate through all those models
-        # collect their columns
-        # collect their yaml content
+        # collect all models in the dbt project --done
+        # iterate through all those models --done
+        # check the models exist in the db --done
+        # collect their columns from the db --done
+        # collect their yaml content from the schema.yml
         # add placeholders (similar to the documentation task)
         # save yaml
+
+        # TODO: Check the case when a model doesn't exist in the db. Does it break?? Do we just get nothing?
+        # TODO: Could we make the check columns in db and add model descriptor path be async.
         ...

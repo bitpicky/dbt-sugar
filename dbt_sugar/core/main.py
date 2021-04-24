@@ -216,7 +216,10 @@ def handle(
 
     if flag_parser.task == "audit":
         audit_task: AuditTask = AuditTask(
-            flag_parser, dbt_project._project_dir, sugar_config=sugar_config
+            flag_parser,
+            dbt_project._project_dir,
+            sugar_config=sugar_config,
+            dbt_profile=dbt_profile,
         )
         return audit_task.run()
 

@@ -3,10 +3,13 @@ import abc
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
+from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
@@ -16,13 +19,26 @@ DEFAULT_EXCLUDED_FOLDERS_PATTERN = r"\/target\/|\/dbt_modules\/"
 DEFAULT_EXCLUDED_YML_FILES = r"dbt_project.yml|packages.yml"
 
 
+DB_CONNECTORS = {
+    "postgres": PostgresConnector,
+    "snowflake": SnowflakeConnector,
+}
+
+
 class BaseTask(abc.ABC):
     """Sets up basic API for task-like classes."""
 
-    def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
+    def __init__(
+        self,
+        flags: FlagParser,
+        dbt_path: Path,
+        sugar_config: DbtSugarConfig,
+        dbt_profile: DbtProfile,
+    ) -> None:
         self.repository_path = dbt_path
         self._sugar_config = sugar_config
         self._flags = flags
+        self._dbt_profile = dbt_profile
 
         # populated by class methods
         self._excluded_folders_from_search_pattern: str = self.setup_paths_exclusion()
@@ -30,6 +46,16 @@ class BaseTask(abc.ABC):
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
+
+    def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector]:
+        dbt_credentials = self._dbt_profile.profile
+        connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
+        if not connector:
+            raise NotImplementedError(
+                f"Connector '{dbt_credentials.get('type')}' is not implemented."
+            )
+
+        return connector(dbt_credentials)
 
     def setup_paths_exclusion(self) -> str:
         """Appends excluded_folders to the default folder exclusion patten."""

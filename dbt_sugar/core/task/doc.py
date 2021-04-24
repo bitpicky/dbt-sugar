@@ -35,7 +35,9 @@ class DocumentationTask(BaseTask):
     def __init__(
         self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
     ) -> None:
-        super().__init__(flags=flags, dbt_path=dbt_path, sugar_config=config)
+        super().__init__(
+            flags=flags, dbt_path=dbt_path, sugar_config=config, dbt_profile=dbt_profile
+        )
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
@@ -48,6 +50,7 @@ class DocumentationTask(BaseTask):
         model = self._flags.model
         schema = self._dbt_profile.profile.get("target_schema", "")
 
+        connector = self.get_connector()
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:

@@ -6,6 +6,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
@@ -22,9 +23,17 @@ class AuditTask(BaseTask):
     Holds methods and attrs necessary to audit a model or a dbt project.
     """
 
-    def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
+    def __init__(
+        self,
+        flags: FlagParser,
+        dbt_path: Path,
+        sugar_config: DbtSugarConfig,
+        dbt_profile: DbtProfile,
+    ) -> None:
         self.dbt_path = dbt_path
-        super().__init__(flags=flags, dbt_path=self.dbt_path, sugar_config=sugar_config)
+        super().__init__(
+            flags=flags, dbt_path=self.dbt_path, sugar_config=sugar_config, dbt_profile=dbt_profile
+        )
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self.model_name = self._flags.model

@@ -4,7 +4,7 @@
 import os
 import re
 from pathlib import Path
-from typing import Dict, Sequence, Union
+from typing import Dict, List, Union
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.config.config import DbtSugarConfig
@@ -31,7 +31,7 @@ class BootstrapTask(BaseTask):
         # we specifically run the super init because we need to populate the cache
         # of all dbt models, where they live etc
         super().__init__(flags, dbt_path, sugar_config, dbt_profile)
-        self.dbt_models_dict: Dict[str, Dict[str, Union[Path, str, Sequence[str]]]] = {}
+        self.dbt_models_dict: Dict[str, Dict[str, Union[None, Path, str, bool, List[str]]]] = {}
         self._dbt_profile = dbt_profile
         self.schema = self._dbt_profile.profile.get("target_schema", "")
 
@@ -49,7 +49,7 @@ class BootstrapTask(BaseTask):
                     }
                 )
 
-    def check_colums_in_db(self):
+    def get_columns_and_descriptor_path(self):
         connector = self.get_connector()
         for model, model_info in self.dbt_models_dict.items():
             model_info["columns"] = connector.get_columns_from_table(
@@ -59,10 +59,11 @@ class BootstrapTask(BaseTask):
                     "use_describe_snowflake", False
                 ),
             )
-
-    def add_model_descriptor_path(self):
-        for model, model_info in self.dbt_models_dict.items():
-            model_info["model_descriptor_path"] = self.find_model_schema_file(model_name=model)
+            (
+                model_info["model_descriptor_path"],
+                model_info["descriptor_file_exiits"],
+                model_info["is_already_documented"],
+            ) = self.find_model_schema_file(model_name=model)
 
     def run(self) -> int:
         # collect all models in the dbt project --done

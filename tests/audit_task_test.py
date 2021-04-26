@@ -3,6 +3,7 @@ from unittest.mock import call
 
 import pytest
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.main import parser
@@ -12,7 +13,7 @@ from dbt_sugar.core.task.base import COLUMN_NOT_DOCUMENTED
 FIXTURE_DIR = Path(__file__).resolve().parent
 
 
-def __init_descriptions():
+def __init_descriptions(datafiles):
     flag_parser = FlagParser(parser)
     config_filepath = Path(FIXTURE_DIR).joinpath("sugar_config.yml")
     flag_parser.consume_cli_arguments(
@@ -24,7 +25,16 @@ def __init_descriptions():
     )
     sugar_config = DbtSugarConfig(flag_parser)
     sugar_config.load_config()
-    audit_task = AuditTask(flag_parser, FIXTURE_DIR, sugar_config=sugar_config)
+
+    profile = DbtProfile(
+        flags=flag_parser,
+        profile_name="dbt_sugar_test",
+        target_name=str(),
+        profiles_dir=Path(datafiles),
+    )
+    profile.read_profile()
+
+    audit_task = AuditTask(flag_parser, FIXTURE_DIR, sugar_config=sugar_config, dbt_profile=profile)
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     audit_task.repository_path = Path("tests/test_dbt_project/")
     return audit_task
@@ -50,8 +60,9 @@ def __init_descriptions():
         ),
     ],
 )
-def test_get_project_total_test_coverage(dbt_definitions, result):
-    audit_task = __init_descriptions()
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_get_project_total_test_coverage(datafiles, dbt_definitions, result):
+    audit_task = __init_descriptions(datafiles)
     audit_task.dbt_definitions = dbt_definitions
     assert audit_task.get_project_total_test_coverage() == result
 
@@ -79,8 +90,9 @@ def test_get_project_total_test_coverage(dbt_definitions, result):
         ),
     ],
 )
-def test_calculate_coverage_percentage(failures, total, result):
-    audit_task = __init_descriptions()
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_calculate_coverage_percentage(datafiles, failures, total, result):
+    audit_task = __init_descriptions(datafiles)
     assert audit_task.calculate_coverage_percentage(misses=failures, total=total) == result
 
 
@@ -107,8 +119,9 @@ def test_calculate_coverage_percentage(failures, total, result):
         ),
     ],
 )
-def test_print_nicely_the_data(data, total, result):
-    audit_task = __init_descriptions()
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_print_nicely_the_data(datafiles, data, total, result):
+    audit_task = __init_descriptions(datafiles)
     assert audit_task.print_nicely_the_data(data=data, total=total) == result
 
 
@@ -138,9 +151,10 @@ def test_print_nicely_the_data(data, total, result):
         ),
     ],
 )
-def test_get_model_test_coverage(mocker, dbt_tests, model_name, call_input):
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_get_model_test_coverage(datafiles, mocker, dbt_tests, model_name, call_input):
     create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
-    audit_task = __init_descriptions()
+    audit_task = __init_descriptions(datafiles)
     audit_task.model_name = model_name
     audit_task.dbt_tests = dbt_tests
 
@@ -173,9 +187,10 @@ def test_get_model_test_coverage(mocker, dbt_tests, model_name, call_input):
         ),
     ],
 )
-def test_get_project_test_coverage(mocker, dbt_tests, call_input):
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_get_project_test_coverage(datafiles, mocker, dbt_tests, call_input):
     create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
-    audit_task = __init_descriptions()
+    audit_task = __init_descriptions(datafiles)
     audit_task.dbt_tests = dbt_tests
 
     audit_task.get_project_test_coverage()
@@ -218,12 +233,15 @@ def test_get_project_test_coverage(mocker, dbt_tests, call_input):
         ),
     ],
 )
-def test_get_model_column_description_coverage(mocker, model_content, model_name, call_input):
-    audit_task = __init_descriptions()
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_get_model_column_description_coverage(
+    datafiles, mocker, model_content, model_name, call_input
+):
+    audit_task = __init_descriptions(datafiles)
     audit_task.get_model_column_description_coverage()
 
     create_table = mocker.patch("dbt_sugar.core.task.audit.AuditTask.create_table")
-    audit_task = __init_descriptions()
+    audit_task = __init_descriptions(datafiles)
     audit_task.model_content = model_content
     audit_task.model_name = model_name
 

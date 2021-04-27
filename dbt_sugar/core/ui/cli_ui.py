@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
 import click
 import questionary
+import yaml
 from pydantic import BaseModel, validator
 
 DESCRIPTION_PROMPT_MESSAGE = "Please write down your description:"
@@ -196,7 +197,9 @@ class UserInputCollector:
             str: string version of the text input which will then be loaded.
         """
         tests = click.edit(extension=".yml")
-        tests = tests.replace("\t", "  ")
+        if tests:
+            tests = tests.replace("\t", "    ")
+            tests = yaml.safe_load(tests)
         return tests
 
     def _iterate_through_columns(

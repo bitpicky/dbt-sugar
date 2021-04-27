@@ -247,9 +247,9 @@ class DocumentationTask(BaseTask):
 
         if "Compilation Error" in dbt_result_command:
             logger.info(
-                "There's have been a compilation error in one or more custom tests that you have added."
+                """There's have been a compilation error in one or more custom tests that you have added.\n
+                Not able to check if the tests that you have added has PASS."""
             )
-            logger.info("Not able to check if the tests that you have added has PASS.")
 
         for column in self.column_update_payload.keys():
             tests = self.column_update_payload[column].get("tests", [])

@@ -174,7 +174,7 @@ class DbtProfile(BaseYamlConfig):
                 if _profile_type == "snowflake":
                     # uses pydantic to validate profile. It will raise and break app if invalid.
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
-                elif _profile_type == "postgres":
+                elif _profile_type == "postgres" or "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
 
                 # if we don't manage to read the db type for some reason.

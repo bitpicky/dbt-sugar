@@ -248,7 +248,7 @@ class DocumentationTask(BaseTask):
         if "Compilation Error" in dbt_result_command:
             logger.info(
                 "There's have been a compilation error in one or more custom tests that you have added.\n"
-                "Not able to check if the tests that you have added has PASS."
+                "Not able to check if the tests that you have added has PASS.\n"
                 f"The dbt original logs: {dbt_result_command}"
             )
 

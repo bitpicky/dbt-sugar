@@ -12,6 +12,7 @@ from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
+from dbt_sugar.core.connectors.redshift_connector import RedshiftConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
@@ -24,6 +25,7 @@ NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 DB_CONNECTORS = {
     "postgres": PostgresConnector,
     "snowflake": SnowflakeConnector,
+    "redshift": RedshiftConnector,
 }
 PRIMARY_KEYS_TESTS = ["unique", "not_null"]
 

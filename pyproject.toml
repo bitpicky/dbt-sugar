@@ -34,6 +34,7 @@ pyfiglet = "^0.8.post1"
 rich = ">=9.13,<11.0"
 psycopg2 = "^2.8.6"
 pytest-dictsdiff = "^0.5.8"
+sqlalchemy-redshift = "^0.8.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-sugar"
-version = "0.0.0-rc.2"
+version = "0.0.0"
 description = "A sweet CLI tool to help dbt users enforce documentation and testing on their dbt projects."
 authors = ["Bastien Boutonnet <bastien.b1@gmail.com>"]
 license = "GPLv3+"
@@ -44,7 +44,7 @@ pytest-mock = "^3.5.1"
 pytest-sugar = "^0.9.4"
 pytest-datafiles = "^2.0"
 tox-poetry-installer = "^0.6.4"
-pre-commit = "^2.12.0"
+pre-commit = "^2.12.1"
 tox = "^3.23.0"
 asciinema = "^2.0.2"
 
@@ -60,10 +60,15 @@ dbt-sugar="dbt_sugar.core.main:main"
 [tool.towncrier]
 package = "dbt_sugar"
 package_dir = "dbt_sugar/"
+filename = "changelog/CHANGELOG.md"
 directory = "changelog/"
-filename = "changelog/CHANGELOG.rst"
-title_format = "dbt-sugar {version} ({project_date})"
-template = "changelog/_template.rst"
+start_string = "# Changelog\n"
+issue_format = "[#{issue}](https://github.com/bitpicky/dbt-sugar/issues/{issue})"
+underlines = ["", ""]
+template = "changelog/.towncrier.template.md"
+title_format = "## dbt-sugar [{version}] - {project_date}"
+
+
 
     [[tool.towncrier.type]]
     directory = "fix"

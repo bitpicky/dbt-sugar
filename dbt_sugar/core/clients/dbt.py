@@ -145,15 +145,14 @@ class DbtProfile(BaseYamlConfig):
     def _get_target_profile(self, profile_dict: Dict[str, Any]) -> Dict[str, Union[str, int]]:
         if self._target_name:
             return profile_dict["outputs"].get(self._target_name)
+        self._target_name = profile_dict.get("target", str())
+        if self._target_name:
+            return profile_dict["outputs"].get(self._target_name)
         else:
-            self._target_name = profile_dict.get("target", str())
-            if self._target_name:
-                return profile_dict["outputs"].get(self._target_name)
-            else:
-                raise TargetNameNotProvided(
-                    f"No target name provied in {self._profiles_dir} and none provided via "
-                    "--target in CLI. Cannot figure out appropriate profile information to load."
-                )
+            raise TargetNameNotProvided(
+                f"No target name provied in {self._profiles_dir} and none provided via "
+                "--target in CLI. Cannot figure out appropriate profile information to load."
+            )
 
     def read_profile(self):
         _ = self._assert_file_exists(

@@ -247,8 +247,9 @@ class DocumentationTask(BaseTask):
 
         if "Compilation Error" in dbt_result_command:
             logger.info(
-                """There's have been a compilation error in one or more custom tests that you have added.\n
-                Not able to check if the tests that you have added has PASS."""
+                "There's have been a compilation error in one or more custom tests that you have added.\n"
+                "Not able to check if the tests that you have added has PASS."
+                f"The dbt original logs: {dbt_result_command}"
             )
 
         for column in self.column_update_payload.keys():
@@ -260,8 +261,8 @@ class DocumentationTask(BaseTask):
                     logger.info(f"The test {test} in the column {column} has PASSED.")
                 else:
                     logger.info(
-                        f"""The test {test} in the column {column} has FAILED to execute.
-                        The test won't be added to your schema.yml file"""
+                        f"The test {test} in the column {column} has FAILED to execute."
+                        "The test won't be added to your schema.yml file"
                     )
                     tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
         if tests_to_delete:

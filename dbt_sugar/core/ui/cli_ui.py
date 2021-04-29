@@ -320,7 +320,6 @@ class UserInputCollector:
         question_payload: Sequence[Mapping[str, Any]],
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
 
-        results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
         columns_to_document = question_payload[0].get("choices", list())
         quantifier_word = self._set_quantifier_word()
         # check if user wants to document all columns

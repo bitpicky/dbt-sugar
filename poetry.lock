@@ -221,7 +221,7 @@ python-versions = ">=3.6, <3.7"
 name = "dictdiffer"
 version = "0.8.1"
 description = "Dictdiffer is a library that helps you to diff and patch dictionaries."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -685,7 +685,7 @@ pytest = ">=3.6"
 name = "pytest-dictsdiff"
 version = "0.5.8"
 description = ""
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1081,7 +1081,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "eeb3507c1851c1628ca668df1e14ba1ccb5c6621b20e345c1bee73282969924c"
+content-hash = "40b09a78dd32738b8f3b472ff746a8ea91ca8828ea9ac18b0aba54fd3cd50d28"
 
 [metadata.files]
 appdirs = [

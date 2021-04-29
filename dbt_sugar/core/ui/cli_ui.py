@@ -337,8 +337,8 @@ class UserInputCollector:
         # get the list of columns from user
         columns_to_document = questionary.prompt(question_payload)
         return self._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"],
-            )
+            cols=columns_to_document["cols_to_document"],
+        )
 
     def _document_already_documented_cols(
         self,
@@ -349,8 +349,7 @@ class UserInputCollector:
 
         # massage the question payload
         choices = [
-            f"{col} | {desc}"
-            for col, desc in mutable_payload[0].get("choices", dict()).items()
+            f"{col} | {desc}" for col, desc in mutable_payload[0].get("choices", dict()).items()
         ]
 
         mutable_payload[0].update({"choices": choices})

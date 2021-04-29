@@ -1,20 +1,31 @@
 version: 2
 models:
   - name: stg_customers
+    description: this is a BS description and we will need to fix this
     columns:
       - name: customer_id
-        tests:
-          - unique
-          - not_null
         description: This is a unique identifier for a customer.
-  - name: stg_orders
-    columns:
-      - name: order_id
         tests:
           - unique
           - not_null
+      - name: first_name
+        description: No description for this column.
+      - name: last_name
+        description: No description for this column.
+  - name: stg_orders
+    description: this is a BS description and we will need to fix this
+    columns:
+      - name: customer_id
+        description: This is a unique identifier for a customer.
+      - name: order_date
+        description: Date when the order was made
+      - name: order_id
         description: Unique ID for an order
+        tests:
+          - unique
+          - not_null
       - name: status
+        description: Status the order is in.
         tests:
           - accepted_values:
               values:
@@ -23,14 +34,20 @@ models:
                 - completed
                 - return_pending
                 - returned
-        description: Status the order is in.
   - name: stg_payments
+    description: this is a BS description and we will need to fix this
     columns:
+      - name: amount
+        description: Total amout of the order irrespective of payment method.
+      - name: order_id
+        description: Unique ID for an order
       - name: payment_id
+        description: No description for this column.
         tests:
           - unique
           - not_null
       - name: payment_method
+        description: No description for this column.
         tests:
           - accepted_values:
               values:

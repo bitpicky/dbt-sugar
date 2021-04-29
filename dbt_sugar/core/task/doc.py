@@ -118,7 +118,8 @@ class DocumentationTask(BaseTask):
         """
         # DEPRECATION: Drop ordered dict when dropping python 3.6 support
         ordered_dict = OrderedDict(model)
-        ordered_dict.move_to_end("description", last=False)
+        if ordered_dict.get("description"):
+            ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
         return ordered_dict
 
@@ -395,10 +396,12 @@ class DocumentationTask(BaseTask):
 
                     columns = model.get("columns", [])
                     columns_names = [column["name"] for column in columns]
+
                     if column not in columns_names:
                         description = self.get_column_description_from_dbt_definitions(column)
                         logger.info(f"Updating column '{column.lower()}'")
                         columns.append({"name": column, "description": description})
+
         return content
 
     def create_new_model(

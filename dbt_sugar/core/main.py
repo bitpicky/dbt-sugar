@@ -13,6 +13,7 @@ from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 from dbt_sugar.core.logger import log_manager
 from dbt_sugar.core.task.audit import AuditTask
+from dbt_sugar.core.task.bootstrap import BootstrapTask
 from dbt_sugar.core.task.doc import DocumentationTask
 from dbt_sugar.core.ui.traceback_manager import DbtSugarTracebackManager
 from dbt_sugar.core.utils import check_and_compare_version
@@ -26,7 +27,7 @@ def check_and_print_version() -> str:
     Returns:
         str: version info message ready for printing
     """
-    needs_update, latest_version = check_and_compare_version()
+    _, latest_version = check_and_compare_version()
     installed_version_message = f"Installed dbt-sugar version: {__version__}".rjust(40)
     latest_version_message = f"Latest dbt-sugar version: {latest_version}".rjust(40)
     if latest_version:
@@ -163,6 +164,7 @@ bootstrap_sub_parser = sub_parsers.add_parser(
     parents=[base_subparser],
     help="Runs the bootstrap task, which creates model descriptor files for all your models.",
 )
+bootstrap_sub_parser.set_defaults(cls=BootstrapTask, which="bootstrap")
 
 
 # task handler
@@ -222,6 +224,15 @@ def handle(
             dbt_profile=dbt_profile,
         )
         return audit_task.run()
+
+    if flag_parser.task == "bootstrap":
+        bootstrap_task: BootstrapTask = BootstrapTask(
+            flags=flag_parser,
+            dbt_path=dbt_project._project_dir,
+            sugar_config=sugar_config,
+            dbt_profile=dbt_profile,
+        )
+        return bootstrap_task.run()
 
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
 

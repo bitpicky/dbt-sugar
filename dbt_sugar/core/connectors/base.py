@@ -4,7 +4,7 @@ Module base connector.
 Only use this class implemented by a child connector.
 """
 from abc import ABC
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Sequence
 
 import sqlalchemy
 
@@ -40,7 +40,7 @@ class BaseConnector(ABC):
             target_schema (str): schema to get the table from.
 
         Returns:
-            Optional[List[Tuple[Any]]]: With the results of the query.
+            Optional[Sequence[str]]: With the results of the query.
         """
         inspector = sqlalchemy.engine.reflection.Inspector.from_engine(self.engine)
         columns = inspector.get_columns(target_table, target_schema)

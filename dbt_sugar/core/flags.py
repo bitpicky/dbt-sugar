@@ -53,6 +53,7 @@ class FlagParser:
         # task specific args consumption
         if self.task == "audit":
             self.model = self.args.model
+            self.run_bootstrap_first = self.args.bootstrap
         elif self.task == "doc":
             self.model = self.args.model
             self.schema = self.args.schema

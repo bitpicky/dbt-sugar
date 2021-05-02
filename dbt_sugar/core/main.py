@@ -156,6 +156,16 @@ audit_sub_parser.add_argument(
     default=None,
     required=False,
 )
+audit_sub_parser.add_argument(
+    "--bootstrap",
+    help=(
+        "When passed the audit task will run the bootstrap task "
+        "(which creates placeholders for any undocumented model and columns) first"
+    ),
+    default=False,
+    action="store_true",
+    required=False,
+)
 
 
 # ##### BOOTSTRAP Task Arg parser
@@ -223,10 +233,19 @@ def handle(
             sugar_config=sugar_config,
             dbt_profile=dbt_profile,
         )
+        if flag_parser.run_bootstrap_first:
+            logger.info("Running 'bootstrap' task first then auditing your project or model")
+            bootstrap_task: BootstrapTask = BootstrapTask(
+                flags=flag_parser,
+                dbt_path=dbt_project._project_dir,
+                sugar_config=sugar_config,
+                dbt_profile=dbt_profile,
+            )
+            bootstrap_task.run()
         return audit_task.run()
 
     if flag_parser.task == "bootstrap":
-        bootstrap_task: BootstrapTask = BootstrapTask(
+        bootstrap_task = BootstrapTask(
             flags=flag_parser,
             dbt_path=dbt_project._project_dir,
             sugar_config=sugar_config,

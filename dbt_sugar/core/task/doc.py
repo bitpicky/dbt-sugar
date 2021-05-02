@@ -3,7 +3,7 @@ import copy
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress
@@ -37,7 +37,9 @@ class DocumentationTask(BaseTask):
     def __init__(
         self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
     ) -> None:
-        super().__init__(flags=flags, dbt_path=dbt_path, sugar_config=config)
+        super().__init__(
+            flags=flags, dbt_path=dbt_path, sugar_config=config, dbt_profile=dbt_profile
+        )
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
@@ -50,6 +52,7 @@ class DocumentationTask(BaseTask):
         model = self._flags.model
         schema = self._dbt_profile.profile.get("target_schema", "")
 
+        connector = self.get_connector()
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
@@ -115,7 +118,8 @@ class DocumentationTask(BaseTask):
         """
         # DEPRECATION: Drop ordered dict when dropping python 3.6 support
         ordered_dict = OrderedDict(model)
-        ordered_dict.move_to_end("description", last=False)
+        if ordered_dict.get("description"):
+            ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
         return ordered_dict
 
@@ -370,7 +374,7 @@ class DocumentationTask(BaseTask):
             self.column_update_payload.update(user_input)
 
     def update_model(
-        self, content: Dict[str, Any], model_name: str, columns_on_db: List[str]
+        self, content: Dict[str, Any], model_name: str, columns_on_db: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to update the columns from a model in a schema.yaml content.
 
@@ -392,14 +396,16 @@ class DocumentationTask(BaseTask):
 
                     columns = model.get("columns", [])
                     columns_names = [column["name"] for column in columns]
+
                     if column not in columns_names:
                         description = self.get_column_description_from_dbt_definitions(column)
                         logger.info(f"Updating column '{column.lower()}'")
                         columns.append({"name": column, "description": description})
+
         return content
 
     def create_new_model(
-        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
+        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to create a new model in a schema.yaml content.
 
@@ -432,7 +438,7 @@ class DocumentationTask(BaseTask):
         is_already_documented: bool,
         content: Optional[Dict[str, Any]],
         model_name: str,
-        columns_sql: List[str],
+        columns_sql: Sequence[str],
     ) -> Dict[str, Any]:
         """Method to update/create a model entry in the schema.yml.
 

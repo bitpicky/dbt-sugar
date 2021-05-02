@@ -694,7 +694,7 @@ def test_document_columns(mocker):
     [
         pytest.param(
             "my_first_dbt_model",
-            Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml").resolve(),
             False,
             id="find_model",
         ),

@@ -167,7 +167,7 @@ class BaseTask(abc.ABC):
                         if tests:
                             if not isinstance(tests, list):
                                 tests = [tests]
-                            column["tests"] = self.__combine_two_list_without_duplicates(
+                            column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 

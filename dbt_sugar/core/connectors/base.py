@@ -30,9 +30,7 @@ class BaseConnector(ABC):
         self.engine = sqlalchemy.create_engine(**connection_params)
 
     def get_columns_from_table(
-        self,
-        target_table: str,
-        target_schema: str,
+        self, target_table: str, target_schema: str, use_describe: bool = False
     ) -> Optional[List[Tuple[Any]]]:
         """
         Method that creates cursor to run a query.

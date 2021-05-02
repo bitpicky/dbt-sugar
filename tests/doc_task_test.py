@@ -986,7 +986,6 @@ def test_move_name_and_description_to_first_position(content, result):
 
 def test_setup_paths_and_models_exclusion():
     doc_task = __init_descriptions()
-    print(doc_task._sugar_config)
     assert (
         doc_task._excluded_folders_from_search_pattern
         == r"\/target\/|\/dbt_modules\/|\/folder_to_exclude\/"
@@ -1054,3 +1053,4 @@ def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_d
     doc_task = __init_descriptions()
     doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
     save_yaml.assert_has_calls(result)
+

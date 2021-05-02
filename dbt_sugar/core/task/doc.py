@@ -1,4 +1,5 @@
 """Document Task module."""
+import copy
 import re
 import subprocess
 from collections import OrderedDict
@@ -25,6 +26,7 @@ DB_CONNECTORS = {
     "postgres": PostgresConnector,
     "snowflake": SnowflakeConnector,
 }
+PRIMARY_KEYS_TESTS = ["unique", "not_null"]
 
 
 class DocumentationTask(BaseTask):
@@ -40,7 +42,7 @@ class DocumentationTask(BaseTask):
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
-        # self._sugar_config = config
+        self._sugar_config = config
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -60,7 +62,9 @@ class DocumentationTask(BaseTask):
 
         # exit early if model is in the excluded_models list
         _ = self.is_exluded_model(model)
-        columns_sql = self.connector.get_columns_from_table(model, schema)
+        columns_sql = self.connector.get_columns_from_table(
+            model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
+        )
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
@@ -150,6 +154,63 @@ class DocumentationTask(BaseTask):
         content_yml["models"] = sorted(content_yml["models"], key=lambda k: k["name"].lower())
         return content_yml
 
+    def get_primary_key_from_sql(self, sql_file_path: Path) -> Optional[str]:
+        """
+        Gets the primary key info from a dbt model's config block.
+
+        Args:
+            sql_file_path (Path): full path including file name of a dbt .sql file.
+
+        Returns:
+            Optional[str]: name of the primary key column. None if no primary key is specified in the config block.
+        """
+        sql_content = self.read_file(sql_file_path)
+        unique_key = re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content)
+        if unique_key:
+            return unique_key.group(1)
+        return None
+
+    def add_primary_key_tests(
+        self,
+        schema_content: Dict[str, Any],
+        model_name: str,
+    ) -> None:
+        """
+        Adds the primary key tests (unique, not_null) to the primary key column.
+
+        Args:
+            schema_content (Dict[str, Any]): content of the schema.yml.
+            model_name (str): Name of the model on which to add primary key tests.
+        """
+        model_file_path = self.get_file_path_from_sql_model(model_name=model_name)
+        if not model_file_path:
+            return
+
+        primary_key_column = self.get_primary_key_from_sql(model_file_path)
+        if not primary_key_column:
+            logger.info(
+                f"""The model {model_name} do not have a primary key identified in the config block.
+                Note: you could use this to make dbt-sugar enforce unique and not null tests for you automatically."""
+            )
+            return
+
+        has_primary_key_tests = self.column_has_primary_key_tests(
+            schema_content=schema_content, model_name=model_name, column_name=primary_key_column
+        )
+
+        if has_primary_key_tests is False:
+            logger.info(
+                f"""\nAutomatic Process: We have detected that column '{primary_key_column}'
+                is a primary key, 'unique' and 'not_null' tests will be added for you.\n"""
+            )
+            if primary_key_column not in self.column_update_payload.keys():
+                self.column_update_payload[primary_key_column] = {"tests": PRIMARY_KEYS_TESTS}
+            else:
+                tests = self.column_update_payload[primary_key_column].get("tests", [])
+                self.column_update_payload[primary_key_column][
+                    "tests"
+                ] = self.combine_two_list_without_duplicates(PRIMARY_KEYS_TESTS, tests)
+
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]
     ) -> int:
@@ -195,7 +256,7 @@ class DocumentationTask(BaseTask):
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
         save_yaml(schema_file_path, self.order_schema_yml(content))
-
+        self.add_primary_key_tests(schema_content=content, model_name=model_name)
         self.update_model_description_test_tags(
             schema_file_path, model_name, self.column_update_payload
         )

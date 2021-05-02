@@ -48,20 +48,6 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.main import parser
 
-    expectation = {
-        "name": "syrup_1",
-        "dbt_projects": [
-            {
-                "name": "dbt_sugar_test",
-                "path": "./tests/test_dbt_project/dbt_sugar_test",
-                "excluded_models": ["my_first_dbt_model_excluded"],
-                "excluded_folders": ["folder_to_exclude"],
-            },
-        ],
-        "always_add_tags": True,
-        "always_enforce_tests": True,
-    }
-
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
     if has_no_default_syrup:
         config_filepath = Path(datafiles).joinpath("sugar_config_missing_default.yml")
@@ -110,6 +96,21 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
             config.load_config()
     else:
         config.load_config()
+        expectation = {
+            "name": "syrup_1",
+            "dbt_projects": [
+                {
+                    "name": "dbt_sugar_test",
+                    "path": "./tests/test_dbt_project/dbt_sugar_test",
+                    "excluded_models": ["my_first_dbt_model_excluded"],
+                    "excluded_folders": ["folder_to_exclude"],
+                },
+            ],
+            "always_add_tags": True,
+            "always_enforce_tests": True,
+            "use_describe_snowflake": False,
+        }
+
         assert config.config == expectation
         assert config._config_file_found_nearby is True
 
@@ -177,7 +178,7 @@ def test_assert_only_one_dbt_project_in_scope(
 
 
 @pytest.mark.parametrize(
-    "test_and_flag_args, expectation",
+    "cli_arg_appendix, expectation",
     [
         pytest.param(
             "",
@@ -193,6 +194,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 ],
                 "always_enforce_tests": True,
                 "always_add_tags": True,
+                "use_describe_snowflake": False,
             },
             id="no_test_or_tag_override",
         ),
@@ -210,6 +212,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 ],
                 "always_enforce_tests": False,
                 "always_add_tags": True,
+                "use_describe_snowflake": False,
             },
             id="no_tests_on_cli",
         ),
@@ -227,21 +230,40 @@ def test_assert_only_one_dbt_project_in_scope(
                 ],
                 "always_enforce_tests": True,
                 "always_add_tags": False,
+                "use_describe_snowflake": False,
             },
             id="no_tags_on_cli",
+        ),
+        pytest.param(
+            "--use-describe-snowflake",
+            {
+                "name": "syrup_1",
+                "dbt_projects": [
+                    {
+                        "name": "dbt_sugar_test",
+                        "path": "./tests/test_dbt_project/dbt_sugar_test",
+                        "excluded_models": ["my_first_dbt_model_excluded"],
+                        "excluded_folders": ["folder_to_exclude"],
+                    }
+                ],
+                "always_enforce_tests": True,
+                "always_add_tags": True,
+                "use_describe_snowflake": True,
+            },
+            id="override snowflake describe option",
         ),
     ],
 )
 @pytest.mark.datafiles(FIXTURE_DIR)
-def test__integrate_cli_flags(datafiles, test_and_flag_args, expectation):
+def test__integrate_cli_flags(datafiles, cli_arg_appendix, expectation):
     from dbt_sugar.core.config.config import DbtSugarConfig
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.main import parser
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
     cli_args = ["doc", "-m", "test_model", "--config-path", str(config_filepath)]
-    if test_and_flag_args:
-        cli_args.append(test_and_flag_args)
+    if cli_arg_appendix:
+        cli_args.append(cli_arg_appendix)
 
     fp = FlagParser(cli_parser=parser)
     fp.consume_cli_arguments(test_cli_args=cli_args)

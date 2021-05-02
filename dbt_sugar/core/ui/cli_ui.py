@@ -3,7 +3,9 @@
 import copy
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
+import click
 import questionary
+import yaml
 from pydantic import BaseModel, validator
 
 DESCRIPTION_PROMPT_MESSAGE = "Please write down your description:"
@@ -174,7 +176,7 @@ class UserInputCollector:
             for payload_element_index, payload_element in enumerate(self._question_payload):
                 if payload_element_index == 0:
                     ConfirmModelDoc(**payload_element)
-                if payload_element_index == 1:
+                elif payload_element_index == 1:
                     DescriptionTextInput(**payload_element)
 
         elif self._question_type == "undocumented_columns":
@@ -187,6 +189,18 @@ class UserInputCollector:
             raise NotImplementedError(f"{self._question_type} is not implemented.")
 
         self._is_valid_question_payload = True
+
+    def collect_rich_user_input(self) -> str:
+        """Uses click to open up a text editor to collect rich user input.
+
+        Returns:
+            str: string version of the text input which will then be loaded.
+        """
+        tests = click.edit(extension=".yml")
+        if tests:
+            tests = tests.replace("\t", "    ")
+            tests = yaml.safe_load(tests)
+        return tests
 
     def _iterate_through_columns(
         self, cols: List[str]
@@ -236,10 +250,17 @@ class UserInputCollector:
                     message="Would you like to add any tests?"
                 ).unsafe_ask()
                 if wants_to_add_tests:
-                    tests = questionary.checkbox(
-                        message="Please select one or more tests from the list below",
-                        choices=AVAILABLE_TESTS,
+                    wants_to_pop_editor = questionary.confirm(
+                        message="Do you want to add a complex or custom tests? If, so we'll open a test editor for "
+                        f"you, otherwise you can choose from the following builtins: {AVAILABLE_TESTS}"
                     ).unsafe_ask()
+                    if wants_to_pop_editor:
+                        tests = self.collect_rich_user_input()
+                    else:
+                        tests = questionary.checkbox(
+                            message="Please select one or more tests from the list below",
+                            choices=AVAILABLE_TESTS,
+                        ).unsafe_ask()
                     if tests:
                         results[column]["tests"] = tests
 
@@ -280,8 +301,8 @@ class UserInputCollector:
 
             if not results.get("model_description"):
                 # we return an empty dict if user decided to not enter a description in the end.
-                results = dict()
-            if collect_model_description is False:
+                results = {}
+            if not collect_model_description:
                 # if the user doesnt want to document the model we exit early even if the payload
                 # has a second entry which would trigger the description collection
                 break
@@ -299,7 +320,6 @@ class UserInputCollector:
         question_payload: Sequence[Mapping[str, Any]],
     ) -> Mapping[str, Mapping[str, Union[str, List[str]]]]:
 
-        results: Mapping[str, Mapping[str, Union[str, List[str]]]] = dict()
         columns_to_document = question_payload[0].get("choices", list())
         quantifier_word = self._set_quantifier_word()
         # check if user wants to document all columns
@@ -312,14 +332,12 @@ class UserInputCollector:
         ).unsafe_ask()
 
         if document_all_cols:
-            results = self._iterate_through_columns(cols=columns_to_document)
-        else:
-            # get the list of columns from user
-            columns_to_document = questionary.prompt(question_payload)
-            results = self._iterate_through_columns(
-                cols=columns_to_document["cols_to_document"],
-            )
-        return results
+            return self._iterate_through_columns(cols=columns_to_document)
+        # get the list of columns from user
+        columns_to_document = questionary.prompt(question_payload)
+        return self._iterate_through_columns(
+            cols=columns_to_document["cols_to_document"],
+        )
 
     def _document_already_documented_cols(
         self,
@@ -329,13 +347,14 @@ class UserInputCollector:
         mutable_payload = cast(Sequence[Dict[str, Any]], mutable_payload)
 
         # massage the question payload
-        choices = []
-        for col, desc in mutable_payload[0].get("choices", dict()).items():
-            choices.append(f"{col} | {desc}")
+        choices = [
+            f"{col} | {desc}" for col, desc in mutable_payload[0].get("choices", dict()).items()
+        ]
+
         mutable_payload[0].update({"choices": choices})
 
         # ask user if they want to see any of the documented columns?
-        results = dict()
+        results = {}
         document_any_columns = questionary.confirm(
             message="Do you want to document any of the already documented columns in this model?",
             auto_enter=True,

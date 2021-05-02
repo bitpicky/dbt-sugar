@@ -1148,3 +1148,66 @@ def test_get_primary_key_from_sql(mocker, content, result):
     read_file = mocker.patch("dbt_sugar.core.task.doc.DocumentationTask.read_file")
     read_file.return_value = content
     assert doc_task.get_primary_key_from_sql("path") == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, tests_to_delete, result",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "columns": [
+                            {
+                                "name": "columnA",
+                                "description": "descriptionA",
+                                "tests": ["unique", "not_null"],
+                                "tags": ["hi", "hey"],
+                            },
+                            {
+                                "name": "columnF",
+                                "description": "descriptionF",
+                                "tests": ["unique", "not_null"],
+                            },
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnA": ["unique", "not_null"], "columnF": ["not_null"]},
+            [
+                call(
+                    PosixPath("."),
+                    {
+                        "models": [
+                            {
+                                "columns": [
+                                    {
+                                        "description": "descriptionA",
+                                        "name": "columnA",
+                                        "tags": ["hi", "hey"],
+                                    },
+                                    {
+                                        "description": "descriptionF",
+                                        "name": "columnF",
+                                        "tests": ["unique"],
+                                    },
+                                ],
+                                "name": "testmodel",
+                            }
+                        ]
+                    },
+                )
+            ],
+            id="delete_failed_test_from_schema",
+        ),
+    ],
+)
+def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_delete, result):
+    open_yaml = mocker.patch("dbt_sugar.core.task.doc.open_yaml")
+    save_yaml = mocker.patch("dbt_sugar.core.task.doc.save_yaml")
+    open_yaml.return_value = content
+    doc_task = __init_descriptions()
+    doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
+    save_yaml.assert_has_calls(result)

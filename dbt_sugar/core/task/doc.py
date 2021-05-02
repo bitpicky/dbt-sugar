@@ -1,4 +1,5 @@
 """Document Task module."""
+import copy
 import re
 import subprocess
 from collections import OrderedDict
@@ -117,7 +118,8 @@ class DocumentationTask(BaseTask):
         """
         # DEPRECATION: Drop ordered dict when dropping python 3.6 support
         ordered_dict = OrderedDict(model)
-        ordered_dict.move_to_end("description", last=False)
+        if ordered_dict.get("description"):
+            ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
         return ordered_dict
 
@@ -260,8 +262,9 @@ class DocumentationTask(BaseTask):
         save_yaml(schema_file_path, self.order_schema_yml(content))
         self.add_primary_key_tests(schema_content=content, model_name=model_name)
 
+        # The copy is here because it was modifying the tests.
         self.update_model_description_test_tags(
-            schema_file_path, model_name, self.column_update_payload
+            schema_file_path, model_name, copy.deepcopy(self.column_update_payload)
         )
         self.check_tests(schema_file_path, model_name)
         # Method to update the descriptions in all the schemas.yml
@@ -311,9 +314,9 @@ class DocumentationTask(BaseTask):
 
         if "Compilation Error" in dbt_result_command:
             logger.info(
-                "There's have been a compilation error in one or more custom tests that you have added.\n"
-                "Not able to check if the tests that you have added has PASS.\n"
-                f"The dbt original logs: {dbt_result_command}"
+                "dbt encountered a compilation error in one or more of your custom tests.\n"
+                "Not able to check if the tests that you have added have PASSED.\n"
+                f"This is what dbt's compilation error says:\n{dbt_result_command}"
             )
 
         for column in self.column_update_payload.keys():

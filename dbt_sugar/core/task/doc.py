@@ -1,12 +1,13 @@
 """Document Task module."""
 import copy
 import re
+import subprocess
 from collections import OrderedDict
 from pathlib import Path
+from shlex import quote
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from rich.console import Console
-from rich.progress import BarColumn, Progress
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
@@ -52,7 +53,6 @@ class DocumentationTask(BaseTask):
         model = self._flags.model
         schema = self._dbt_profile.profile.get("target_schema", "")
 
-        connector = self.get_connector()
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
@@ -258,51 +258,82 @@ class DocumentationTask(BaseTask):
         except KeyboardInterrupt:
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
+
         save_yaml(schema_file_path, self.order_schema_yml(content))
         self.add_primary_key_tests(schema_content=content, model_name=model_name)
-        self.check_tests(schema, model_name)
+
+        # The copy is here because it was modifying the tests.
         self.update_model_description_test_tags(
-            schema_file_path, model_name, self.column_update_payload
+            schema_file_path, model_name, copy.deepcopy(self.column_update_payload)
         )
+        self.check_tests(schema_file_path, model_name)
         # Method to update the descriptions in all the schemas.yml
         self.update_column_descriptions(self.column_update_payload)
 
         return 0
 
-    def check_tests(self, schema: str, model_name: str) -> None:
+    def delete_failed_tests_from_schema(
+        self, path_file: Path, model_name: str, tests_to_delete: Dict[str, List[str]]
+    ):
+        """
+        Method to delete the failing tests from the schema.yml.
+
+        Args:
+            path_file (Path): Path of the schema.yml file to update.
+            model_name (str): Name of the model to document.
+            tests_to_delete (Dict[str, List[str]]): with the tests that have failed.
+        """
+        content = open_yaml(path_file)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    tests_to_delete_from_column = tests_to_delete.get(column["name"], [])
+                    tests_from_column = column.get("tests", [])
+                    tests_pass = [
+                        x for x in tests_from_column if x not in tests_to_delete_from_column
+                    ]
+                    if not tests_pass and tests_from_column:
+                        del column["tests"]
+                    elif tests_pass:
+                        column["tests"] = tests_pass
+        save_yaml(path_file, content)
+
+    def check_tests(self, path_file: Path, model_name: str) -> None:
         """
         Method to run and add test into a schema.yml, this method will:
 
         Run the tests and if they have been successful it will add them into the schema.yml.
 
         Args:
-            schema (str): Name of the schema where the model lives.
+            path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
-        with Progress(
-            "[progress.description]{task.description}",
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            transient=True,
-        ) as progress:
-            test_checking_task = progress.add_task(
-                "[bold] checking your tests...", total=len(self.column_update_payload.keys())
+        dbt_command = f"dbt test --models {quote(model_name)}".split()
+        dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
+        tests_to_delete: Dict[str, List[str]] = {}
+
+        if "Compilation Error" in dbt_result_command:
+            logger.info(
+                "dbt encountered a compilation error in one or more of your custom tests.\n"
+                "Not able to check if the tests that you have added have PASSED.\n"
+                f"This is what dbt's compilation error says:\n{dbt_result_command}"
             )
-            for column in self.column_update_payload.keys():
-                tests = self.column_update_payload[column].get("tests", [])
-                tests_ = copy.deepcopy(tests)
-                for test in tests_:
-                    has_passed = self.connector.run_test(
-                        test,
-                        schema,
-                        model_name,
-                        column,
+
+        for column in self.column_update_payload.keys():
+            tests = self.column_update_payload[column].get("tests", [])
+            for test in tests:
+                test_name = test if type(test) == str else list(test.keys())[0]
+                test_passed_pattern = f"PASS {test_name}_{model_name}_{column}"
+                if re.search(test_passed_pattern, dbt_result_command):
+                    logger.info(f"The test {test} in the column {column} has PASSED.")
+                else:
+                    logger.info(
+                        f"The test {test} in the column {column} has FAILED to execute."
+                        "The test won't be added to your schema.yml file"
                     )
-                    message = self._generate_test_success_message(test, column, has_passed)
-                    progress.console.log(message)
-                    if not has_passed:
-                        tests.remove(test)
-                progress.advance(test_checking_task)
+                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+        if tests_to_delete:
+            self.delete_failed_tests_from_schema(path_file, model_name, tests_to_delete)
 
     @staticmethod
     def _generate_test_success_message(test_name: str, column_name: str, has_passed: bool):
@@ -396,12 +427,10 @@ class DocumentationTask(BaseTask):
 
                     columns = model.get("columns", [])
                     columns_names = [column["name"] for column in columns]
-
                     if column not in columns_names:
                         description = self.get_column_description_from_dbt_definitions(column)
                         logger.info(f"Updating column '{column.lower()}'")
                         columns.append({"name": column, "description": description})
-
         return content
 
     def create_new_model(

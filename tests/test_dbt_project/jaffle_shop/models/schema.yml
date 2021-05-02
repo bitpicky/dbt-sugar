@@ -19,12 +19,10 @@ models:
       - name: number_of_orders
         description: Cumulative number of orders this customer has made since their joining of the platform.
   - name: orders
-    description: Facts about orders
+    description: No description for this model.
     columns:
       - name: amount
         description: Total amout of the order irrespective of payment method.
-        tests:
-          - not_null
       - name: bank_transfer_amount
         description: No description for this column.
       - name: coupon_amount
@@ -39,10 +37,5 @@ models:
         description: Date when the order was made
       - name: order_id
         description: Unique ID for an order
-        tests:
-          - unique
-          - not_null
-        tags:
-          - PK
       - name: status
         description: Status the order is in.

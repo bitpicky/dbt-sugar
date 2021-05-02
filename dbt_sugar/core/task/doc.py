@@ -1,5 +1,4 @@
 """Document Task module."""
-import copy
 import re
 import subprocess
 from collections import OrderedDict

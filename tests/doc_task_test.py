@@ -1053,4 +1053,3 @@ def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_d
     doc_task = __init_descriptions()
     doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
     save_yaml.assert_has_calls(result)
-

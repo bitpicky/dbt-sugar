@@ -50,7 +50,6 @@ class BootstrapTask(DocumentationTask):
         super().__init__(
             flags=flags, dbt_profile=dbt_profile, config=sugar_config, dbt_path=dbt_path
         )
-        # self.dbt_models_dict: Dict[str, Dict[str, Union[None, Path, str, bool, List[str]]]] = {}
         self.dbt_models_dict: Dict[str, Union[Path, List[str]]] = {}
         self._dbt_profile = dbt_profile
         self.schema = self._dbt_profile.profile.get("target_schema", "")
@@ -107,34 +106,7 @@ class BootstrapTask(DocumentationTask):
             if model_descriptor_path:
                 save_yaml(model_descriptor_path, self.order_schema_yml(model_descriptor_content))
 
-    # def add_placeholders(self):
-    # for model, model_info in self.dbt_models_dict.items():
-    # # if model is described, we want to check whether the columns are described
-    # if not model_info["descriptor_file_exists"]:
-    # content = self.create_or_update_model_entry(
-    # is_already_documented=model_info["is_already_documented"],
-    # content=None,
-    # model_name=model,
-    # column_sql=model_info["column"],
-    # )
-    # if model_info["descriptor_file_exists"]:
-    # model_descriptor_content = open_yaml(model_info["model_descriptor_path"])  # noqa
-    # not_documented_columns = self.get_not_documented_columns(content, model)  # noqa
-    # documented_columns = self.get_documented_columns(content, model)  # noqa
-    # ...
-
     def run(self) -> int:
         self.build_all_models_dict()
         self.add_or_update_model_descriptor_placeholders()
         return 0
-
-        # collect all models in the dbt project --done
-        # iterate through all those models --done
-        # check the models exist in the db --done
-        # collect their columns from the db --done
-        # collect their yaml content from the schema.yml
-        # add placeholders (similar to the documentation task) --done
-        # save yaml --done
-
-        # TODO: Check the case when a model doesn't exist in the db. Does it break?? Do we just get nothing?
-        # TODO: Could we make the check columns in db and add model descriptor path be async.

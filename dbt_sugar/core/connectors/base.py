@@ -30,9 +30,7 @@ class BaseConnector(ABC):
         self.engine = sqlalchemy.create_engine(**connection_params)
 
     def get_columns_from_table(
-        self,
-        target_table: str,
-        target_schema: str,
+        self, target_table: str, target_schema: str, use_describe: bool = False
     ) -> Optional[List[Tuple[Any]]]:
         """
         Method that creates cursor to run a query.
@@ -46,8 +44,7 @@ class BaseConnector(ABC):
         """
         inspector = sqlalchemy.engine.reflection.Inspector.from_engine(self.engine)
         columns = inspector.get_columns(target_table, target_schema)
-        columns_names = [column["name"] for column in columns]
-        return columns_names
+        return [column["name"] for column in columns]
 
     def run_test(self, test_name: str, schema: str, table: str, column: str) -> bool:
         """
@@ -70,8 +67,7 @@ class BaseConnector(ABC):
             "not_null": f"select count(*) as errors from {schema}.{table} where {column} is null",
         }
         query = TESTS[test_name]
-        result = self.execute_and_check(query)
-        return result
+        return self.execute_and_check(query)
 
     def execute_and_check(self, query) -> bool:
         """

@@ -174,9 +174,7 @@ class AuditTask(BaseTask):
             reshaped_data["Total"] = total
             return reshaped_data
         if not data and total == "100.0":
-            reshaped_data = {}
-            reshaped_data["None"] = ""
-            reshaped_data[""] = ""
+            reshaped_data = {"None": "", "": ""}
             reshaped_data["Total"] = total
             return reshaped_data
         return {}

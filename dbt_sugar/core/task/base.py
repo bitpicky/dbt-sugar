@@ -264,8 +264,7 @@ class BaseTask(abc.ABC):
             return [
                 model_dict
                 for model_dict in models
-                if model_dict["name"]
-                not in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"] not in self._sugar_config.dbt_project_info["excluded_models"]
             ]
 
         return None

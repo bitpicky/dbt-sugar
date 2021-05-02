@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,7 @@ def test_build_all_models_dict(datafiles):
     from dbt_sugar.core.config.config import DbtSugarConfig
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.main import parser
-    from dbt_sugar.core.task.bootstrap import BootstrapTask
+    from dbt_sugar.core.task.bootstrap import BootstrapTask, DbtModelsDict
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
     flag_parser = FlagParser(parser)
@@ -35,28 +36,33 @@ def test_build_all_models_dict(datafiles):
         dbt_profile=profile,
     )
     task.build_all_models_dict()
-    expectation = {
-        "my_first_dbt_model": {
-            "path": Path(
+    print(task.dbt_models_data)
+    expectation = [
+        DbtModelsDict(
+            model_name="my_first_dbt_model",
+            model_path=Path(
                 "tests/test_dbt_project/dbt_sugar_test/models/example/my_first_dbt_model.sql"
-            )
-        },
-        "my_second_dbt_model": {
-            "path": Path(
+            ),
+            model_columns=[],
+        ),
+        DbtModelsDict(
+            model_name="my_second_dbt_model",
+            model_path=Path(
                 "tests/test_dbt_project/dbt_sugar_test/models/example/my_second_dbt_model.sql"
-            )
-        },
-    }
-    assert task.dbt_models_dict == expectation
+            ),
+            model_columns=[],
+        ),
+    ]
+    assert task.dbt_models_data == expectation
 
 
 @pytest.mark.datafiles(FIXTURE_DIR)
-def test_get_columns_and_descriptor_path(datafiles):
+def test_add_or_update_model_descriptor_placeholders(datafiles):
     from dbt_sugar.core.clients.dbt import DbtProfile
     from dbt_sugar.core.config.config import DbtSugarConfig
     from dbt_sugar.core.flags import FlagParser
     from dbt_sugar.core.main import parser
-    from dbt_sugar.core.task.bootstrap import BootstrapTask
+    from dbt_sugar.core.task.bootstrap import BootstrapTask, DbtModelsDict
 
     config_filepath = Path(datafiles).joinpath("sugar_config.yml")
     flag_parser = FlagParser(parser)
@@ -79,24 +85,47 @@ def test_get_columns_and_descriptor_path(datafiles):
         sugar_config=config,
         dbt_profile=profile,
     )
-    task.dbt_models_dict = {"my_first_dbt_model": {}, "my_second_dbt_model": {}}
-    task.get_columns_and_descriptor_path()
-    expectation = {
-        "my_first_dbt_model": {
-            "columns": ["id", "answer", "question"],
-            "model_descriptor_path": (
-                Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml")
+    task.dbt_models_data = [
+        DbtModelsDict(model_name="my_first_dbt_model", model_path=None, model_columns=[])
+    ]
+    rez = task.add_or_update_model_descriptor_placeholders(is_test=True)
+    expectation = OrderedDict(
+        [
+            ("version", 2),
+            (
+                "models",
+                [
+                    OrderedDict(
+                        [
+                            ("name", "my_first_dbt_model"),
+                            ("description", "No description for this model."),
+                            (
+                                "columns",
+                                [
+                                    OrderedDict(
+                                        [
+                                            ("name", "answer"),
+                                            ("description", "No description for this column."),
+                                        ]
+                                    ),
+                                    OrderedDict(
+                                        [
+                                            ("name", "id"),
+                                            ("description", "No description for this column."),
+                                        ]
+                                    ),
+                                    OrderedDict(
+                                        [
+                                            ("name", "question"),
+                                            ("description", "No description for this column."),
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ]
+                    )
+                ],
             ),
-            "descriptor_file_exiits": False,
-            "is_already_documented": False,
-        },
-        "my_second_dbt_model": {
-            "columns": ["id", "answer", "question"],
-            "model_descriptor_path": (
-                Path("tests/test_dbt_project/dbt_sugar_test/models/example/arbitrary_name.yml")
-            ),
-            "descriptor_file_exiits": True,
-            "is_already_documented": True,
-        },
-    }
-    assert task.dbt_models_dict == expectation
+        ]
+    )
+    assert rez == expectation

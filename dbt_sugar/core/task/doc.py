@@ -3,7 +3,7 @@ import copy
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress
@@ -374,7 +374,7 @@ class DocumentationTask(BaseTask):
             self.column_update_payload.update(user_input)
 
     def update_model(
-        self, content: Dict[str, Any], model_name: str, columns_on_db: List[str]
+        self, content: Dict[str, Any], model_name: str, columns_on_db: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to update the columns from a model in a schema.yaml content.
 
@@ -405,7 +405,7 @@ class DocumentationTask(BaseTask):
         return content
 
     def create_new_model(
-        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
+        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to create a new model in a schema.yaml content.
 
@@ -438,7 +438,7 @@ class DocumentationTask(BaseTask):
         is_already_documented: bool,
         content: Optional[Dict[str, Any]],
         model_name: str,
-        columns_sql: List[str],
+        columns_sql: Sequence[str],
     ) -> Dict[str, Any]:
         """Method to update/create a model entry in the schema.yml.
 

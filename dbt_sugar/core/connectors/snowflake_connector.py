@@ -3,7 +3,7 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, Sequence
 
 import sqlalchemy
 from snowflake.sqlalchemy import URL
@@ -42,7 +42,7 @@ class SnowflakeConnector(BaseConnector):
 
     def get_columns_from_table(
         self, target_table: str, target_schema: str, use_describe: bool = False
-    ) -> Optional[List[Tuple[Any]]]:
+    ) -> Sequence[str]:
 
         # if user wants to use describe (more preformant but with caveat) method
         # we re-implement column describe since snowflake.sqlalchemy is shit.

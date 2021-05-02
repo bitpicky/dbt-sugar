@@ -1053,3 +1053,128 @@ def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_d
     doc_task = __init_descriptions()
     doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
     save_yaml.assert_has_calls(result)
+
+
+@pytest.mark.parametrize(
+    "content, model_name, column_name, result",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["not_null", "unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique", "not_null"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented in reverse order",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id"}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="primary key tests are not implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="only one primary key test is implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            None,
+            id="primary key not documented in schema.yml",
+        ),
+    ],
+)
+def test_column_has_primary_key_tests(content, model_name, column_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.column_has_primary_key_tests(content, model_name, column_name) == results
+
+
+@pytest.mark.parametrize(
+    "model_name, result",
+    [
+        pytest.param(
+            "my_second_dbt_model",
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/my_second_dbt_model.sql"),
+            id="check if find the SQL file.",
+        ),
+        pytest.param(
+            "no_existing_model",
+            None,
+            id="check if a model doesn't have an sql file.",
+        ),
+    ],
+)
+def test_get_file_path_from_sql_model(model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_file_path_from_sql_model(model_name) == result
+
+
+@pytest.mark.parametrize(
+    "model_name, result",
+    [
+        pytest.param(
+            "my_second_dbt_model",
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/my_second_dbt_model.sql"),
+            id="check if find the SQL file.",
+        ),
+        pytest.param(
+            "no_existing_model",
+            None,
+            id="check if a model doesn't have an sql file.",
+        ),
+    ],
+)
+def test_get_file_path_from_sql_model(model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_file_path_from_sql_model(model_name) == result

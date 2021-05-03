@@ -1,3 +1,5 @@
+![output-onlineasciitools](https://user-images.githubusercontent.com/4304794/116912589-b806ac80-ac48-11eb-9094-813a0502eb94.png)
+
 [![PyPI version](https://badge.fury.io/py/dbt-sugar.svg)](https://badge.fury.io/py/dbt-sugar)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)

@@ -227,12 +227,6 @@ def handle(
         return task.run()
 
     if flag_parser.task == "audit":
-        audit_task: AuditTask = AuditTask(
-            flag_parser,
-            dbt_project._project_dir,
-            sugar_config=sugar_config,
-            dbt_profile=dbt_profile,
-        )
         if flag_parser.run_bootstrap_first:
             logger.info("Running 'bootstrap' task first then auditing your project or model")
             bootstrap_task: BootstrapTask = BootstrapTask(
@@ -242,6 +236,12 @@ def handle(
                 dbt_profile=dbt_profile,
             )
             bootstrap_task.run()
+        audit_task: AuditTask = AuditTask(
+            flag_parser,
+            dbt_project._project_dir,
+            sugar_config=sugar_config,
+            dbt_profile=dbt_profile,
+        )
         return audit_task.run()
 
     if flag_parser.task == "bootstrap":

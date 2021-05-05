@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-sugar"
-version = "0.1.0-a.1"
+version = "0.1.0-a.2"
 description = "A sweet CLI tool to help dbt users enforce documentation and testing on their dbt projects."
 authors = ["Bastien Boutonnet <bastien.b1@gmail.com>"]
 license = "GPLv3+"
@@ -34,6 +34,7 @@ pyfiglet = "^0.8.post1"
 rich = ">=9.13,<11.0"
 psycopg2 = "^2.8.6"
 sqlalchemy-redshift = "^0.8.2"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

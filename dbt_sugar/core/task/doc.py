@@ -194,8 +194,13 @@ class DocumentationTask(BaseTask):
         primary_key_column = self.get_primary_key_from_sql(model_file_path)
         if not primary_key_column:
             logger.info(
-                f"""The model {model_name} do not have a primary key identified in the config block.
-                Note: you could use this to make dbt-sugar enforce unique and not null tests for you automatically."""
+                f"[bold][yellow]Pro Tip:[/yellow][/bold] The model '{model_name}' does not "
+                "have a primary key specified in the "
+                "`{{config()}}` block.\nIf you add it, "
+                "dbt-sugar can [bold]automatically[/bold] enforce 'unique' and 'not_null' "
+                "tests on this column.\n"
+                "[bold]New in dbt-sugar 0.1.0!\n"
+                # DEPRECATION: remove this novely message in the next feature realease.
             )
             return
 
@@ -324,13 +329,13 @@ class DocumentationTask(BaseTask):
         for column in self.column_update_payload.keys():
             tests = self.column_update_payload[column].get("tests", [])
             for test in tests:
-                test_name = test if type(test) == str else list(test.keys())[0]
+                test_name = test if isinstance(test, str) else list(test.keys())[0]
                 test_passed_pattern = f"PASS {test_name}_{model_name}_{column}"
                 if re.search(test_passed_pattern, dbt_result_command):
-                    logger.info(f"The test {test} in the column {column} has PASSED.")
+                    logger.info(f"The test '{test}' on [green]{column}[/green] has PASSED.")
                 else:
                     logger.info(
-                        f"The test {test} in the column {column} has FAILED to execute."
+                        f"The test '{test}' on '{column}' has [red]FAILED[/red] to execute. "
                         "The test won't be added to your schema.yml file"
                     )
                     tests_to_delete[column] = tests_to_delete.get(column, []) + [test]

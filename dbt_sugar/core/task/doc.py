@@ -1,16 +1,19 @@
 """Document Task module."""
 import copy
+import re
+import subprocess
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from shlex import quote
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from rich.console import Console
-from rich.progress import BarColumn, Progress
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
+from dbt_sugar.core.connectors.redshift_connector import RedshiftConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
@@ -23,7 +26,9 @@ NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION = 5
 DB_CONNECTORS = {
     "postgres": PostgresConnector,
     "snowflake": SnowflakeConnector,
+    "redshift": RedshiftConnector,
 }
+PRIMARY_KEYS_TESTS = ["unique", "not_null"]
 
 
 class DocumentationTask(BaseTask):
@@ -35,11 +40,13 @@ class DocumentationTask(BaseTask):
     def __init__(
         self, flags: FlagParser, dbt_profile: DbtProfile, config: DbtSugarConfig, dbt_path: Path
     ) -> None:
-        super().__init__(flags=flags, dbt_path=dbt_path, sugar_config=config)
+        super().__init__(
+            flags=flags, dbt_path=dbt_path, sugar_config=config, dbt_profile=dbt_profile
+        )
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self._dbt_profile = dbt_profile
-        # self._sugar_config = config
+        self._sugar_config = config
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -59,7 +66,9 @@ class DocumentationTask(BaseTask):
 
         # exit early if model is in the excluded_models list
         _ = self.is_exluded_model(model)
-        columns_sql = self.connector.get_columns_from_table(model, schema)
+        columns_sql = self.connector.get_columns_from_table(
+            model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
+        )
         if columns_sql:
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
@@ -111,7 +120,8 @@ class DocumentationTask(BaseTask):
         """
         # DEPRECATION: Drop ordered dict when dropping python 3.6 support
         ordered_dict = OrderedDict(model)
-        ordered_dict.move_to_end("description", last=False)
+        if ordered_dict.get("description"):
+            ordered_dict.move_to_end("description", last=False)
         ordered_dict.move_to_end("name", last=False)
         return ordered_dict
 
@@ -148,6 +158,63 @@ class DocumentationTask(BaseTask):
         # Sorting models names in alphabetical order.
         content_yml["models"] = sorted(content_yml["models"], key=lambda k: k["name"].lower())
         return content_yml
+
+    def get_primary_key_from_sql(self, sql_file_path: Path) -> Optional[str]:
+        """
+        Gets the primary key info from a dbt model's config block.
+
+        Args:
+            sql_file_path (Path): full path including file name of a dbt .sql file.
+
+        Returns:
+            Optional[str]: name of the primary key column. None if no primary key is specified in the config block.
+        """
+        sql_content = self.read_file(sql_file_path)
+        unique_key = re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content)
+        if unique_key:
+            return unique_key.group(1)
+        return None
+
+    def add_primary_key_tests(
+        self,
+        schema_content: Dict[str, Any],
+        model_name: str,
+    ) -> None:
+        """
+        Adds the primary key tests (unique, not_null) to the primary key column.
+
+        Args:
+            schema_content (Dict[str, Any]): content of the schema.yml.
+            model_name (str): Name of the model on which to add primary key tests.
+        """
+        model_file_path = self.get_file_path_from_sql_model(model_name=model_name)
+        if not model_file_path:
+            return
+
+        primary_key_column = self.get_primary_key_from_sql(model_file_path)
+        if not primary_key_column:
+            logger.info(
+                f"""The model {model_name} do not have a primary key identified in the config block.
+                Note: you could use this to make dbt-sugar enforce unique and not null tests for you automatically."""
+            )
+            return
+
+        has_primary_key_tests = self.column_has_primary_key_tests(
+            schema_content=schema_content, model_name=model_name, column_name=primary_key_column
+        )
+
+        if has_primary_key_tests is False:
+            logger.info(
+                f"""\nAutomatic Process: We have detected that column '{primary_key_column}'
+                is a primary key, 'unique' and 'not_null' tests will be added for you.\n"""
+            )
+            if primary_key_column not in self.column_update_payload.keys():
+                self.column_update_payload[primary_key_column] = {"tests": PRIMARY_KEYS_TESTS}
+            else:
+                tests = self.column_update_payload[primary_key_column].get("tests", [])
+                self.column_update_payload[primary_key_column][
+                    "tests"
+                ] = self.combine_two_list_without_duplicates(PRIMARY_KEYS_TESTS, tests)
 
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]
@@ -193,50 +260,82 @@ class DocumentationTask(BaseTask):
         except KeyboardInterrupt:
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
+
         save_yaml(schema_file_path, self.order_schema_yml(content))
-        self.check_tests(schema, model_name)
+        self.add_primary_key_tests(schema_content=content, model_name=model_name)
+
+        # The copy is here because it was modifying the tests.
         self.update_model_description_test_tags(
-            schema_file_path, model_name, self.column_update_payload
+            schema_file_path, model_name, copy.deepcopy(self.column_update_payload)
         )
+        self.check_tests(schema_file_path, model_name)
         # Method to update the descriptions in all the schemas.yml
         self.update_column_descriptions(self.column_update_payload)
 
         return 0
 
-    def check_tests(self, schema: str, model_name: str) -> None:
+    def delete_failed_tests_from_schema(
+        self, path_file: Path, model_name: str, tests_to_delete: Dict[str, List[str]]
+    ):
+        """
+        Method to delete the failing tests from the schema.yml.
+
+        Args:
+            path_file (Path): Path of the schema.yml file to update.
+            model_name (str): Name of the model to document.
+            tests_to_delete (Dict[str, List[str]]): with the tests that have failed.
+        """
+        content = open_yaml(path_file)
+        for model in content["models"]:
+            if model["name"] == model_name:
+                for column in model.get("columns", []):
+                    tests_to_delete_from_column = tests_to_delete.get(column["name"], [])
+                    tests_from_column = column.get("tests", [])
+                    tests_pass = [
+                        x for x in tests_from_column if x not in tests_to_delete_from_column
+                    ]
+                    if not tests_pass and tests_from_column:
+                        del column["tests"]
+                    elif tests_pass:
+                        column["tests"] = tests_pass
+        save_yaml(path_file, content)
+
+    def check_tests(self, path_file: Path, model_name: str) -> None:
         """
         Method to run and add test into a schema.yml, this method will:
 
         Run the tests and if they have been successful it will add them into the schema.yml.
 
         Args:
-            schema (str): Name of the schema where the model lives.
+            path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
-        with Progress(
-            "[progress.description]{task.description}",
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            transient=True,
-        ) as progress:
-            test_checking_task = progress.add_task(
-                "[bold] checking your tests...", total=len(self.column_update_payload.keys())
+        dbt_command = f"dbt test --models {quote(model_name)}".split()
+        dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
+        tests_to_delete: Dict[str, List[str]] = {}
+
+        if "Compilation Error" in dbt_result_command:
+            logger.info(
+                "dbt encountered a compilation error in one or more of your custom tests.\n"
+                "Not able to check if the tests that you have added have PASSED.\n"
+                f"This is what dbt's compilation error says:\n{dbt_result_command}"
             )
-            for column in self.column_update_payload.keys():
-                tests = self.column_update_payload[column].get("tests", [])
-                tests_ = copy.deepcopy(tests)
-                for test in tests_:
-                    has_passed = self.connector.run_test(
-                        test,
-                        schema,
-                        model_name,
-                        column,
+
+        for column in self.column_update_payload.keys():
+            tests = self.column_update_payload[column].get("tests", [])
+            for test in tests:
+                test_name = test if type(test) == str else list(test.keys())[0]
+                test_passed_pattern = f"PASS {test_name}_{model_name}_{column}"
+                if re.search(test_passed_pattern, dbt_result_command):
+                    logger.info(f"The test {test} in the column {column} has PASSED.")
+                else:
+                    logger.info(
+                        f"The test {test} in the column {column} has FAILED to execute."
+                        "The test won't be added to your schema.yml file"
                     )
-                    message = self._generate_test_success_message(test, column, has_passed)
-                    progress.console.log(message)
-                    if not has_passed:
-                        tests.remove(test)
-                progress.advance(test_checking_task)
+                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+        if tests_to_delete:
+            self.delete_failed_tests_from_schema(path_file, model_name, tests_to_delete)
 
     @staticmethod
     def _generate_test_success_message(test_name: str, column_name: str, has_passed: bool):
@@ -264,7 +363,7 @@ class DocumentationTask(BaseTask):
             "documented_columns": "documented columns",
         }
         assert (
-            question_type in allowed_question_types_map.keys()
+            question_type in allowed_question_types_map
         ), f"question_type must be one of those: {list(allowed_question_types_map.keys())}"
 
         # set up pagination messaging
@@ -280,14 +379,14 @@ class DocumentationTask(BaseTask):
         # go through columns to document
         for i in range(0, number_of_colums_to_document, NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION):
             final_index = i + NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
-            is_first_page = True if final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION else False
+            is_first_page = final_index <= NUMBER_COLUMNS_TO_PRINT_PER_ITERACTION
 
             choices_undocumented = columns_names[i:final_index]
             choices_documented = {}
             # Feed the current description into the choices messahe.
             if question_type == "documented_columns":
                 choices_documented = {key: columns[key] for key in choices_undocumented}
-            choices = choices_documented if choices_documented else choices_undocumented
+            choices = choices_documented or choices_undocumented
 
             payload: List[Mapping[str, Any]] = [
                 {
@@ -308,7 +407,7 @@ class DocumentationTask(BaseTask):
             self.column_update_payload.update(user_input)
 
     def update_model(
-        self, content: Dict[str, Any], model_name: str, columns_on_db: List[str]
+        self, content: Dict[str, Any], model_name: str, columns_on_db: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to update the columns from a model in a schema.yaml content.
 
@@ -337,7 +436,7 @@ class DocumentationTask(BaseTask):
         return content
 
     def create_new_model(
-        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: List[str]
+        self, content: Optional[Dict[str, Any]], model_name: str, columns_sql: Sequence[str]
     ) -> Dict[str, Any]:
         """Method to create a new model in a schema.yaml content.
 
@@ -370,7 +469,7 @@ class DocumentationTask(BaseTask):
         is_already_documented: bool,
         content: Optional[Dict[str, Any]],
         model_name: str,
-        columns_sql: List[str],
+        columns_sql: Sequence[str],
     ) -> Dict[str, Any]:
         """Method to update/create a model entry in the schema.yml.
 

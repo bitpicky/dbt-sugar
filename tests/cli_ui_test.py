@@ -212,12 +212,12 @@ def test__document_already_documented_cols(
             {
                 "column_a": {
                     "description": "Dummy description",
-                    "tests": ["unique"],
+                    "tests": [{"accepted_values": ["a"]}],
                     "tags": ["Dummy description"],
                 },
                 "column_b": {
                     "description": "Dummy description",
-                    "tests": ["unique"],
+                    "tests": [{"accepted_values": ["a"]}],
                     "tags": ["Dummy description"],
                 },
             },
@@ -229,6 +229,7 @@ def test__iterate_through_columns(mocker, question_payload, expected_results):
     mocker.patch("questionary.text", return_value=Question("Dummy description"))
     mocker.patch("questionary.checkbox", return_value=Question(["unique"]))
     mocker.patch("questionary.confirm", return_value=Question(question_payload["ask_for_tests"]))
+    mocker.patch("click.edit", return_value="- accepted_values:\n\t- a")
     results = UserInputCollector(
         "undocumented_columns", question_payload=[], ask_for_tests=question_payload["ask_for_tests"]
     )._iterate_through_columns(cols=question_payload["col_list"])

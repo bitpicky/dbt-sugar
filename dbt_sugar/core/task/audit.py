@@ -6,6 +6,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
+from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
@@ -22,9 +23,17 @@ class AuditTask(BaseTask):
     Holds methods and attrs necessary to audit a model or a dbt project.
     """
 
-    def __init__(self, flags: FlagParser, dbt_path: Path, sugar_config: DbtSugarConfig) -> None:
+    def __init__(
+        self,
+        flags: FlagParser,
+        dbt_path: Path,
+        sugar_config: DbtSugarConfig,
+        dbt_profile: DbtProfile,
+    ) -> None:
         self.dbt_path = dbt_path
-        super().__init__(flags=flags, dbt_path=self.dbt_path, sugar_config=sugar_config)
+        super().__init__(
+            flags=flags, dbt_path=self.dbt_path, sugar_config=sugar_config, dbt_profile=dbt_profile
+        )
         self.column_update_payload: Dict[str, Dict[str, Any]] = {}
         self._flags = flags
         self.model_name = self._flags.model
@@ -113,14 +122,14 @@ class AuditTask(BaseTask):
     def get_model_column_description_coverage(self) -> None:
         """Method to get the descriptions coverage from a specific model."""
         not_documented_columns = self.get_not_documented_columns(
-            content=self.model_content,
+            schema_content=self.model_content,
             model_name=self.model_name,
         ).keys()
 
         number_not_documented_columns = len(not_documented_columns)
         number_documented_columns = len(
             self.get_documented_columns(
-                content=self.model_content,
+                schema_content=self.model_content,
                 model_name=self.model_name,
             )
         )
@@ -165,9 +174,7 @@ class AuditTask(BaseTask):
             reshaped_data["Total"] = total
             return reshaped_data
         if not data and total == "100.0":
-            reshaped_data = {}
-            reshaped_data["None"] = ""
-            reshaped_data[""] = ""
+            reshaped_data = {"None": "", "": ""}
             reshaped_data["Total"] = total
             return reshaped_data
         return {}
@@ -230,18 +237,18 @@ class AuditTask(BaseTask):
         """Method to get the model descriptions coverage per model in a dbt project."""
         print_statistics = {}
         for model_name, path in self.all_dbt_models.items():
-            content = open_yaml(path)
+            schema_content = open_yaml(path)
 
             number_documented_columns = len(
                 self.get_documented_columns(
-                    content=content,
+                    schema_content=schema_content,
                     model_name=model_name,
                 )
             )
 
             number_not_documented_columns = len(
                 self.get_not_documented_columns(
-                    content=content,
+                    schema_content=schema_content,
                     model_name=model_name,
                 )
             )

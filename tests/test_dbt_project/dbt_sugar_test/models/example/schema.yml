@@ -1,7 +1,7 @@
 version: 2
 models:
-  - name: my_second_dbt_model
-    description: dummy description for my second dbt model
+  - name: my_first_dbt_model
+    description: No description for this model.
     columns:
       - name: answer
         description: No description for this column.

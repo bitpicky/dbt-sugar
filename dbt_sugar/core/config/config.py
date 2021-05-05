@@ -32,6 +32,7 @@ class SyrupModel(BaseModel):
     dbt_projects: List[DbtProjectsModel]
     always_enforce_tests: Optional[bool] = True
     always_add_tags: Optional[bool] = True
+    use_describe_snowflake: Optional[bool] = False
 
 
 class DefaultsModel(BaseModel):
@@ -55,6 +56,7 @@ class DbtSugarConfig:
     CLI_OVERRIDE_FLAGS = [
         {"cli_arg_name": "ask_for_tests", "maps_to": "always_enforce_tests"},
         {"cli_arg_name": "ask_for_tags", "maps_to": "always_add_tags"},
+        {"cli_arg_name": "use_describe_snowflake", "maps_to": "use_describe_snowflake"},
     ]
 
     def __init__(self, flags: FlagParser, max_dir_upwards_iterations: int = 4) -> None:
@@ -80,8 +82,7 @@ class DbtSugarConfig:
     @property
     def config(self):
         if self.config_model:
-            config_dict = self._integrate_cli_flags(self.config_model.dict())
-            return config_dict
+            return self._integrate_cli_flags(self.config_model.dict())
         raise AttributeError(f"{type(self).__name__} does not have a parsed config.")
 
     # ! REGRESSION
@@ -105,21 +106,20 @@ class DbtSugarConfig:
             self._syrup_to_load = self._config.defaults.dict().get("syrup", str())
 
     def retain_syrup(self) -> None:
-        if self._syrup_to_load:
-            for syrup in self._config.syrups:
-                syrup_dict = syrup.dict()
-                if syrup_dict["name"] == self._syrup_to_load:
-                    self.config_model = syrup
-
-            if not hasattr(self, "config_model"):
-                raise SyrupNotFoundError(
-                    f"Could not find a syrup named {self._syrup_to_load} in {self._config_path}."
-                )
-
-        else:
+        if not self._syrup_to_load:
             raise NoSyrupProvided(
                 "A syrup must be provided either in your config.yml or passed to the CLI. "
                 "Run `dbt-sugar --help` for more information."
+            )
+
+        for syrup in self._config.syrups:
+            syrup_dict = syrup.dict()
+            if syrup_dict["name"] == self._syrup_to_load:
+                self.config_model = syrup
+
+        if not hasattr(self, "config_model"):
+            raise SyrupNotFoundError(
+                f"Could not find a syrup named {self._syrup_to_load} in {self._config_path}."
             )
 
     # TODO: Deprecate this when we lift off and address this regression
@@ -141,14 +141,15 @@ class DbtSugarConfig:
             resolved_dbt_project_path = Path(project["path"]).resolve()
             logger.debug(f"Looking for {project['name']} in {resolved_dbt_project_path}")
             project_existance[project["name"]] = {
-                "exists": True if resolved_dbt_project_path.exists() else False,
+                "exists": bool(resolved_dbt_project_path.exists()),
                 "path": resolved_dbt_project_path,
             }
 
-        bogus_projects = dict()
-        for project, details in project_existance.items():
-            if details["exists"] is False:
-                bogus_projects[project] = details["path"]
+        bogus_projects = {
+            project: details["path"]
+            for project, details in project_existance.items()
+            if details["exists"] is False
+        }
 
         # TODO: Maybe we want to revisit this and not have a raise but rather a logger warning and says we'll ignore
         if bogus_projects:
@@ -159,7 +160,6 @@ class DbtSugarConfig:
         return True
 
     def locate_config(self) -> None:
-        folder_iteration = 0
         logger.debug(f"Starting config file finding from {self._current_folder}")
         current = self._current_folder
         filename = Path(current).joinpath(self.SUGAR_CONFIG_FILENAME)
@@ -167,10 +167,11 @@ class DbtSugarConfig:
         if self._config_path == Path(str()):
             logger.debug("Trying to find sugar_config.yml in current and parent folders")
 
+            folder_iteration = 0
             while folder_iteration < self._max_folder_iterations:
                 if filename.exists():
                     sugar_config_dir = filename
-                    logger.debug(f"{filename} exists and was retreived.")
+                    logger.debug(f"{sugar_config_dir} exists and was retreived.")
                     self._config_path = sugar_config_dir
                     self._config_file_found_nearby = True
                     break

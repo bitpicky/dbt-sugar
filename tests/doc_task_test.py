@@ -694,7 +694,7 @@ def test_document_columns(mocker):
     [
         pytest.param(
             "my_first_dbt_model",
-            Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml"),
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/schema.yml").resolve(),
             False,
             id="find_model",
         ),
@@ -986,8 +986,228 @@ def test_move_name_and_description_to_first_position(content, result):
 
 def test_setup_paths_and_models_exclusion():
     doc_task = __init_descriptions()
-    print(doc_task._sugar_config)
     assert (
         doc_task._excluded_folders_from_search_pattern
         == r"\/target\/|\/dbt_modules\/|\/folder_to_exclude\/"
     )
+
+
+@pytest.mark.parametrize(
+    "content, model_name, column_name, result",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["not_null", "unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique", "not_null"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            True,
+            id="primary key tests are implemented in reverse order",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id"}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="primary key tests are not implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [{"name": "id", "tests": ["unique"]}],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            False,
+            id="only one primary key test is implemented",
+        ),
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "description": "No description for this model.",
+                        "columns": [],
+                    }
+                ]
+            },
+            "testmodel",
+            "id",
+            None,
+            id="primary key not documented in schema.yml",
+        ),
+    ],
+)
+def test_column_has_primary_key_tests(content, model_name, column_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.column_has_primary_key_tests(content, model_name, column_name) == result
+
+
+@pytest.mark.parametrize(
+    "model_name, result",
+    [
+        pytest.param(
+            "my_second_dbt_model",
+            Path("tests/test_dbt_project/dbt_sugar_test/models/example/my_second_dbt_model.sql"),
+            id="check if find the SQL file.",
+        ),
+        pytest.param(
+            "no_existing_model",
+            None,
+            id="check if a model doesn't have an sql file.",
+        ),
+    ],
+)
+def test_get_file_path_from_sql_model(model_name, result):
+    doc_task = __init_descriptions()
+    assert doc_task.get_file_path_from_sql_model(model_name) == result
+
+
+@pytest.mark.parametrize(
+    "content, result",
+    [
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                    unique_key='id' ,
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            "id",
+            id="check reading the primary key",
+        ),
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                    unique_key = 'id' ,
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            "id",
+            id="check reading the primary key with spaces",
+        ),
+        pytest.param(
+            """{{
+                config(
+                    materialized='table',
+                )
+            }}
+                select *
+                from {{ ref('my_first_dbt_model') }}
+                where id = 1
+            """,
+            None,
+            id="check case of not primary key presented",
+        ),
+    ],
+)
+def test_get_primary_key_from_sql(mocker, content, result):
+    doc_task = __init_descriptions()
+    read_file = mocker.patch("dbt_sugar.core.task.doc.DocumentationTask.read_file")
+    read_file.return_value = content
+    assert doc_task.get_primary_key_from_sql("path") == result
+
+
+@pytest.mark.parametrize(
+    "content, model_name, tests_to_delete, result",
+    [
+        pytest.param(
+            {
+                "models": [
+                    {
+                        "name": "testmodel",
+                        "columns": [
+                            {
+                                "name": "columnA",
+                                "description": "descriptionA",
+                                "tests": ["unique", "not_null"],
+                                "tags": ["hi", "hey"],
+                            },
+                            {
+                                "name": "columnF",
+                                "description": "descriptionF",
+                                "tests": ["unique", "not_null"],
+                            },
+                        ],
+                    }
+                ]
+            },
+            "testmodel",
+            {"columnA": ["unique", "not_null"], "columnF": ["not_null"]},
+            [
+                call(
+                    PosixPath("."),
+                    {
+                        "models": [
+                            {
+                                "columns": [
+                                    {
+                                        "description": "descriptionA",
+                                        "name": "columnA",
+                                        "tags": ["hi", "hey"],
+                                    },
+                                    {
+                                        "description": "descriptionF",
+                                        "name": "columnF",
+                                        "tests": ["unique"],
+                                    },
+                                ],
+                                "name": "testmodel",
+                            }
+                        ]
+                    },
+                )
+            ],
+            id="delete_failed_test_from_schema",
+        ),
+    ],
+)
+def test_delete_failed_tests_from_schema(mocker, content, model_name, tests_to_delete, result):
+    open_yaml = mocker.patch("dbt_sugar.core.task.doc.open_yaml")
+    save_yaml = mocker.patch("dbt_sugar.core.task.doc.save_yaml")
+    open_yaml.return_value = content
+    doc_task = __init_descriptions()
+    doc_task.delete_failed_tests_from_schema(Path("."), model_name, tests_to_delete)
+    save_yaml.assert_has_calls(result)

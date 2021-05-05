@@ -145,15 +145,14 @@ class DbtProfile(BaseYamlConfig):
     def _get_target_profile(self, profile_dict: Dict[str, Any]) -> Dict[str, Union[str, int]]:
         if self._target_name:
             return profile_dict["outputs"].get(self._target_name)
+        self._target_name = profile_dict.get("target", str())
+        if self._target_name:
+            return profile_dict["outputs"].get(self._target_name)
         else:
-            self._target_name = profile_dict.get("target", str())
-            if self._target_name:
-                return profile_dict["outputs"].get(self._target_name)
-            else:
-                raise TargetNameNotProvided(
-                    f"No target name provied in {self._profiles_dir} and none provided via "
-                    "--target in CLI. Cannot figure out appropriate profile information to load."
-                )
+            raise TargetNameNotProvided(
+                f"No target name provied in {self._profiles_dir} and none provided via "
+                "--target in CLI. Cannot figure out appropriate profile information to load."
+            )
 
     def read_profile(self):
         _ = self._assert_file_exists(
@@ -174,7 +173,7 @@ class DbtProfile(BaseYamlConfig):
                 if _profile_type == "snowflake":
                     # uses pydantic to validate profile. It will raise and break app if invalid.
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
-                elif _profile_type == "postgres":
+                elif _profile_type == "postgres" or "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
 
                 # if we don't manage to read the db type for some reason.

@@ -68,7 +68,7 @@ class BootstrapTask(DocumentationTask):
                             model_path=Path(root, f),
                             model_columns=[],
                         )
-                        for f in files
+                        for f in sorted(files)
                         if f.lower().endswith(".sql")
                         and f.lower().replace(".sql", "")
                         not in self._sugar_config.dbt_project_info.get("excluded_models", [])

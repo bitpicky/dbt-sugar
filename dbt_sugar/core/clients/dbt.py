@@ -1,6 +1,5 @@
 """Holds methods to interact with dbt API (we mostly don't for now because not stable) and objects."""
 import os
-
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 

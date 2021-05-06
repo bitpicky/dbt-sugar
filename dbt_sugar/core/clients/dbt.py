@@ -1,4 +1,5 @@
 """Holds methods to interact with dbt API (we mostly don't for now because not stable) and objects."""
+import os
 
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
@@ -14,7 +15,7 @@ from dbt_sugar.core.exceptions import (
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
-DEFAULT_DBT_PROFILE_PATH = Path.home().joinpath(".dbt")
+DEFAULT_DBT_PROFILE_PATH = Path(os.getenv("DBT_PROFILES_DIR", default=Path.home().joinpath(".dbt")))
 
 
 class PostgresDbtProfilesModel(BaseModel):

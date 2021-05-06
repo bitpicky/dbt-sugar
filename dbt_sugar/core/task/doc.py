@@ -8,6 +8,7 @@ from shlex import quote
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn
 
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
@@ -316,30 +317,43 @@ class DocumentationTask(BaseTask):
             path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
-        dbt_command = f"dbt test --models {quote(model_name)} --project-dir {self.dbt_path}".split()
-        dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
-        tests_to_delete: Dict[str, List[str]] = {}
-
-        if "Compilation Error" in dbt_result_command:
-            logger.info(
-                "dbt encountered a compilation error in one or more of your custom tests.\n"
-                "Not able to check if the tests that you have added have PASSED.\n"
-                f"This is what dbt's compilation error says:\n{dbt_result_command}"
+        with Progress(
+            "[progress.description]{task.description}",
+            SpinnerColumn(spinner_name="pong"),
+            transient=True,
+        ) as progress:
+            test_checking_task = progress.add_task(
+                "[bold]checking your tests via dbt... [/bold]",
+                total=len(self.column_update_payload.keys()),
             )
+            dbt_command = (
+                f"dbt test --models {quote(model_name)} --project-dir {self.dbt_path}".split()
+            )
+            dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
+            tests_to_delete: Dict[str, List[str]] = {}
 
-        for column in self.column_update_payload.keys():
-            tests = self.column_update_payload[column].get("tests", [])
-            for test in tests:
-                test_name = test if isinstance(test, str) else list(test.keys())[0]
-                test_passed_pattern = f"PASS {test_name}_{model_name}_{column}"
-                if re.search(test_passed_pattern, dbt_result_command):
-                    logger.info(f"The test '{test}' on [green]{column}[/green] has PASSED.")
-                else:
-                    logger.info(
-                        f"The test '{test}' on '{column}' has [red]FAILED[/red] to execute. "
-                        "The test won't be added to your schema.yml file"
+            if "Compilation Error" in dbt_result_command:
+                logger.info(
+                    "dbt encountered a compilation error in one or more of your custom tests.\n"
+                    "Not able to check if the tests that you have added have PASSED.\n"
+                    f"This is what dbt's compilation error says:\n{dbt_result_command}"
+                )
+
+            for column in self.column_update_payload.keys():
+                tests = self.column_update_payload[column].get("tests", [])
+                for test in tests:
+                    test_name = test if isinstance(test, str) else list(test.keys())[0]
+                    test_passed_pattern = f"PASS {test_name}_{model_name}_{column}"
+                    if re.search(test_passed_pattern, dbt_result_command):
+                        has_passed = True
+                    else:
+                        has_passed = False
+                        tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+                    test_checking_message = self._generate_test_success_message(
+                        test_name, column, has_passed
                     )
-                    tests_to_delete[column] = tests_to_delete.get(column, []) + [test]
+                    progress.console.log(test_checking_message)
+                progress.advance(test_checking_task)
         if tests_to_delete:
             self.delete_failed_tests_from_schema(path_file, model_name, tests_to_delete)
 

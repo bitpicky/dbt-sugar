@@ -36,6 +36,7 @@ def test_build_all_models_dict(datafiles):
         dbt_profile=profile,
     )
     task.build_all_models_dict()
+    print("BUILT")
     print(task.dbt_models_data)
     expectation = [
         DbtModelsDict(
@@ -53,6 +54,8 @@ def test_build_all_models_dict(datafiles):
             model_columns=[],
         ),
     ]
+    print("EXPT")
+    print(expectation)
     assert task.dbt_models_data == expectation
 
 

@@ -17,10 +17,10 @@ jobs:
       - name: Check for Container
         run: docker ps
 
-      - name: Set up Python 3.7
+      - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Install Poetry
         uses: Gr1N/setup-poetry@v4
@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Tests and Coverage Report
         run: |
-          PYTHONPATH=src/ poetry run python -m pytest --cov-report=xml:coverage-reports/coverage.xml --cov-report term-missing  --cov=dbt_sugar tests/
+          PYTHONPATH=src/ poetry run python -m pytest --cov-report=xml:coverage-reports/coverage.xml --cov-report term-missing  --cov=dbt_sugar tests/ -vv
 
       - name: Upload coverage report to CodeCov
         uses: codecov/codecov-action@v1

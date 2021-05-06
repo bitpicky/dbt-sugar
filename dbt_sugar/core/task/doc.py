@@ -47,6 +47,7 @@ class DocumentationTask(BaseTask):
         self._flags = flags
         self._dbt_profile = dbt_profile
         self._sugar_config = config
+        self.dbt_path = dbt_path
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -315,7 +316,7 @@ class DocumentationTask(BaseTask):
             path_file (Path): Path of the schema.yml file to update.
             model_name (str): Name of the model to document.
         """
-        dbt_command = f"dbt test --models {quote(model_name)}".split()
+        dbt_command = f"dbt test --models {quote(model_name)} --project-dir {self.dbt_path}".split()
         dbt_result_command = subprocess.run(dbt_command, capture_output=True, text=True).stdout
         tests_to_delete: Dict[str, List[str]] = {}
 

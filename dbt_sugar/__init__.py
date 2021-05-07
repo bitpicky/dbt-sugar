@@ -1,3 +1,3 @@
 """Version module and init for dbt-sugar."""
 
-__version__ = "0.1.0-a.2"
+__version__ = "0.1.0-a.3"

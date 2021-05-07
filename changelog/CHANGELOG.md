@@ -1,3 +1,15 @@
+## dbt-sugar [0.1.0a3] - 2021-05-07
+
+### Bug Fixes
+
+- [#252](https://github.com/bitpicky/dbt-sugar/issues/252) Fixes a bug where the `audit` task was initialised before the `bootstrap` task in a `--bootstrap` run making the audit unable to report on newly bootstrapped model descriptions and still give an inaccurate coverage result.
+
+- [#257](https://github.com/bitpicky/dbt-sugar/issues/257) Fixes a weird bug in the `bootstrap` task which resulted in unpredictable file ordering and failed only in GitHub Actions. We now sort the files before building the dbt model info dict for the bootstrap task.
+
+### Features
+
+- [#256](https://github.com/bitpicky/dbt-sugar/issues/256) Add support for `DBT_PROFILES_DIR` environment variable. If the variable is undefined, dbt profiles directory will default to `~/.dbt`.
+
 ## dbt-sugar [v0.1.0a1] - 2021-05-05
 
 ### Features

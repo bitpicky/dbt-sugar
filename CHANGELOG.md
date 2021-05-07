@@ -1,3 +1,31 @@
+## dbt-sugar [v0.1.0a3] - 2021-05-07
+
+### Bug Fixes
+
+- [#252](https://github.com/bitpicky/dbt-sugar/issues/252) Fixes a bug where the `audit` task was initialised before the `bootstrap` task in a `--bootstrap` run making the audit unable to report on newly bootstrapped model descriptions and still give an inaccurate coverage result.
+
+- [#257](https://github.com/bitpicky/dbt-sugar/issues/257) Fixes a weird bug in the `bootstrap` task which resulted in unpredictable file ordering and failed only in GitHub Actions. We now sort the files before building the dbt model info dict for the bootstrap task.
+
+### Features
+
+- [#203](https://github.com/bitpicky/dbt-sugar/issues/203) dbt-sugar will now automatically add a `unique` and `not_null` test to the column listed as `primary_key` in your model's `{{ config() }}` block.
+
+- [#212](https://github.com/bitpicky/dbt-sugar/issues/212) Users of snowflake can decide to make the `dbt-sugar` connector use `describe table` when using the `doc` task instead of the native `snowflake.sqlalchemy.get_columns()` by setting the `use_describe_snowflake:` config argument to `true` or by passing the `--use-describe-snowflake` CLI argument. This method is a much faster way to get column information from snowflake's information schema. However, the developers of `snowflake.sqlachemy` opted for the less performant options for reasons that are not entirely clear at this point hence why we're making this an optional and **experimental** feature until we get more clarity in the following [issue](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/221).
+
+- [#229](https://github.com/bitpicky/dbt-sugar/issues/229) dbt-sugar can now connect to **Redshift** databases by parsing credentials from dbt `profiles.yml`. **NOTE:** Still experimental!
+
+- [#233](https://github.com/bitpicky/dbt-sugar/issues/233) dbt-sugar can now automatically generate bootstrap model descriptor files (schema.yml) for all your models as well as their columns. Bootstrap model descriptors will contain either placeholders for undocumented columns and model descrptions, unless columns are documented in other models and in that case `bootstrap` will populate those columns with their definitions.
+
+  You can generate bootstraps by calling `dbt-sugar bootstrap`. Running `bootstrap` is particularly useful when you want to run an **exhaustive** `audit` on all your model since the `audit` task does not, by itself, check your models agains the database to make it less resource hungry. A follow up code-change will introduce an `--exhaustive` option on the `audit` task which will call `bootstrap` first and run `audit` after.
+
+- [#238](https://github.com/bitpicky/dbt-sugar/issues/238) dbt-sugar can now add your custom tests via the console, you only need to write the test as you want to look in the schema.yml. dbt-sugar will check if the test PASSES and if it does will add the custom test to your schema.yml.
+
+- [#239](https://github.com/bitpicky/dbt-sugar/issues/239) When running `dbt-sugar audit` users can now trigger all models (as well as their columns) to have at least placeholders in schema.yml files by passing the `--bootstrap` optional argument. This ensures that the audit task is fully aware of all the models before running its checks.
+
+  **NOTE:** the `--bootstrap` option will check for all of your models against your database and may be slower but it will give you the most accurate coverage statistics.
+
+- [#256](https://github.com/bitpicky/dbt-sugar/issues/256) Add support for `DBT_PROFILES_DIR` environment variable. If the variable is undefined, dbt profiles directory will default to `~/.dbt`. (Contributed by [@smomni](https://github.com/smomni) :sparkles:)
+
 # dbt-sugar [0.0.0] - 2021-04-18
 
 No significant changes.

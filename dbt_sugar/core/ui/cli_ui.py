@@ -258,7 +258,6 @@ class UserInputCollector:
                         " those more easily.",
                         choices=["builtin tests", "complex tests"],
                     ).unsafe_ask()
-                    print(wants_to_pop_editor)
                     if "complex tests" in wants_to_pop_editor:
                         tests = self.collect_rich_user_input()
                     else:

@@ -1,3 +1,11 @@
+## dbt-sugar [v0.1.0-a.4] - 2021-05-13
+
+### Bug Fixes
+
+- [#263](https://github.com/bitpicky/dbt-sugar/issues/263) SQLAlchemy-redshift is incompatible with versions of SQLAlchemy > 1.4 at the moment which broke the redshift adaptor we shipped in the previous alpha. We're going to pin `sqlalchemy` for the time being and watch any potential progress on the sqlalchemy-redshift pluging [issue](https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/issues/214).
+
+  Thanks to [@ldbrandi](https://github.com/ldbrandi) for reporting [the issue](https://github.com/bitpicky/dbt-sugar/issues/262) and helping with testing.
+
 ## dbt-sugar [0.1.0a3] - 2021-05-07
 
 ### Bug Fixes

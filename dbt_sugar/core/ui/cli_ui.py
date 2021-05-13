@@ -250,11 +250,15 @@ class UserInputCollector:
                     message="Would you like to add any tests?"
                 ).unsafe_ask()
                 if wants_to_add_tests:
-                    wants_to_pop_editor = questionary.confirm(
-                        message="Do you want to add a complex or custom tests? If, so we'll open a test editor for "
-                        f"you, otherwise you can choose from the following builtins: {AVAILABLE_TESTS}"
+                    wants_to_pop_editor = questionary.checkbox(
+                        # message="Do you want to add a complex or custom tests? If, so we'll open a test editor for "
+                        # f"you, otherwise you can choose from the following builtins: {AVAILABLE_TESTS}"
+                        message="Do you want to add simple builtin tests or custom/more complex tests?"
+                        "\nIf you choose 'complex tests' we'll take you to a text editor so you can add"
+                        " those more easily.",
+                        choices=["builtin tests", "complex tests"],
                     ).unsafe_ask()
-                    if wants_to_pop_editor:
+                    if "complex tests" in wants_to_pop_editor:
                         tests = self.collect_rich_user_input()
                     else:
                         tests = questionary.checkbox(

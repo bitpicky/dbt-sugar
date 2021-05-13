@@ -212,12 +212,12 @@ def test__document_already_documented_cols(
             {
                 "column_a": {
                     "description": "Dummy description",
-                    "tests": [{"accepted_values": ["a"]}],
+                    "tests": ["unique"],
                     "tags": ["Dummy description"],
                 },
                 "column_b": {
                     "description": "Dummy description",
-                    "tests": [{"accepted_values": ["a"]}],
+                    "tests": ["unique"],
                     "tags": ["Dummy description"],
                 },
             },

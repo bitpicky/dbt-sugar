@@ -352,6 +352,14 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "logredactor"
+version = "0.0.1"
+description = "Redact logs based on regex filters"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "luddite"
 version = "1.0.1"
 description = "Checks for out-of-date package versions"
@@ -1064,7 +1072,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "bd5b5ffe1e692f6d585aa4e0804f2babf573cd9d5fc0fdd8282c89a307abdd84"
+content-hash = "226c94780fe55c3cb68bf8122fd9af69a44894e87c1067375e58d5d7f417c74f"
 
 [metadata.files]
 appdirs = [
@@ -1291,6 +1299,9 @@ jinja2 = [
 jmespath = [
     {file = "jmespath-0.10.0-py2.py3-none-any.whl", hash = "sha256:cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f"},
     {file = "jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9"},
+]
+logredactor = [
+    {file = "logredactor-0.0.1.tar.gz", hash = "sha256:1df30bdfeb35d462a74ce96e90e63f6a832bdea1b03d14651e838b6927d8be64"},
 ]
 luddite = [
     {file = "luddite-1.0.1-py2.py3-none-any.whl", hash = "sha256:af6b66317a86e173257627a1fde0c7e6265f57a03fdf354d25e3ec8b13670c43"},

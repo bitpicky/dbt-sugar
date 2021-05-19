@@ -1,3 +1,11 @@
+## dbt-sugar [v0.1.0a5] - 2021-05-19
+
+### Under The Hood/Misc
+
+- [#268](https://github.com/bitpicky/dbt-sugar/issues/268) The test adding prompt is a bit more user-friendly and clear when it comes to asking about whether users want to add complex or simple builtin tests.
+
+- [#275](https://github.com/bitpicky/dbt-sugar/issues/275) The dbt password is now obfuscated from the log messages via `logredactor`.
+
 ## dbt-sugar [v0.1.0-a.4] - 2021-05-13
 
 ### Bug Fixes

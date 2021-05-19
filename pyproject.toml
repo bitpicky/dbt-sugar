@@ -34,7 +34,7 @@ pyfiglet = "^0.8.post1"
 rich = ">=9.13,<11.0"
 psycopg2 = "^2.8.6"
 sqlalchemy-redshift = "^0.8.2"
-click = "^7.1.2"
+click = ">=7.1.2,<9.0.0"
 logredactor = "^0.0.1"
 
 [tool.poetry.dev-dependencies]

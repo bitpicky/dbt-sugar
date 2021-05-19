@@ -1,8 +1,10 @@
 """Logger module contains LogManager which sets up file and stream handler + formatting."""
 
 import logging
+import re
 from pathlib import Path
 
+import logredactor
 from rich.logging import RichHandler
 
 
@@ -57,6 +59,8 @@ class LogManager:
             )
             c_handler.setLevel(logging.INFO)
             logger.addHandler(c_handler)
+        redact_patterns = [re.compile(r"(?<=password=).*(?= database)")]
+        logger.addFilter(logredactor.RedactingFilter(redact_patterns, default_mask="'*hidden*'"))
 
         self.logger = logger
         self.f_format = f_format

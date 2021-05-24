@@ -492,7 +492,7 @@ importlib-metadata = {version = ">=1.7.0,<2.0.0", markers = "python_version >= \
 
 [[package]]
 name = "pre-commit"
-version = "2.12.1"
+version = "2.13.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 category = "dev"
 optional = false
@@ -1072,7 +1072,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "226c94780fe55c3cb68bf8122fd9af69a44894e87c1067375e58d5d7f417c74f"
+content-hash = "8397d2218c2e9151f45d5dad6087a81ab29ad71599c9e9340210c22699843ef6"
 
 [metadata.files]
 appdirs = [
@@ -1429,8 +1429,8 @@ poetry-core = [
     {file = "poetry_core-1.0.3-py2.py3-none-any.whl", hash = "sha256:c6bde46251112de8384013e1ab8d66e7323d2c75172f80220aba2bc07e208e9a"},
 ]
 pre-commit = [
-    {file = "pre_commit-2.12.1-py2.py3-none-any.whl", hash = "sha256:70c5ec1f30406250b706eda35e868b87e3e4ba099af8787e3e8b4b01e84f4712"},
-    {file = "pre_commit-2.12.1.tar.gz", hash = "sha256:900d3c7e1bf4cf0374bb2893c24c23304952181405b4d88c9c40b72bda1bb8a9"},
+    {file = "pre_commit-2.13.0-py2.py3-none-any.whl", hash = "sha256:b679d0fddd5b9d6d98783ae5f10fd0c4c59954f375b70a58cbe1ce9bcf9809a4"},
+    {file = "pre_commit-2.13.0.tar.gz", hash = "sha256:764972c60693dc668ba8e86eb29654ec3144501310f7198742a767bec385a378"},
 ]
 pretty-errors = [
     {file = "pretty_errors-1.2.21-py3-none-any.whl", hash = "sha256:2329b2a1af933ac77b7410d576dce095996d3e660db59cc0f8e93f713866121a"},

@@ -25,7 +25,7 @@ repos:
         files: ^dbt_sugar/core/
         entry: mypy dbt_sugar/core
         pass_filenames: false
-        args: [--ignore-missing-imports]
+        args: ["--install-types", "--ignore-missing-imports"]
   - repo: https://github.com/PyCQA/isort
     rev: "5.8.0"
     hooks:

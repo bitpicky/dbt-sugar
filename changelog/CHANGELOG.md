@@ -1,3 +1,11 @@
+## dbt-sugar [v0.1.0-a.6] - 2021-06-16
+
+### Bug Fixes
+
+- [#291](https://github.com/bitpicky/dbt-sugar/issues/291) The redshift_connector now includes the default `sslmode=prefer` parameter in the engine when creating a connection. This fixes an issue when Redshift connections are made via SSH.
+
+  by @danieldiamond
+
 ## dbt-sugar [v0.1.0a5] - 2021-05-19
 
 ### Under The Hood/Misc

@@ -27,8 +27,7 @@ repos:
         pass_filenames: false
         args: ["--ignore-missing-imports"]
         additional_dependencies:
-          - "types-click"
-          - "types-PyYAML"
+          - "types-all"
   - repo: https://github.com/PyCQA/isort
     rev: "5.8.0"
     hooks:

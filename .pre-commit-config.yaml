@@ -25,7 +25,10 @@ repos:
         files: ^dbt_sugar/core/
         entry: mypy dbt_sugar/core
         pass_filenames: false
-        args: ["--install-types", "--ignore-missing-imports"]
+        args: ["--ignore-missing-imports"]
+        additional_dependencies:
+          - "types-click"
+          - "types-PyYAML"
   - repo: https://github.com/PyCQA/isort
     rev: "5.8.0"
     hooks:

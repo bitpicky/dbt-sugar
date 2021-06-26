@@ -36,4 +36,6 @@ class RedshiftConnector(BaseConnector):
             database=connection_params.get("database", str()),
             port=connection_params.get("port", str()),
         )
-        self.engine = sqlalchemy.create_engine(self.connection_url)
+        self.engine = sqlalchemy.create_engine(
+            self.connection_url, connect_args={"sslmode": "prefer"}
+        )

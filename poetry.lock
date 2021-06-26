@@ -509,7 +509,7 @@ virtualenv = ">=20.0.8"
 
 [[package]]
 name = "pretty-errors"
-version = "1.2.21"
+version = "1.2.22"
 description = "Prettifies Python exception output to make it legible."
 category = "main"
 optional = false
@@ -1434,8 +1434,8 @@ pre-commit = [
     {file = "pre_commit-2.13.0.tar.gz", hash = "sha256:764972c60693dc668ba8e86eb29654ec3144501310f7198742a767bec385a378"},
 ]
 pretty-errors = [
-    {file = "pretty_errors-1.2.21-py3-none-any.whl", hash = "sha256:2329b2a1af933ac77b7410d576dce095996d3e660db59cc0f8e93f713866121a"},
-    {file = "pretty_errors-1.2.21.tar.gz", hash = "sha256:70198b13b5b438fe4ccef832e0c8659249965b69ba130d1b2130b6ec74336b0b"},
+    {file = "pretty_errors-1.2.22-py3-none-any.whl", hash = "sha256:f398de632fb3c3ce003565fca68f10e328c6db3b63563fc878ccee5620381467"},
+    {file = "pretty_errors-1.2.22.tar.gz", hash = "sha256:9d8f03385f4f664f2e158338b5b060c17a90dea0ef60d30de17dfdfab601607f"},
 ]
 prompt-toolkit = [
     {file = "prompt_toolkit-3.0.18-py3-none-any.whl", hash = "sha256:bf00f22079f5fadc949f42ae8ff7f05702826a97059ffcc6281036ad40ac6f04"},

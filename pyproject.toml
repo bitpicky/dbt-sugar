@@ -35,6 +35,7 @@ rich = ">=9.13,<11.0"
 psycopg2 = "^2.8.6"
 sqlalchemy-redshift = "^0.8.2"
 click = "^7.1.2"
+pybigquery = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

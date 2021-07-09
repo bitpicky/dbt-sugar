@@ -123,6 +123,7 @@ def test_update_description_in_dbt_descriptions(column, description, result):
                             }
                         ]
                     },
+                    preserve_yaml_order=False,
                 )
             ],
         ),
@@ -1198,6 +1199,7 @@ def test_get_primary_key_from_sql(mocker, content, result):
                             }
                         ]
                     },
+                    preserve_yaml_order=False,
                 )
             ],
             id="delete_failed_test_from_schema",

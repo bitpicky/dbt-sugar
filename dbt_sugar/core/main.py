@@ -177,6 +177,17 @@ audit_sub_parser.add_argument(
     action="store_true",
     required=False,
 )
+# TODO: see about how we can share arguments between parsers in non inheritance setup
+audit_sub_parser.add_argument(
+    "--preserve-yaml-order",
+    help=(
+        "When passed, the original order of the model descriptors is preserved, "
+        "included any inline or block comments. This means your schema.yml file "
+        "will not be sanitised in any way such as alphabetically sorted."
+    ),
+    action="store_true",
+    default=False,
+)
 
 
 # ##### BOOTSTRAP Task Arg parser

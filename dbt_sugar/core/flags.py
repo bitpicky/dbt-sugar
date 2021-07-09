@@ -54,6 +54,7 @@ class FlagParser:
         if self.task == "audit":
             self.model = self.args.model
             self.run_bootstrap_first = self.args.bootstrap
+            self.preserve_yaml_order = self.args.preserve_yaml_order
         elif self.task == "doc":
             self.model = self.args.model
             self.schema = self.args.schema

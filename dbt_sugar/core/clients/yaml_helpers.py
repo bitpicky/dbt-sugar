@@ -8,6 +8,7 @@ import yaml
 import yamlloader
 
 from dbt_sugar.core.exceptions import YAMLFileEmptyError
+from dbt_sugar.core.logger import GLOBAL_LOGGER as logger
 
 # TODO: I probably need to also make sure that we load with the appropriate method
 # let's always use ruamel.yaml but in one case we will load with `typ='safe'` and
@@ -24,6 +25,7 @@ def open_yaml(path: Path, preserve_yaml_order: bool = False) -> Dict[str, Any]:
         Dict[str, Any]: A python dict containing the content from the yaml file.
     """
     if path.is_file():
+        logger.debug(f"Opening: {path}")
         with open(path, "r") as stream:
             if preserve_yaml_order:
                 ryaml = ruamel.yaml.YAML(typ="rt")
@@ -43,10 +45,13 @@ def save_yaml(path: Path, data: Dict[str, Any], preserve_yaml_order: bool = Fals
         path (Path): Full filename path pointing to the yaml file we want to save.
         data (dict[str, Any]): Data to save in the file.
     """
-    with open(path, "w") as outfile:
-        if preserve_yaml_order:
-            ryaml = ruamel.yaml.YAML(typ="rt")
-            ryaml.width = 100
-            ryaml.dump(data, outfile)
-        else:
-            yaml.dump(data, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)
+    # TODO: This is a bit of a hot fix. Ideally we should avoid processing those
+    # non-model conatining files earlier in the flow.
+    if data.get("models"):
+        with open(path, "w") as outfile:
+            if preserve_yaml_order:
+                ryaml = ruamel.yaml.YAML(typ="rt")
+                ryaml.width = 100
+                ryaml.dump(data, outfile)
+            else:
+                yaml.dump(data, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)

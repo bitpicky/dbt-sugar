@@ -389,7 +389,8 @@ class BaseTask(abc.ABC):
                         ),
                     )
                     logger.debug(path_file)
-                    self.load_descriptions_from_a_schema_file(content, path_file)
+                    if content.get("models"):
+                        self.load_descriptions_from_a_schema_file(content, path_file)
 
     def is_model_in_schema_content(self, content, model_name) -> bool:
         """Method to check if a model exists in a schema.yaml content.

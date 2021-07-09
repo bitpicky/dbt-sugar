@@ -109,6 +109,7 @@ def test_load_config(datafiles, has_no_default_syrup, is_missing_syrup, is_missi
             "always_add_tags": True,
             "always_enforce_tests": True,
             "use_describe_snowflake": False,
+            "preserve_yaml_order": False,
         }
 
         assert config.config == expectation
@@ -195,6 +196,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 "always_enforce_tests": True,
                 "always_add_tags": True,
                 "use_describe_snowflake": False,
+                "preserve_yaml_order": False,
             },
             id="no_test_or_tag_override",
         ),
@@ -213,6 +215,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 "always_enforce_tests": False,
                 "always_add_tags": True,
                 "use_describe_snowflake": False,
+                "preserve_yaml_order": False,
             },
             id="no_tests_on_cli",
         ),
@@ -231,6 +234,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 "always_enforce_tests": True,
                 "always_add_tags": False,
                 "use_describe_snowflake": False,
+                "preserve_yaml_order": False,
             },
             id="no_tags_on_cli",
         ),
@@ -249,6 +253,7 @@ def test_assert_only_one_dbt_project_in_scope(
                 "always_enforce_tests": True,
                 "always_add_tags": True,
                 "use_describe_snowflake": True,
+                "preserve_yaml_order": False,
             },
             id="override snowflake describe option",
         ),

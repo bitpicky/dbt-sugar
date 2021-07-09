@@ -177,7 +177,10 @@ class BaseTask(abc.ABC):
             dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description, tags and tests to update.
         """
-        content = open_yaml(path_file)
+        content = open_yaml(
+            path_file,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
         for model in content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
@@ -203,7 +206,11 @@ class BaseTask(abc.ABC):
                             column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
                             )
-        save_yaml(path_file, content)
+        save_yaml(
+            path_file,
+            content,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
 
     def update_column_description_from_schema(
         self, path_file: Path, dict_column_description_to_update: Dict[str, Dict[str, Any]]
@@ -215,7 +222,10 @@ class BaseTask(abc.ABC):
             dict_column_description_to_update (Dict[str, Dict[str, Any]]): Dict with the column name with
             the description to update.
         """
-        content = open_yaml(path_file)
+        content = open_yaml(
+            path_file,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
         for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
@@ -225,7 +235,11 @@ class BaseTask(abc.ABC):
                     )
                     if new_desctiption:
                         column["description"] = new_desctiption
-        save_yaml(path_file, content)
+        save_yaml(
+            path_file,
+            content,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
 
     def update_column_descriptions(
         self, dict_column_description_to_update: Dict[str, Dict[str, Any]]
@@ -368,7 +382,12 @@ class BaseTask(abc.ABC):
                 ]
                 for file in files:
                     path_file = Path(os.path.join(root, file))
-                    content = open_yaml(path_file)
+                    content = open_yaml(
+                        path_file,
+                        preserve_yaml_order=self._sugar_config.config.get(
+                            "preserve_yaml_order", False
+                        ),
+                    )
                     logger.debug(path_file)
                     self.load_descriptions_from_a_schema_file(content, path_file)
 

@@ -143,6 +143,17 @@ document_sub_parser.add_argument(
     default=False,
 )
 
+document_sub_parser.add_argument(
+    "--preserve-yaml-order",
+    help=(
+        "When passed, the original order of the model descriptors is preserved, "
+        "included any inline or block comments. This means your schema.yml file "
+        "will not be sanitised in any way such as alphabetically sorted."
+    ),
+    action="store_true",
+    default=False,
+)
+
 # ##### AUDIT Task
 audit_sub_parser = sub_parsers.add_parser(
     "audit", parents=[base_subparser], help="Runs audit task."
@@ -175,6 +186,18 @@ bootstrap_sub_parser = sub_parsers.add_parser(
     help="Runs the bootstrap task, which creates model descriptor files for all your models.",
 )
 bootstrap_sub_parser.set_defaults(cls=BootstrapTask, which="bootstrap")
+
+# TODO: see about how we can share arguments between parsers
+bootstrap_sub_parser.add_argument(
+    "--preserve-yaml-order",
+    help=(
+        "When passed, the original order of the model descriptors is preserved, "
+        "included any inline or block comments. This means your schema.yml file "
+        "will not be sanitised in any way such as alphabetically sorted."
+    ),
+    action="store_true",
+    default=False,
+)
 
 
 # task handler

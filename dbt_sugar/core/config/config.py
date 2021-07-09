@@ -33,6 +33,7 @@ class SyrupModel(BaseModel):
     always_enforce_tests: Optional[bool] = True
     always_add_tags: Optional[bool] = True
     use_describe_snowflake: Optional[bool] = False
+    preserve_yaml_order: Optional[bool] = False
 
 
 class DefaultsModel(BaseModel):
@@ -57,6 +58,7 @@ class DbtSugarConfig:
         {"cli_arg_name": "ask_for_tests", "maps_to": "always_enforce_tests"},
         {"cli_arg_name": "ask_for_tags", "maps_to": "always_add_tags"},
         {"cli_arg_name": "use_describe_snowflake", "maps_to": "use_describe_snowflake"},
+        {"cli_arg_name": "preserve_yaml_order", "maps_to": "preserve_yaml_order"},
     ]
 
     def __init__(self, flags: FlagParser, max_dir_upwards_iterations: int = 4) -> None:

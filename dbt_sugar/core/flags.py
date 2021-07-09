@@ -63,3 +63,6 @@ class FlagParser:
             self.ask_for_tests = self.args.ask_for_tests
             self.ask_for_tags = self.args.ask_for_tags
             self.use_describe_snowflake = self.args.use_describe_snowflake
+            self.preserve_yaml_order = self.args.preserve_yaml_order
+        elif self.task == "bootstrap":
+            self.preserve_yaml_order = self.args.preserve_yaml_order

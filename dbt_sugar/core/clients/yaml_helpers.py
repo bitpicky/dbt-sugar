@@ -1,16 +1,20 @@
 """Contains yaml related utils which might get used in places."""
 
-import collections
 from pathlib import Path
 from typing import Any, Dict
 
+import ruamel.yaml
 import yaml
 import yamlloader
 
 from dbt_sugar.core.exceptions import YAMLFileEmptyError
 
+# TODO: I probably need to also make sure that we load with the appropriate method
+# let's always use ruamel.yaml but in one case we will load with `typ='safe'` and
+# in the other we will load with `typ='rt'` the same will be applied to when we save.
 
-def open_yaml(path: Path) -> Dict[str, Any]:
+
+def open_yaml(path: Path, preserve_yaml_order: bool = False) -> Dict[str, Any]:
     """Opens a yaml file... Nothing too exciting there.
 
     Args:
@@ -21,14 +25,18 @@ def open_yaml(path: Path) -> Dict[str, Any]:
     """
     if path.is_file():
         with open(path, "r") as stream:
-            yaml_dict = yaml.load(stream, Loader=yamlloader.ordereddict.CSafeLoader)
+            if preserve_yaml_order:
+                ryaml = ruamel.yaml.YAML(typ="rt")
+                yaml_dict = ryaml.load(stream)
+            else:
+                yaml_dict = yaml.load(stream, Loader=yamlloader.ordereddict.CSafeLoader)
             if yaml_dict:
                 return yaml_dict
             raise YAMLFileEmptyError(f"The following file {path.resolve()} seems empty.")
     raise FileNotFoundError(f"File {path.resolve()} was not found.")
 
 
-def save_yaml(path: Path, data: Dict[str, Any]) -> None:
+def save_yaml(path: Path, data: Dict[str, Any], preserve_yaml_order: bool = False) -> None:
     """Saves a YAML content.
 
     Args:
@@ -36,5 +44,9 @@ def save_yaml(path: Path, data: Dict[str, Any]) -> None:
         data (dict[str, Any]): Data to save in the file.
     """
     with open(path, "w") as outfile:
-        data_order_dict = collections.OrderedDict(data)
-        yaml.dump(data_order_dict, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)
+        if preserve_yaml_order:
+            ryaml = ruamel.yaml.YAML(typ="rt")
+            ryaml.width = 100
+            ryaml.dump(data, outfile)
+        else:
+            yaml.dump(data, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)

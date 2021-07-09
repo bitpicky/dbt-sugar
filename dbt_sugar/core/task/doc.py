@@ -251,7 +251,10 @@ class DocumentationTask(BaseTask):
                 f"Model: '{model_name}' could not be found in your dbt project."
             )
         if schema_exists:
-            content = open_yaml(schema_file_path)
+            content = open_yaml(
+                schema_file_path,
+                preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+            )
 
         content = self.create_or_update_model_entry(
             is_already_documented, content, model_name, columns_sql
@@ -268,7 +271,10 @@ class DocumentationTask(BaseTask):
             logger.info("The user has exited the doc task, all changes have been discarded.")
             return 0
 
-        save_yaml(schema_file_path, self.order_schema_yml(content))
+        if self._sugar_config.config.get("preserve_yaml_order"):
+            save_yaml(schema_file_path, content, preserve_yaml_order=True)
+        else:
+            save_yaml(schema_file_path, self.order_schema_yml(content))
         self.add_primary_key_tests(schema_content=content, model_name=model_name)
 
         # The copy is here because it was modifying the tests.
@@ -292,7 +298,10 @@ class DocumentationTask(BaseTask):
             model_name (str): Name of the model to document.
             tests_to_delete (Dict[str, List[str]]): with the tests that have failed.
         """
-        content = open_yaml(path_file)
+        content = open_yaml(
+            path_file,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
         for model in content["models"]:
             if model["name"] == model_name:
                 for column in model.get("columns", []):
@@ -305,7 +314,11 @@ class DocumentationTask(BaseTask):
                         del column["tests"]
                     elif tests_pass:
                         column["tests"] = tests_pass
-        save_yaml(path_file, content)
+        save_yaml(
+            path_file,
+            content,
+            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+        )
 
     def check_tests(self, path_file: Path, model_name: str) -> None:
         """

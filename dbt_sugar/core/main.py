@@ -151,7 +151,7 @@ document_sub_parser.add_argument(
         "will not be sanitised in any way such as alphabetically sorted."
     ),
     action="store_true",
-    default=False,
+    # default=False,
 )
 
 # ##### AUDIT Task

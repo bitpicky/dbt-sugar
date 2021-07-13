@@ -189,9 +189,9 @@ class DbtSugarConfig:
 
     def _integrate_cli_flags(self, config_dict: Dict[str, Any]):
         for flag_override_dict in self.CLI_OVERRIDE_FLAGS:
-            config_dict[flag_override_dict["maps_to"]] = getattr(
-                self._flags, flag_override_dict["cli_arg_name"]
-            )
+            flag_override = getattr(self._flags, flag_override_dict["cli_arg_name"])
+            if flag_override is not None:
+                config_dict[flag_override_dict["maps_to"]] = flag_override
         return config_dict
 
     def load_config(self) -> None:

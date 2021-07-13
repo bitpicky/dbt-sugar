@@ -93,7 +93,10 @@ class BootstrapTask(DocumentationTask):
                 is_already_documented,
             ) = self.find_model_schema_file(model_name=model_info.model_name)
             if descriptor_file_exists and model_descriptor_path:
-                model_descriptor_content = open_yaml(model_descriptor_path)
+                model_descriptor_content = open_yaml(
+                    model_descriptor_path,
+                    preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+                )
 
             model_descriptor_content = self.create_or_update_model_entry(
                 is_already_documented,
@@ -104,7 +107,14 @@ class BootstrapTask(DocumentationTask):
             if is_test:
                 return self.order_schema_yml(model_descriptor_content)
             if model_descriptor_path:
-                save_yaml(model_descriptor_path, self.order_schema_yml(model_descriptor_content))
+                if self._sugar_config.config.get("preserve_yaml_order"):
+                    save_yaml(
+                        model_descriptor_path, model_descriptor_content, preserve_yaml_order=True
+                    )
+                else:
+                    save_yaml(
+                        model_descriptor_path, self.order_schema_yml(model_descriptor_content)
+                    )
 
     def run(self) -> int:
         self.build_all_models_dict()

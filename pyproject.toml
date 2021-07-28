@@ -37,6 +37,7 @@ sqlalchemy-redshift = "^0.8.2"
 click = "^7.1.2"
 logredactor = "^0.0.1"
 "ruamel.yaml" = "^0.17.10"
+dbt = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

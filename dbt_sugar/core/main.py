@@ -293,10 +293,7 @@ def handle(
 def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = list()) -> int:
     """Just your boring main."""
     exit_code = 0
-    _cli_args = []
-    if test_cli_args:
-        _cli_args = test_cli_args
-
+    _cli_args = test_cli_args or []
     # print version on every run unless doing `--version` which is better handled by argparse
     if "--version" not in sys.argv[1:]:
         version_message = check_and_print_version()

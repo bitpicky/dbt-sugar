@@ -759,7 +759,7 @@ python-versions = "*"
 
 [[package]]
 name = "luddite"
-version = "1.0.1"
+version = "1.0.2"
 description = "Checks for out-of-date package versions"
 category = "main"
 optional = false
@@ -2183,7 +2183,8 @@ logredactor = [
     {file = "logredactor-0.0.1.tar.gz", hash = "sha256:1df30bdfeb35d462a74ce96e90e63f6a832bdea1b03d14651e838b6927d8be64"},
 ]
 luddite = [
-    {file = "luddite-1.0.1-py2.py3-none-any.whl", hash = "sha256:af6b66317a86e173257627a1fde0c7e6265f57a03fdf354d25e3ec8b13670c43"},
+    {file = "luddite-1.0.2-py2.py3-none-any.whl", hash = "sha256:5d4cd45c91e7876465330b84e18e6994d44b77ee8f723fdc384d5fd7ff160c04"},
+    {file = "luddite-1.0.2.tar.gz", hash = "sha256:8bec9f75247716320da307ff84df141b57fbd1f7e81a8bc2a7d7db88531cebc5"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},

@@ -1,3 +1,17 @@
+## dbt-sugar [0.1.0] - 2021-07-30
+
+### Bug Fixes
+
+- [#291](https://github.com/bitpicky/dbt-sugar/issues/291) The redshift_connector now includes the default `sslmode=prefer` parameter in the engine when creating a connection. This fixes an issue when Redshift connections are made via SSH.
+
+  by [@danieldiamond](https://github.com/danieldiamond)
+
+- [#309](https://github.com/bitpicky/dbt-sugar/issues/309) dbt-sugar now stops messing with `.yaml` files that are not model descriptor files. When we are about to save a yaml file that we have processed for some reason, we will just not save it. An under the hood revisit will address this issue in a more long-term and economical way. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
+
+### Features
+
+- [#305](https://github.com/bitpicky/dbt-sugar/issues/305) Users can now prevent their `.yaml` files to be re-formated (sorted alphabetically) by setting the `sugar_config.yml` variable `preserve_yaml_order: true` at syrup-level or via the CLI at runtime by adding the `--preserve-yaml-order` flag. **This is also a good way to ensure that comments will be preserved if you use them in model descriptor files**. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
+
 ## dbt-sugar [v0.1.0-a.6] - 2021-06-16
 
 ### Bug Fixes

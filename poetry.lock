@@ -1680,7 +1680,7 @@ watchdog = ["watchdog"]
 
 [[package]]
 name = "yamlloader"
-version = "1.0.0"
+version = "1.1.0"
 description = "Ordered YAML loader and dumper for PyYAML."
 category = "main"
 optional = false
@@ -2848,8 +2848,8 @@ werkzeug = [
     {file = "Werkzeug-2.0.1.tar.gz", hash = "sha256:1de1db30d010ff1af14a009224ec49ab2329ad2cde454c8a708130642d579c42"},
 ]
 yamlloader = [
-    {file = "yamlloader-1.0.0-py3-none-any.whl", hash = "sha256:dc132ef450b10a73d51a89a4124cd8a0b76567ca938883e3ceb41222729589ed"},
-    {file = "yamlloader-1.0.0.tar.gz", hash = "sha256:e96dc3dc6895d814c330c054c966d993fc81ef1dbf5a30a4bdafeb256359e058"},
+    {file = "yamlloader-1.1.0-py3-none-any.whl", hash = "sha256:1dde3127e570ad60583711b8963ca3e06fe042e5272d17bea80f12a5366198dd"},
+    {file = "yamlloader-1.1.0.tar.gz", hash = "sha256:8a297c7a197683ba02e5e2b882ffd6c6180d01bdefb534b69cd3962df020bfe6"},
 ]
 zipp = [
     {file = "zipp-3.4.1-py3-none-any.whl", hash = "sha256:51cb66cc54621609dd593d1787f286ee42a5c0adbb4b29abea5a63edc3e03098"},

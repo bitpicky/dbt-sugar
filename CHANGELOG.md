@@ -2,47 +2,19 @@
 
 ### Bug Fixes
 
-- [#291](https://github.com/bitpicky/dbt-sugar/issues/291) The redshift_connector now includes the default `sslmode=prefer` parameter in the engine when creating a connection. This fixes an issue when Redshift connections are made via SSH.
+- [#252](https://github.com/bitpicky/dbt-sugar/issues/252) Fixes a bug where the `audit` task was initialised before the `bootstrap` task in a `--bootstrap` run making the audit unable to report on newly bootstrapped model descriptions and still give an inaccurate coverage result.
 
-  by [@danieldiamond](https://github.com/danieldiamond)
-
-- [#309](https://github.com/bitpicky/dbt-sugar/issues/309) dbt-sugar now stops messing with `.yaml` files that are not model descriptor files. When we are about to save a yaml file that we have processed for some reason, we will just not save it. An under the hood revisit will address this issue in a more long-term and economical way. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
-
-### Features
-
-- [#305](https://github.com/bitpicky/dbt-sugar/issues/305) Users can now prevent their `.yaml` files to be re-formated (sorted alphabetically) by setting the `sugar_config.yml` variable `preserve_yaml_order: true` at syrup-level or via the CLI at runtime by adding the `--preserve-yaml-order` flag. **This is also a good way to ensure that comments will be preserved if you use them in model descriptor files**. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
-
-## dbt-sugar [v0.1.0-a.6] - 2021-06-16
-
-### Bug Fixes
+- [#257](https://github.com/bitpicky/dbt-sugar/issues/257) Fixes a weird bug in the `bootstrap` task which resulted in unpredictable file ordering and failed only in GitHub Actions. We now sort the files before building the dbt model info dict for the bootstrap task.
 
 - [#291](https://github.com/bitpicky/dbt-sugar/issues/291) The redshift_connector now includes the default `sslmode=prefer` parameter in the engine when creating a connection. This fixes an issue when Redshift connections are made via SSH.
 
   by [@danieldiamond](https://github.com/danieldiamond)
-
-## dbt-sugar [v0.1.0a5] - 2021-05-19
-
-### Under The Hood/Misc
-
-- [#268](https://github.com/bitpicky/dbt-sugar/issues/268) The test adding prompt is a bit more user-friendly and clear when it comes to asking about whether users want to add complex or simple builtin tests.
-
-- [#275](https://github.com/bitpicky/dbt-sugar/issues/275) The dbt password is now obfuscated from the log messages via `logredactor`. Issue by [@ldbrandi](https://github.com/ldbrandi)
-
-## dbt-sugar [v0.1.0-a.4] - 2021-05-13
-
-### Bug Fixes
 
 - [#263](https://github.com/bitpicky/dbt-sugar/issues/263) SQLAlchemy-redshift is incompatible with versions of SQLAlchemy > 1.4 at the moment which broke the redshift adaptor we shipped in the previous alpha. We're going to pin `sqlalchemy` for the time being and watch any potential progress on the sqlalchemy-redshift pluging [issue](https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/issues/214).
 
   Thanks to [@ldbrandi](https://github.com/ldbrandi) for reporting [the issue](https://github.com/bitpicky/dbt-sugar/issues/262) and helping with testing.
 
-## dbt-sugar [v0.1.0a3] - 2021-05-07
-
-### Bug Fixes
-
-- [#252](https://github.com/bitpicky/dbt-sugar/issues/252) Fixes a bug where the `audit` task was initialised before the `bootstrap` task in a `--bootstrap` run making the audit unable to report on newly bootstrapped model descriptions and still give an inaccurate coverage result.
-
-- [#257](https://github.com/bitpicky/dbt-sugar/issues/257) Fixes a weird bug in the `bootstrap` task which resulted in unpredictable file ordering and failed only in GitHub Actions. We now sort the files before building the dbt model info dict for the bootstrap task.
+- [#309](https://github.com/bitpicky/dbt-sugar/issues/309) dbt-sugar now stops messing with `.yaml` files that are not model descriptor files. When we are about to save a yaml file that we have processed for some reason, we will just not save it. An under the hood revisit will address this issue in a more long-term and economical way. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
 
 ### Features
 
@@ -63,6 +35,14 @@
   **NOTE:** the `--bootstrap` option will check for all of your models against your database and may be slower but it will give you the most accurate coverage statistics.
 
 - [#256](https://github.com/bitpicky/dbt-sugar/issues/256) Add support for `DBT_PROFILES_DIR` environment variable. If the variable is undefined, dbt profiles directory will default to `~/.dbt`. (Contributed by [@smomni](https://github.com/smomni) :sparkles:)
+
+- [#305](https://github.com/bitpicky/dbt-sugar/issues/305) Users can now prevent their `.yaml` files to be re-formated (sorted alphabetically) by setting the `sugar_config.yml` variable `preserve_yaml_order: true` at syrup-level or via the CLI at runtime by adding the `--preserve-yaml-order` flag. **This is also a good way to ensure that comments will be preserved if you use them in model descriptor files**. Resolves #294, reported by [@diegodewilde](https://github.com/diegodewilde)
+
+### Under The Hood/Misc
+
+- [#268](https://github.com/bitpicky/dbt-sugar/issues/268) The test adding prompt is a bit more user-friendly and clear when it comes to asking about whether users want to add complex or simple builtin tests.
+
+- [#275](https://github.com/bitpicky/dbt-sugar/issues/275) The dbt password is now obfuscated from the log messages via `logredactor`. Issue by [@ldbrandi](https://github.com/ldbrandi)
 
 # dbt-sugar [0.0.0] - 2021-04-18
 

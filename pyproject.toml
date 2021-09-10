@@ -39,7 +39,7 @@ logredactor = "^0.0.1"
 "ruamel.yaml" = "^0.17.10"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
+pytest = "^6.2.5"
 pytest-cov = "^2.12.1"
 mypy = "^0.910"
 towncrier = "^21.3.0"

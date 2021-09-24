@@ -40,10 +40,12 @@ parser = argparse.ArgumentParser(
     prog="dbt-sugar",
     formatter_class=argparse.RawTextHelpFormatter,
     description="CLI tool to help users document their dbt models",
-    epilog="Select onf of the available sub-commands with --help to find out more about them.",
+    epilog="Select one of the available sub-commands with --help to find out more about them.",
 )
 
-parser.add_argument("-v", "--version", action="version", version=check_and_print_version())
+parser.add_argument(
+    "-v", "--version", action="version", version=check_and_print_version()
+)
 
 # base sub-parser (sets up args that need to be provided to ALL other sub parsers)
 base_subparser = argparse.ArgumentParser(add_help=False)
@@ -69,9 +71,18 @@ base_subparser.add_argument(
 base_subparser.add_argument(
     "--profiles-dir", help="Alternative path to the dbt profiles.yml file.", type=str
 )
+base_subparser.add_argument(
+    "-t",
+    "--target",
+    help="Which target from the dbt profile to load.",
+    type=str,
+    default=str(),
+)
 
 # Task-specific argument sub parsers
-sub_parsers = parser.add_subparsers(title="Available dbt-sugar commands", dest="command")
+sub_parsers = parser.add_subparsers(
+    title="Available dbt-sugar commands", dest="command"
+)
 
 # DOC task parser
 document_sub_parser = sub_parsers.add_parser(
@@ -80,7 +91,12 @@ document_sub_parser = sub_parsers.add_parser(
 document_sub_parser.set_defaults(cls=DocumentationTask, which="doc")
 # TODO: We shouldn't be requiring this if we have a `--model` format as it's considered bad practice
 document_sub_parser.add_argument(
-    "-m", "--model", help="Name of the dbt model to document", type=str, default=None, required=True
+    "-m",
+    "--model",
+    help="Name of the dbt model to document",
+    type=str,
+    default=None,
+    required=True,
 )
 document_sub_parser.add_argument(
     "-s",
@@ -94,13 +110,6 @@ document_sub_parser.add_argument(
     help="When provided the documentation task will not modify your files",
     action="store_true",
     default=False,
-)
-document_sub_parser.add_argument(
-    "-t",
-    "--target",
-    help="Which target from the dbt profile to load.",
-    type=str,
-    default=str(),
 )
 
 document_sub_parser.add_argument(
@@ -255,14 +264,18 @@ def handle(
         # dry run but for now this allows testing without side effects.
         # the current implementation upsets mypy also.
         if flag_parser.is_dry_run:
-            logger.warning("[yellow]Running in --dry-run mode no files will be modified")
+            logger.warning(
+                "[yellow]Running in --dry-run mode no files will be modified"
+            )
             logger.info(f"Would run {task}")
             return 0
         return task.run()
 
     if flag_parser.task == "audit":
         if flag_parser.run_bootstrap_first:
-            logger.info("Running 'bootstrap' task first then auditing your project or model")
+            logger.info(
+                "Running 'bootstrap' task first then auditing your project or model"
+            )
             bootstrap_task: BootstrapTask = BootstrapTask(
                 flags=flag_parser,
                 dbt_path=dbt_project._project_dir,
@@ -290,7 +303,9 @@ def handle(
     raise NotImplementedError(f"{flag_parser.task} is not supported.")
 
 
-def main(parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = list()) -> int:
+def main(
+    parser: argparse.ArgumentParser = parser, test_cli_args: List[str] = list()
+) -> int:
     """Just your boring main."""
     exit_code = 0
     _cli_args = test_cli_args or []

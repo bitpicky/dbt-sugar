@@ -49,7 +49,9 @@ class BaseTask(abc.ABC):
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
 
-    def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
+    def get_connector(
+        self,
+    ) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
@@ -97,7 +99,10 @@ class BaseTask(abc.ABC):
         for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
-                    if column.get("description", COLUMN_NOT_DOCUMENTED) != COLUMN_NOT_DOCUMENTED:
+                    if (
+                        column.get("description", COLUMN_NOT_DOCUMENTED)
+                        != COLUMN_NOT_DOCUMENTED
+                    ):
                         documented_columns[column["name"]] = column["description"]
         return documented_columns
 
@@ -139,11 +144,16 @@ class BaseTask(abc.ABC):
         for model in schema_content.get("models", []):
             if model["name"] == model_name:
                 for column in model.get("columns", []):
-                    if column.get("description", COLUMN_NOT_DOCUMENTED) == COLUMN_NOT_DOCUMENTED:
+                    if (
+                        column.get("description", COLUMN_NOT_DOCUMENTED)
+                        == COLUMN_NOT_DOCUMENTED
+                    ):
                         not_documented_columns[column["name"]] = COLUMN_NOT_DOCUMENTED
         return not_documented_columns
 
-    def combine_two_list_without_duplicates(self, list1: List[Any], list2: List[Any]) -> List[Any]:
+    def combine_two_list_without_duplicates(
+        self, list1: List[Any], list2: List[Any]
+    ) -> List[Any]:
         """
         Method to combine two list without duplicates.
 
@@ -179,7 +189,9 @@ class BaseTask(abc.ABC):
         """
         content = open_yaml(
             path_file,
-            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+            preserve_yaml_order=self._sugar_config.config.get(
+                "preserve_yaml_order", False
+            ),
         )
         for model in content.get("models", []):
             if model["name"] == model_name:
@@ -187,21 +199,25 @@ class BaseTask(abc.ABC):
                     column_name = column["name"]
                     if column_name in dict_column_description_to_update:
                         # Update the description
-                        description = dict_column_description_to_update[column_name].get(
-                            "description"
-                        )
+                        description = dict_column_description_to_update[
+                            column_name
+                        ].get("description")
                         if description:
                             column["description"] = description
 
                         # Update the tests without duplicating them.
-                        tests = dict_column_description_to_update[column_name].get("tests")
+                        tests = dict_column_description_to_update[column_name].get(
+                            "tests"
+                        )
                         if tests:
                             column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 
                         # Update the tags without duplicating them.
-                        tags = dict_column_description_to_update[column_name].get("tags")
+                        tags = dict_column_description_to_update[column_name].get(
+                            "tags"
+                        )
                         if tags:
                             column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
@@ -209,11 +225,15 @@ class BaseTask(abc.ABC):
         save_yaml(
             path_file,
             content,
-            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+            preserve_yaml_order=self._sugar_config.config.get(
+                "preserve_yaml_order", False
+            ),
         )
 
     def update_column_description_from_schema(
-        self, path_file: Path, dict_column_description_to_update: Dict[str, Dict[str, Any]]
+        self,
+        path_file: Path,
+        dict_column_description_to_update: Dict[str, Dict[str, Any]],
     ) -> None:
         """Method to update a schema.yml with a Dict of columns names and description.
 
@@ -224,21 +244,25 @@ class BaseTask(abc.ABC):
         """
         content = open_yaml(
             path_file,
-            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+            preserve_yaml_order=self._sugar_config.config.get(
+                "preserve_yaml_order", False
+            ),
         )
         for model in content.get("models", []):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update:
-                    new_desctiption = dict_column_description_to_update[column_name].get(
-                        "description"
-                    )
-                    if new_desctiption:
-                        column["description"] = new_desctiption
+                    new_description = dict_column_description_to_update[
+                        column_name
+                    ].get("description")
+                    if new_description:
+                        column["description"] = new_description
         save_yaml(
             path_file,
             content,
-            preserve_yaml_order=self._sugar_config.config.get("preserve_yaml_order", False),
+            preserve_yaml_order=self._sugar_config.config.get(
+                "preserve_yaml_order", False
+            ),
         )
 
     def update_column_descriptions(
@@ -293,7 +317,9 @@ class BaseTask(abc.ABC):
             column_description = COLUMN_NOT_DOCUMENTED
         self.dbt_definitions[column_name] = column_description
 
-    def remove_excluded_models(self, content: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+    def remove_excluded_models(
+        self, content: Dict[str, Any]
+    ) -> Optional[List[Dict[str, Any]]]:
         """Removes models that are excluded_models from the models dict"""
         models = content.get("models", [])
         # if self._sugar_config.dbt_project_info.get("excluded_models"):
@@ -302,7 +328,8 @@ class BaseTask(abc.ABC):
             return [
                 model_dict
                 for model_dict in models
-                if model_dict["name"] not in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"]
+                not in self._sugar_config.dbt_project_info["excluded_models"]
             ]
 
         return None
@@ -343,7 +370,9 @@ class BaseTask(abc.ABC):
             self.all_dbt_models[model["name"]] = path_schema
             for column in model.get("columns", []):
                 column_description = column.get("description", None)
-                self.update_description_in_dbt_descriptions(column["name"], column_description)
+                self.update_description_in_dbt_descriptions(
+                    column["name"], column_description
+                )
                 self.update_test_in_dbt_tests(model["name"], column)
 
     def get_file_path_from_sql_model(self, model_name: str) -> Optional[Path]:
@@ -407,7 +436,9 @@ class BaseTask(abc.ABC):
 
         return any(model["name"] == model_name for model in content.get("models", []))
 
-    def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool, bool]:
+    def find_model_schema_file(
+        self, model_name: str
+    ) -> Tuple[Optional[Path], bool, bool]:
         for root, _, files in os.walk(self.repository_path):
             if not re.search(self._excluded_folders_from_search_pattern, root):
                 schema_file_path = None
@@ -432,7 +463,11 @@ class BaseTask(abc.ABC):
                         schema_file_exists = False
                         if schema_file_path.exists():
                             schema_file_exists = True
-                        return schema_file_path, schema_file_exists, is_already_documented
+                        return (
+                            schema_file_path,
+                            schema_file_exists,
+                            is_already_documented,
+                        )
 
                     if schema_file_path and model_file_found:
                         logger.debug(
@@ -440,7 +475,11 @@ class BaseTask(abc.ABC):
                         )
                         is_already_documented = True
                         schema_file_exists = True
-                        return schema_file_path, schema_file_exists, is_already_documented
+                        return (
+                            schema_file_path,
+                            schema_file_exists,
+                            is_already_documented,
+                        )
         return None, False, False
 
     def is_exluded_model(self, model_name: str) -> bool:

@@ -42,7 +42,7 @@ class BaseTask(abc.ABC):
         self._flags = flags
         self._dbt_profile = dbt_profile
 
-        # populated by class methods
+        # Populated by class methods
         self._excluded_folders_from_search_pattern: str = self.setup_paths_exclusion()
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
@@ -444,7 +444,7 @@ class BaseTask(abc.ABC):
 
                     if schema_file_path and model_file_found:
                         logger.debug(
-                            f"'{model_name}' found in '{schema_file_path}' we'll update entry."
+                            f"'{model_name}' found in '{schema_file_path}', we'll update entry."
                         )
                         is_already_documented = True
                         schema_file_exists = True

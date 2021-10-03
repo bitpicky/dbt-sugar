@@ -49,9 +49,7 @@ class BaseTask(abc.ABC):
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
 
-    def get_connector(
-        self,
-    ) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
+    def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:
@@ -215,9 +213,7 @@ class BaseTask(abc.ABC):
         )
 
     def update_column_description_from_schema(
-        self,
-        path_file: Path,
-        dict_column_description_to_update: Dict[str, Dict[str, Any]],
+        self, path_file: Path, dict_column_description_to_update: Dict[str, Dict[str, Any]]
     ) -> None:
         """Method to update a schema.yml with a Dict of columns names and description.
 
@@ -436,11 +432,7 @@ class BaseTask(abc.ABC):
                         schema_file_exists = False
                         if schema_file_path.exists():
                             schema_file_exists = True
-                        return (
-                            schema_file_path,
-                            schema_file_exists,
-                            is_already_documented,
-                        )
+                        return (schema_file_path, schema_file_exists, is_already_documented)
 
                     if schema_file_path and model_file_found:
                         logger.debug(
@@ -448,11 +440,7 @@ class BaseTask(abc.ABC):
                         )
                         is_already_documented = True
                         schema_file_exists = True
-                        return (
-                            schema_file_path,
-                            schema_file_exists,
-                            is_already_documented,
-                        )
+                        return (schema_file_path, schema_file_exists, is_already_documented)
         return None, False, False
 
     def is_exluded_model(self, model_name: str) -> bool:

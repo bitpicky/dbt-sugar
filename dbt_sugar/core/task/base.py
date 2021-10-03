@@ -428,10 +428,7 @@ class BaseTask(abc.ABC):
                             f"'{model_name}' was not contained in a schema file. Creating one at {root}"
                         )
                         schema_file_path = Path(os.path.join(root, "schema.yml"))
-                        # check whether there is a schema file already present
-                        schema_file_exists = False
-                        if schema_file_path.exists():
-                            schema_file_exists = True
+                        schema_file_exists = bool(schema_file_path.exists())
                         return (schema_file_path, schema_file_exists, is_already_documented)
 
                     if schema_file_path and model_file_found:
@@ -439,8 +436,7 @@ class BaseTask(abc.ABC):
                             f"'{model_name}' found in '{schema_file_path}', we'll update entry."
                         )
                         is_already_documented = True
-                        schema_file_exists = True
-                        return (schema_file_path, schema_file_exists, is_already_documented)
+                        return schema_file_path, True, is_already_documented
         return None, False, False
 
     def is_exluded_model(self, model_name: str) -> bool:

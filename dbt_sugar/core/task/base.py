@@ -42,7 +42,7 @@ class BaseTask(abc.ABC):
         self._flags = flags
         self._dbt_profile = dbt_profile
 
-        # populated by class methods
+        # Populated by class methods
         self._excluded_folders_from_search_pattern: str = self.setup_paths_exclusion()
         self.all_dbt_models: Dict[str, Path] = {}
         self.dbt_definitions: Dict[str, str] = {}
@@ -230,11 +230,11 @@ class BaseTask(abc.ABC):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update:
-                    new_desctiption = dict_column_description_to_update[column_name].get(
+                    new_description = dict_column_description_to_update[column_name].get(
                         "description"
                     )
-                    if new_desctiption:
-                        column["description"] = new_desctiption
+                    if new_description:
+                        column["description"] = new_description
         save_yaml(
             path_file,
             content,
@@ -432,15 +432,15 @@ class BaseTask(abc.ABC):
                         schema_file_exists = False
                         if schema_file_path.exists():
                             schema_file_exists = True
-                        return schema_file_path, schema_file_exists, is_already_documented
+                        return (schema_file_path, schema_file_exists, is_already_documented)
 
                     if schema_file_path and model_file_found:
                         logger.debug(
-                            f"'{model_name}' found in '{schema_file_path}' we'll update entry."
+                            f"'{model_name}' found in '{schema_file_path}', we'll update entry."
                         )
                         is_already_documented = True
                         schema_file_exists = True
-                        return schema_file_path, schema_file_exists, is_already_documented
+                        return (schema_file_path, schema_file_exists, is_already_documented)
         return None, False, False
 
     def is_exluded_model(self, model_name: str) -> bool:

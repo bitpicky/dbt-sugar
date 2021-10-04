@@ -1,6 +1,6 @@
 [[package]]
 name = "asciinema"
-version = "2.0.2"
+version = "2.1.0"
 description = "Terminal session recorder"
 category = "dev"
 optional = false
@@ -1146,11 +1146,11 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "4670208489d8db6d7bf20df9b7c2020114a8b4d7a6cdc5b7dbaa57c1849cb72b"
+content-hash = "a9e60eb4b18c24c74998f0fd80ff8bc60c7efa7ea9f4beef8ee057cfcd6e7720"
 
 [metadata.files]
 asciinema = [
-    {file = "asciinema-2.0.2.tar.gz", hash = "sha256:32f2c1a046564e030708e596f67e0405425d1eca9d5ec83cd917ef8da06bc423"},
+    {file = "asciinema-2.1.0-py3-none-any.whl", hash = "sha256:00afd5ba5b07197ec5454c70fa2a5d064ee27736654cd5cbe816dfc87576366f"},
 ]
 asn1crypto = [
     {file = "asn1crypto-1.4.0-py2.py3-none-any.whl", hash = "sha256:4bcdf33c861c7d40bdcd74d8e4dd7661aac320fcdf40b9a3f95b4ee12fde2fa8"},

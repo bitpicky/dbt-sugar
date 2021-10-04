@@ -550,7 +550,7 @@ virtualenv = ">=20.0.8"
 
 [[package]]
 name = "pretty-errors"
-version = "1.2.23"
+version = "1.2.24"
 description = "Prettifies Python exception output to make it legible."
 category = "main"
 optional = false
@@ -1150,6 +1150,7 @@ content-hash = "4670208489d8db6d7bf20df9b7c2020114a8b4d7a6cdc5b7dbaa57c1849cb72b
 
 [metadata.files]
 asciinema = [
+    {file = "asciinema-2.0.2-py3.7.egg", hash = "sha256:273c2a772e9f00191ac763ea4f96046b534aeab76e1bf00d686198aea0d78d53"},
     {file = "asciinema-2.0.2.tar.gz", hash = "sha256:32f2c1a046564e030708e596f67e0405425d1eca9d5ec83cd917ef8da06bc423"},
 ]
 asn1crypto = [
@@ -1568,8 +1569,8 @@ pre-commit = [
     {file = "pre_commit-2.15.0.tar.gz", hash = "sha256:3c25add78dbdfb6a28a651780d5c311ac40dd17f160eb3954a0c59da40a505a7"},
 ]
 pretty-errors = [
-    {file = "pretty_errors-1.2.23-py3-none-any.whl", hash = "sha256:2c6a228d1c13d6dde56c5af52bc9b63f95561c7123433e4476b3bc5fec8cecd5"},
-    {file = "pretty_errors-1.2.23.tar.gz", hash = "sha256:e8a5abbad5cd70302f2f435709d82ce97d1c05b1d4d6c1636e4ff1ffbf517360"},
+    {file = "pretty_errors-1.2.24-py3-none-any.whl", hash = "sha256:4a66b50dd2eecd22f301ff64a454ab2e6f2565d70982026a86a1569d174abcc1"},
+    {file = "pretty_errors-1.2.24.tar.gz", hash = "sha256:7c5be4f082b3f6319d856683eb0ecf44b416e09853996c57cd85fabc18d31b45"},
 ]
 prompt-toolkit = [
     {file = "prompt_toolkit-3.0.19-py3-none-any.whl", hash = "sha256:7089d8d2938043508aa9420ec18ce0922885304cddae87fb96eebca942299f88"},

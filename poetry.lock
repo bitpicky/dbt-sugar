@@ -977,7 +977,7 @@ sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
 name = "sqlalchemy-redshift"
-version = "0.8.4"
+version = "0.8.6"
 description = "Amazon Redshift Dialect for sqlalchemy"
 category = "main"
 optional = false
@@ -1150,6 +1150,7 @@ content-hash = "4670208489d8db6d7bf20df9b7c2020114a8b4d7a6cdc5b7dbaa57c1849cb72b
 
 [metadata.files]
 asciinema = [
+    {file = "asciinema-2.0.2-py3.7.egg", hash = "sha256:273c2a772e9f00191ac763ea4f96046b534aeab76e1bf00d686198aea0d78d53"},
     {file = "asciinema-2.0.2.tar.gz", hash = "sha256:32f2c1a046564e030708e596f67e0405425d1eca9d5ec83cd917ef8da06bc423"},
 ]
 asn1crypto = [
@@ -1840,8 +1841,8 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.4.22.tar.gz", hash = "sha256:ec1be26cdccd60d180359a527d5980d959a26269a2c7b1b327a1eea0cab37ed8"},
 ]
 sqlalchemy-redshift = [
-    {file = "sqlalchemy-redshift-0.8.4.tar.gz", hash = "sha256:88f4bc73178e2c9e0023e6ac77591a1c68f9edfd222ae4d6962d7c3fe71a257e"},
-    {file = "sqlalchemy_redshift-0.8.4-py2.py3-none-any.whl", hash = "sha256:14c30356709e40a4cd93e2631223e60ade6a3ea43dd2432141828e36d9909de1"},
+    {file = "sqlalchemy-redshift-0.8.6.tar.gz", hash = "sha256:4fb96fc4e711413b106afb5f1ef5a6d67ec636312526c58aa5a0ee2d18fd662b"},
+    {file = "sqlalchemy_redshift-0.8.6-py2.py3-none-any.whl", hash = "sha256:95a154a5a2f654483b572eadc535c1ec6cfdd4ceef3b8430b5030a5ea6e54d30"},
 ]
 termcolor = [
     {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},

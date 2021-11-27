@@ -92,3 +92,6 @@ title_format = "## dbt-sugar [{version}] - {project_date}"
 
 [tool.pytest.ini_options]
 markers = ["datafiles"]
+
+[tool.black]
+line-length = 100

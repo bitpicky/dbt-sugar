@@ -484,14 +484,14 @@ asn1crypto = ">=1.0.0"
 
 [[package]]
 name = "packaging"
-version = "20.9"
+version = "21.3"
 description = "Core utilities for Python packages"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.6"
 
 [package.dependencies]
-pyparsing = ">=2.0.2"
+pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
 name = "platformdirs"
@@ -1146,7 +1146,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<3.10"
-content-hash = "f5c3f6b1a4974b7a1501990edfed2666e2264279bb6dc107d04e684b21a53e10"
+content-hash = "4a6a480bd45481692540d0494a145a92cec0d7efbd772aa0cd5f133efd6e47f0"
 
 [metadata.files]
 asciinema = [
@@ -1564,8 +1564,8 @@ oscrypto = [
     {file = "oscrypto-1.2.1.tar.gz", hash = "sha256:7d2cca6235d89d1af6eb9cfcd4d2c0cb405849868157b2f7b278beb644d48694"},
 ]
 packaging = [
-    {file = "packaging-20.9-py2.py3-none-any.whl", hash = "sha256:67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a"},
-    {file = "packaging-20.9.tar.gz", hash = "sha256:5b327ac1320dc863dca72f4514ecc086f31186744b84a230374cc1fd776feae5"},
+    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
+    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 platformdirs = [
     {file = "platformdirs-2.2.0-py3-none-any.whl", hash = "sha256:4666d822218db6a262bdfdc9c39d21f23b4cfdb08af331a81e92751daf6c866c"},

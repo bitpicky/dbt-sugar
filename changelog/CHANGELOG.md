@@ -1,3 +1,15 @@
+## dbt-sugar [0.2.0] - 2021-12-25
+
+### Bug Fixes
+
+- [#348](https://github.com/bitpicky/dbt-sugar/issues/348) Moved profile target CLI arg to base subparser such that it is available in all commands. This means other
+  commands are no longer forced into the default target.
+  by [@z3z1ma](https://github.com/z3z1ma)
+
+### Under The Hood/Misc
+
+- [#390](https://github.com/bitpicky/dbt-sugar/issues/390) dbt-sugar can now be installed on Python 3.10 as dependencies have been bumped to allow for it.
+
 ## dbt-sugar [0.1.0] - 2021-07-30
 
 ### Bug Fixes

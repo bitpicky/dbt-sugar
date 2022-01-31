@@ -65,7 +65,7 @@ class BaseTask(abc.ABC):
             excluded_folders_from_search_pattern: str = r"\/|\/".join(
                 self._sugar_config.dbt_project_info["excluded_folders"]
             )
-            return fr"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
+            return rf"{DEFAULT_EXCLUDED_FOLDERS_PATTERN}|\/{excluded_folders_from_search_pattern}\/"
 
         else:
             return DEFAULT_EXCLUDED_FOLDERS_PATTERN

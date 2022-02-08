@@ -795,7 +795,7 @@ secure-local-storage = ["keyring (!=16.1.0,<24.0.0)"]
 
 [[package]]
 name = "snowflake-sqlalchemy"
-version = "1.2.4"
+version = "1.3.3"
 description = "Snowflake SQLAlchemy Dialect"
 category = "main"
 optional = false
@@ -803,7 +803,7 @@ python-versions = "*"
 
 [package.dependencies]
 snowflake-connector-python = "<3.0.0"
-sqlalchemy = "<2.0.0"
+sqlalchemy = ">=1.4.0,<2.0.0"
 
 [package.extras]
 development = ["pytest (<6.1.0)", "pytest-cov", "pytest-rerunfailures", "pytest-timeout", "coverage", "pexpect", "mock", "pytz", "pytzdata", "cython", "more-itertools", "numpy", "pandas (==0.24.2)", "pandas (>=1.0.0,<1.1.0)"]
@@ -1020,7 +1020,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<4.0"
-content-hash = "1c4cb5b261f406648e578b6443bba426a8b8a0d403a0e567c312d16fcc01195d"
+content-hash = "e3ebd2abfbc08feca426aed936dcf4fa44a878624182676d897c0330114af88b"
 
 [metadata.files]
 asciinema = [
@@ -1663,8 +1663,8 @@ snowflake-connector-python = [
     {file = "snowflake_connector_python-2.7.2-cp39-cp39-win_amd64.whl", hash = "sha256:3070479c037172fe2b1b71f8b24816086272c2bb8e2a6551bccb50f68c3c4e50"},
 ]
 snowflake-sqlalchemy = [
-    {file = "snowflake-sqlalchemy-1.2.4.tar.gz", hash = "sha256:e79d83d4947a0945488699324802eda4ad4a63c7680ad5b2a42c71f4faa2cd8b"},
-    {file = "snowflake_sqlalchemy-1.2.4-py2.py3-none-any.whl", hash = "sha256:e20ee81f3c2f6748b33a69d2e97018930ed09f83e27b1aa36ba5f841eb53bdce"},
+    {file = "snowflake-sqlalchemy-1.3.3.tar.gz", hash = "sha256:d1c087ce0a90bbce77f2308b9c4aeb14efeb26a3ae9da7c3d5a153341cd8ef34"},
+    {file = "snowflake_sqlalchemy-1.3.3-py2.py3-none-any.whl", hash = "sha256:8aee53d24c2f56f36f8b0511bdd05f7ed37d9f493522d4ecd98be3adfc95546a"},
 ]
 sqlalchemy = [
     {file = "SQLAlchemy-1.4.29-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:da64423c05256f4ab8c0058b90202053b201cbe3a081f3a43eb590cd554395ab"},

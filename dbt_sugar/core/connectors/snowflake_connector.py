@@ -30,15 +30,30 @@ class SnowflakeConnector(BaseConnector):
             connection_params (Dict[str, str]): Dict containing database connection
                 parameters and credentials.
         """
-        self.connection_url = URL(
-            drivername="postgresql+psycopg2",
-            user=connection_params.get("user", str()),
-            password=connection_params.get("password", str()),
-            database=connection_params.get("database", str()),
-            account=connection_params.get("account", str()),
-            warehouse=connection_params.get("warehouse", str()),
-        )
-        self.engine = sqlalchemy.create_engine(self.connection_url)
+
+        if "private_key" not in connection_params:
+            self.connection_url = URL(
+                drivername="postgresql+psycopg2",
+                user=connection_params.get("user", str()),
+                password=connection_params.get("password", str()),
+                database=connection_params.get("database", str()),
+                account=connection_params.get("account", str()),
+                warehouse=connection_params.get("warehouse", str()),
+            )
+            self.engine = sqlalchemy.create_engine(self.connection_url)
+        else:
+            self.connection_url = URL(
+                account=connection_params.get("account", str()),
+                user=connection_params.get("user", str()),
+                password=connection_params.get("password", str()),
+                database=connection_params.get("database", str()),
+                warehouse=connection_params.get("warehouse", str()),
+            )
+            self.engine = sqlalchemy.create_engine(
+                self.connection_url,
+                connect_args={"private_key": connection_params["private_key"]}
+            )
+
 
     def get_columns_from_table(
         self, target_table: str, target_schema: str, use_describe: bool = False

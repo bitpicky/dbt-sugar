@@ -31,7 +31,7 @@ class SnowflakeConnector(BaseConnector):
                 parameters and credentials.
         """
 
-        if "private_key" not in connection_params:
+        if "password" in connection_params:
             self.connection_url = URL(
                 drivername="postgresql+psycopg2",
                 user=connection_params.get("user", str()),

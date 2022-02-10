@@ -44,6 +44,16 @@ def test_read_profile(
             "role": "dummy_role",
             "warehouse": "dummy_warehouse",
         },
+        "snowflake_pk": {
+            "type": "snowflake",
+            "account": "dummy_account",
+            "user": "dummy_user",
+            "private_key": "dummy_pk",
+            "database": "dummy_database",
+            "target_schema": "dummy_target_schema",
+            "role": "dummy_role",
+            "warehouse": "dummy_warehouse",
+        },
         "postgres": {
             "database": "dbt_sugar",
             "password": "magical_password",

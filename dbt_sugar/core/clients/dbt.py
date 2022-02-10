@@ -199,7 +199,7 @@ class DbtProfile(BaseYamlConfig):
                 else:
                     raise NotImplementedError(f"{_profile_type} is not implemented yet.")
                 logger.debug(_target_profile)
-                self.profile = _target_profile.dict()
+                self.profile = _target_profile.dict(exclude_unset=True)
 
                 # override profile info with potential CLI args
                 self._integrate_cli_flags()

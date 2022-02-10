@@ -50,10 +50,8 @@ class SnowflakeConnector(BaseConnector):
                 warehouse=connection_params.get("warehouse", str()),
             )
             self.engine = sqlalchemy.create_engine(
-                self.connection_url,
-                connect_args={"private_key": connection_params["private_key"]}
+                self.connection_url, connect_args={"private_key": connection_params["private_key"]}
             )
-
 
     def get_columns_from_table(
         self, target_table: str, target_schema: str, use_describe: bool = False

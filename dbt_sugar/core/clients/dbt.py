@@ -48,13 +48,14 @@ class SnowflakeDbtProfilesModel(BaseModel):
 
         Checks that the values dictionary has either a ``password`` or a ``private_key``
         key.
-        
+
         Args:
             values (Dict[Any, Any]): Dictionary of key-value pairs
         """
         if "password" not in values and "private_key" not in values:
             raise ValueError("Must pass either password or private key!")
         return values
+
 
 class DbtProjectModel(BaseModel):
     """Defines pydandic validation schema for a dbt_project.yml file."""

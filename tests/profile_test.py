@@ -33,52 +33,6 @@ def test_read_profile(
     flag_parser = FlagParser(parser)
     flag_parser.consume_cli_arguments(test_cli_args=cli_args)
 
-    expectations = {
-        "snowflake": {
-            "type": "snowflake",
-            "account": "dummy_account",
-            "user": "dummy_user",
-            "password": "dummy_password",
-            "database": "dummy_database",
-            "target_schema": "dummy_target_schema",
-            "role": "dummy_role",
-            "warehouse": "dummy_warehouse",
-        },
-        "snowflake_pk": {
-            "type": "snowflake",
-            "account": "dummy_account",
-            "user": "dummy_user",
-            "private_key": "dummy_pk",
-            "database": "dummy_database",
-            "target_schema": "dummy_target_schema",
-            "role": "dummy_role",
-            "warehouse": "dummy_warehouse",
-        },
-        "postgres": {
-            "database": "dbt_sugar",
-            "password": "magical_password",
-            "target_schema": "public",
-            "type": "postgres",
-            "user": "dbt_sugar_test_user",
-            "host": "localhost",
-            "port": 5432,
-        },
-        "bad_snowflake": {
-            "type": "snowflake",
-            "user": "dummy_user",
-            "database": "dummy_database",
-            "target_schema": "dummy_target_schema",
-            "role": "dummy_role",
-            "warehouse": "dummy_warehouse",
-        },
-        "bad_postgres": {
-            "database": "dbt_sugar",
-            "type": "postgres",
-            "user": "dbt_sugar_test_user",
-            "target_schema": "public",
-        },
-    }
-
     if target_name.startswith("bad_"):
         with pytest.raises(ValidationError):
             profile = DbtProfile(
@@ -127,6 +81,52 @@ def test_read_profile(
             profiles_dir=Path(datafiles),
         )
         profile.read_profile()
+        expectations = {
+            "snowflake": {
+                "type": "snowflake",
+                "account": "dummy_account",
+                "user": "dummy_user",
+                "password": "dummy_password",
+                "database": "dummy_database",
+                "target_schema": "dummy_target_schema",
+                "role": "dummy_role",
+                "warehouse": "dummy_warehouse",
+            },
+            "snowflake_pk": {
+                "type": "snowflake",
+                "account": "dummy_account",
+                "user": "dummy_user",
+                "private_key": "dummy_pk",
+                "database": "dummy_database",
+                "target_schema": "dummy_target_schema",
+                "role": "dummy_role",
+                "warehouse": "dummy_warehouse",
+            },
+            "postgres": {
+                "database": "dbt_sugar",
+                "password": "magical_password",
+                "target_schema": "public",
+                "type": "postgres",
+                "user": "dbt_sugar_test_user",
+                "host": "localhost",
+                "port": 5432,
+            },
+            "bad_snowflake": {
+                "type": "snowflake",
+                "user": "dummy_user",
+                "database": "dummy_database",
+                "target_schema": "dummy_target_schema",
+                "role": "dummy_role",
+                "warehouse": "dummy_warehouse",
+            },
+            "bad_postgres": {
+                "database": "dbt_sugar",
+                "type": "postgres",
+                "user": "dbt_sugar_test_user",
+                "target_schema": "public",
+            },
+        }
+
         assert profile.profile == expectations[target_name]
 
         # this one tests the auto parsing of the "target:" field in profiles.yml

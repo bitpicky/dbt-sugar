@@ -30,7 +30,6 @@ class SnowflakeConnector(BaseConnector):
             connection_params (Dict[str, str]): Dict containing database connection
                 parameters and credentials.
         """
-
         if "password" in connection_params:
             self.connection_url = URL(
                 drivername="postgresql+psycopg2",

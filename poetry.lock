@@ -879,7 +879,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "towncrier"
-version = "21.3.0"
+version = "21.9.0"
 description = "Building newsfiles for your project."
 category = "dev"
 optional = false
@@ -890,7 +890,7 @@ click = "*"
 click-default-group = "*"
 incremental = "*"
 jinja2 = "*"
-toml = "*"
+tomli = {version = "*", markers = "python_version >= \"3.6\""}
 
 [package.extras]
 dev = ["packaging"]
@@ -1020,7 +1020,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<4.0"
-content-hash = "1c4cb5b261f406648e578b6443bba426a8b8a0d403a0e567c312d16fcc01195d"
+content-hash = "7a9a9a863e8fccccfe1a2cc5d3dafc2009910089922d8c43d52074b52e9dcac7"
 
 [metadata.files]
 asciinema = [
@@ -1720,8 +1720,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 towncrier = [
-    {file = "towncrier-21.3.0-py2.py3-none-any.whl", hash = "sha256:e6ccec65418bbcb8de5c908003e130e37fe0e9d6396cb77c1338241071edc082"},
-    {file = "towncrier-21.3.0.tar.gz", hash = "sha256:6eed0bc924d72c98c000cb8a64de3bd566e5cb0d11032b73fcccf8a8f956ddfe"},
+    {file = "towncrier-21.9.0-py2.py3-none-any.whl", hash = "sha256:fc5a88a2a54988e3a8ed2b60d553599da8330f65722cc607c839614ed87e0f92"},
+    {file = "towncrier-21.9.0.tar.gz", hash = "sha256:9cb6f45c16e1a1eec9d0e7651165e7be60cd0ab81d13a5c96ca97a498ae87f48"},
 ]
 tox = [
     {file = "tox-3.24.4-py2.py3-none-any.whl", hash = "sha256:5e274227a53dc9ef856767c21867377ba395992549f02ce55eb549f9fb9a8d10"},

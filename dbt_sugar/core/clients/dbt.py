@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
 from dbt_sugar.core.clients.yaml_helpers import open_yaml
 from dbt_sugar.core.exceptions import (
@@ -35,11 +35,26 @@ class SnowflakeDbtProfilesModel(BaseModel):
     type: str
     account: str
     user: str
-    password: str
+    password: Optional[str]
+    private_key: Optional[str]
     database: str
     target_schema: str = Field(..., alias="schema")
     role: str
     warehouse: str
+
+    @root_validator
+    def check_password_or_pk(cls, values: Dict[Any, Any]) -> Dict[Any, Any]:
+        """Validates the Snowflake connection args
+
+        Checks that the values dictionary has either a ``password`` or a ``private_key``
+        key.
+
+        Args:
+            values (Dict[Any, Any]): Dictionary of key-value pairs
+        """
+        if "password" not in values and "private_key" not in values:
+            raise ValueError("Must pass either password or private key!")
+        return values
 
 
 class DbtProjectModel(BaseModel):
@@ -185,7 +200,7 @@ class DbtProfile(BaseYamlConfig):
                 else:
                     raise NotImplementedError(f"{_profile_type} is not implemented yet.")
                 logger.debug(_target_profile)
-                self.profile = _target_profile.dict()
+                self.profile = _target_profile.dict(exclude_unset=True)
 
                 # override profile info with potential CLI args
                 self._integrate_cli_flags()

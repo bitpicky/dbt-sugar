@@ -199,7 +199,7 @@ class DbtProfile(BaseYamlConfig):
                 if _profile_type == "snowflake":
                     # uses pydantic to validate profile. It will raise and break app if invalid.
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
-                elif _profile_type == "postgres" or "redshift":
+                elif _profile_type == "postgres" or _profile_type == "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
                 elif _profile_type == 'clickhouse':
                     _target_profile = ClickhouseDbtProfilesModel(**_target_profile)

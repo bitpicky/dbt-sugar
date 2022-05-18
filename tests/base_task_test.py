@@ -47,6 +47,6 @@ def test_is_excluded_model(datafiles, model_name, is_exluded_model):
     audit_task = __init_descriptions(datafiles)
     if is_exluded_model:
         with pytest.raises(ValueError):
-            audit_task.is_exluded_model(model_name)
+            audit_task.is_excluded_model(model_name)
     else:
-        audit_task.is_exluded_model(model_name)
+        audit_task.is_excluded_model(model_name)

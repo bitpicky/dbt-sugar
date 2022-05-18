@@ -67,7 +67,7 @@ class DocumentationTask(BaseTask):
         self.connector = connector(dbt_credentials)
 
         # exit early if model is in the excluded_models list
-        _ = self.is_exluded_model(model)
+        _ = self.is_excluded_model(model)
         columns_sql = self.connector.get_columns_from_table(
             model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
         )

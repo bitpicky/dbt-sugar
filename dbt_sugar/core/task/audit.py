@@ -42,7 +42,7 @@ class AuditTask(BaseTask):
     def run(self) -> int:
         """Main script to run the command doc"""
         if self.model_name:
-            _ = self.is_exluded_model(self.model_name)
+            _ = self.is_excluded_model(self.model_name)
             logger.info(f"Running audit of model [bold magenta]{self.model_name}.[/bold magenta]\n")
             path_file, schema_exists, _ = self.find_model_schema_file(self.model_name)
             if not path_file:

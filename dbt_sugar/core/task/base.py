@@ -302,7 +302,7 @@ class BaseTask(abc.ABC):
             return [
                 model_dict
                 for model_dict in models
-                if model_dict["name"] not in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"] not in self._sugar_config.dbt_project_info.get("excluded_models", [])
             ]
 
         return None
@@ -443,7 +443,7 @@ class BaseTask(abc.ABC):
                         return (schema_file_path, schema_file_exists, is_already_documented)
         return None, False, False
 
-    def is_exluded_model(self, model_name: str) -> bool:
+    def is_excluded_model(self, model_name: str) -> bool:
         if model_name in self._sugar_config.dbt_project_info.get("excluded_models", []):
             raise ValueError(
                 f"You decided to exclude '{model_name}' from dbt-sugar's scope. "

@@ -29,6 +29,17 @@ class PostgresDbtProfilesModel(BaseModel):
     port: int
 
 
+class ClickhouseDbtProfilesModel(BaseModel):
+    """Clickhouse Dbt credentials validation model."""
+
+    type: str
+    user: str
+    password: str
+    target_schema: str = Field(..., alias="schema")
+    host: str
+    port: int
+
+
 class SnowflakeDbtProfilesModel(BaseModel):
     """Snowflake Dbt credentials validation model."""
 
@@ -190,6 +201,8 @@ class DbtProfile(BaseYamlConfig):
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
                 elif _profile_type == "postgres" or "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
+                elif _profile_type == 'clickhouse':
+                    _target_profile = ClickhouseDbtProfilesModel(**_target_profile)
 
                 # if we don't manage to read the db type for some reason.
                 elif _profile_type is None:

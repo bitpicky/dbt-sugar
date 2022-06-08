@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn
 
 from dbt_sugar.core.clients.dbt import DbtProfile
-from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml, parse_custom_schemas
+from dbt_sugar.core.clients.yaml_helpers import open_yaml, parse_custom_schemas, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.redshift_connector import RedshiftConnector
@@ -51,7 +51,7 @@ class DocumentationTask(BaseTask):
         self.dbt_path = dbt_path
         if not isinstance(dbt_path, Path):
             dbt_path = Path(dbt_path)
-        self.custom_schemas = parse_custom_schemas(dbt_path, 'dbt_project.yml')
+        self.custom_schemas = parse_custom_schemas(dbt_path, "dbt_project.yml")
 
     def run(self) -> int:
         """Main script to run the command doc"""
@@ -60,7 +60,10 @@ class DocumentationTask(BaseTask):
         model = self._flags.model
         schema = self._dbt_profile.profile.get("target_schema", "")
         model_path = self.get_file_path_from_sql_model(model)
-        custom_schema_suffix = self.get_appropriate_schema_suffix(model_path.parent)
+        if model_path is not None:
+            custom_schema_suffix = self.get_appropriate_schema_suffix(model_path.parent)
+        else:
+            custom_schema_suffix = ""
         schema += custom_schema_suffix
 
         dbt_credentials = self._dbt_profile.profile

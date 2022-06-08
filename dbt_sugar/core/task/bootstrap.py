@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Sequence, Union
 
 from dbt_sugar.core.clients.dbt import DbtProfile
-from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml, parse_custom_schemas
+from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.flags import FlagParser
 from dbt_sugar.core.task.doc import DocumentationTask
@@ -70,7 +70,9 @@ class BootstrapTask(DocumentationTask):
                             model_name=f.replace(".sql", ""),
                             model_path=Path(root, f),
                             model_columns=[],
-                            model_custom_schema_suffix=self.get_appropriate_schema_suffix(Path(root, f))
+                            model_custom_schema_suffix=self.get_appropriate_schema_suffix(
+                                Path(root, f)
+                            ),
                         )
                         for f in sorted(files)
                         if f.lower().endswith(".sql")
@@ -86,7 +88,7 @@ class BootstrapTask(DocumentationTask):
             model_descriptor_content = {}
             model_info.model_columns = connector.get_columns_from_table(
                 model_info.model_name,
-                f'{self.schema}{model_info.model_custom_schema_suffix}',
+                f"{self.schema}{model_info.model_custom_schema_suffix}",
                 use_describe=self._sugar_config.dbt_project_info.get(
                     "use_describe_snowflake", False
                 ),

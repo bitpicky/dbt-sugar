@@ -201,7 +201,7 @@ class DbtProfile(BaseYamlConfig):
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
                 elif _profile_type == "postgres" or _profile_type == "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
-                elif _profile_type == 'clickhouse':
+                elif _profile_type == "clickhouse":
                     _target_profile = ClickhouseDbtProfilesModel(**_target_profile)
 
                 # if we don't manage to read the db type for some reason.

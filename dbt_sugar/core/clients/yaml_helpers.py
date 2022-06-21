@@ -58,7 +58,7 @@ def save_yaml(path: Path, data: Dict[str, Any], preserve_yaml_order: bool = Fals
                 yaml.dump(data, outfile, width=100, Dumper=yamlloader.ordereddict.CDumper)
 
 
-def parse_custom_schemas(path: Path, dbt_project_yaml: str) -> OrderedDict[str, Any]:
+def parse_custom_schemas(path: Path, dbt_project_yaml: str) -> Dict[str, Any]:
     """Parse custom schemas defined in dbt_project YAML
 
     Args:

@@ -29,8 +29,10 @@ def __init_descriptions(datafiles):
     )
     profile.read_profile()
 
-    dbt_project_path = Path(FIXTURE_DIR).joinpath('test_dbt_project/dbt_sugar_test')
-    audit_task = AuditTask(flag_parser, dbt_project_path, sugar_config=sugar_config, dbt_profile=profile)
+    dbt_project_path = Path(FIXTURE_DIR).joinpath("test_dbt_project/dbt_sugar_test")
+    audit_task = AuditTask(
+        flag_parser, dbt_project_path, sugar_config=sugar_config, dbt_profile=profile
+    )
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
     return audit_task
 
@@ -56,7 +58,9 @@ def test_is_excluded_model(datafiles, model_name, is_exluded_model):
     "model_path, schema_suffix",
     [
         pytest.param("models/example/any_model", "", id="model is in base schema"),
-        pytest.param("models/example/custom/any_other_model", "_custom", id="model is in custom schema"),
+        pytest.param(
+            "models/example/custom/any_other_model", "_custom", id="model is in custom schema"
+        ),
     ],
 )
 @pytest.mark.datafiles(FIXTURE_DIR)

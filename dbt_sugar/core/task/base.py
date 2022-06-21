@@ -51,7 +51,7 @@ class BaseTask(abc.ABC):
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
 
-    def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
+    def get_connector(self) -> Union[ClickhouseConnector, PostgresConnector, SnowflakeConnector, RedshiftConnector]:
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:

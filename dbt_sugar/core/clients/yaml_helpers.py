@@ -72,8 +72,7 @@ def parse_custom_schemas(path: Path, dbt_project_yaml: str) -> Dict[str, Any]:
     def get_custom_schema(project_dict, parent_path="models"):
         models = []
         if isinstance(project_dict, dict):
-            custom_schema = project_dict.pop("+schema", None)
-            if custom_schema:
+            if custom_schema := project_dict.pop("+schema", None):
                 models.append((parent_path, custom_schema))
             for potential_model, potential_model_config in project_dict.items():
                 if parent_path:

@@ -79,11 +79,7 @@ class AuditTask(BaseTask):
         Returns:
             str: with the calculation of the percentage.
         """
-        if total == 0:
-            return "0.0"
-
-        percentage_failure = round((1 - (misses / total)) * 100, 1)
-        return str(percentage_failure)
+        return "0.0" if total == 0 else str(round((1 - (misses / total)) * 100, 1))
 
     def get_model_test_coverage(self) -> None:
         """Method to get the tests coverage from a specific model."""
@@ -173,9 +169,8 @@ class AuditTask(BaseTask):
             reshaped_data[""] = ""
             reshaped_data["Total"] = total
             return reshaped_data
-        if not data and total == "100.0":
-            reshaped_data = {"None": "", "": ""}
-            reshaped_data["Total"] = total
+        if total == "100.0":
+            reshaped_data = {"None": "", "": "", "Total": total}
             return reshaped_data
         return {}
 

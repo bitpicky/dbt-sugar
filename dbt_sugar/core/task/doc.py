@@ -77,10 +77,11 @@ class DocumentationTask(BaseTask):
 
         # exit early if model is in the excluded_models list
         _ = self.is_excluded_model(model)
-        columns_sql = self.connector.get_columns_from_table(
-            model, schema, self._sugar_config.config.get("use_describe_snowflake", False)
-        )
-        if columns_sql:
+        if columns_sql := self.connector.get_columns_from_table(
+            model,
+            schema,
+            self._sugar_config.config.get("use_describe_snowflake", False),
+        ):
             return self.orchestrate_model_documentation(schema, model, columns_sql)
         return 1
 
@@ -181,9 +182,10 @@ class DocumentationTask(BaseTask):
             Optional[str]: name of the primary key column. None if no primary key is specified in the config block.
         """
         sql_content = self.read_file(sql_file_path)
-        unique_key = re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content)
-        if unique_key:
-            return unique_key.group(1)
+        if unique_key := re.search(
+            r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content
+        ):
+            return unique_key[1]
         return None
 
     def add_primary_key_tests(

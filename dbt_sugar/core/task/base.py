@@ -54,13 +54,12 @@ class BaseTask(abc.ABC):
 
     def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
         dbt_credentials = self._dbt_profile.profile
-        connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
-        if not connector:
+        if connector := DB_CONNECTORS.get(dbt_credentials.get("type", "")):
+            return connector(dbt_credentials)
+        else:
             raise NotImplementedError(
                 f"Connector '{dbt_credentials.get('type')}' is not implemented."
             )
-
-        return connector(dbt_credentials)
 
     def setup_paths_exclusion(self) -> str:
         """Appends excluded_folders to the default folder exclusion patten."""
@@ -84,10 +83,14 @@ class BaseTask(abc.ABC):
         """
         if isinstance(model_path, Path):
             model_path = str(model_path)
-        for config_path, schema_suffix in self.custom_schemas.items():
-            if config_path in model_path:
-                return f"_{schema_suffix}"
-        return ""
+        return next(
+            (
+                f"_{schema_suffix}"
+                for config_path, schema_suffix in self.custom_schemas.items()
+                if config_path in model_path
+            ),
+            "",
+        )
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
         """Searches for the description of a column in all the descriptions in DBT.
@@ -205,23 +208,21 @@ class BaseTask(abc.ABC):
                 for column in model.get("columns", []):
                     column_name = column["name"]
                     if column_name in dict_column_description_to_update:
-                        # Update the description
-                        description = dict_column_description_to_update[column_name].get(
-                            "description"
-                        )
-                        if description:
+                        if description := dict_column_description_to_update[
+                            column_name
+                        ].get("description"):
                             column["description"] = description
 
-                        # Update the tests without duplicating them.
-                        tests = dict_column_description_to_update[column_name].get("tests")
-                        if tests:
+                        if tests := dict_column_description_to_update[
+                            column_name
+                        ].get("tests"):
                             column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 
-                        # Update the tags without duplicating them.
-                        tags = dict_column_description_to_update[column_name].get("tags")
-                        if tags:
+                        if tags := dict_column_description_to_update[
+                            column_name
+                        ].get("tags"):
                             column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
                             )
@@ -249,10 +250,9 @@ class BaseTask(abc.ABC):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update:
-                    new_description = dict_column_description_to_update[column_name].get(
-                        "description"
-                    )
-                    if new_description:
+                    if new_description := dict_column_description_to_update[
+                        column_name
+                    ].get("description"):
                         column["description"] = new_description
         save_yaml(
             path_file,
@@ -422,10 +422,11 @@ class BaseTask(abc.ABC):
         Returns:
             boolean: is true if the model is present in the schema.yaml.
         """
-        if not content:
-            return False
-
-        return any(model["name"] == model_name for model in content.get("models", []))
+        return (
+            any(model["name"] == model_name for model in content.get("models", []))
+            if content
+            else False
+        )
 
     def find_model_schema_file(self, model_name: str) -> Tuple[Optional[Path], bool, bool]:
         for root, _, files in os.walk(self.repository_path):

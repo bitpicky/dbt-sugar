@@ -164,9 +164,7 @@ class DbtProfile(BaseYamlConfig):
 
     @property
     def profiles_dir(self):
-        if self._profiles_dir:
-            return self._profiles_dir
-        return DEFAULT_DBT_PROFILE_PATH
+        return self._profiles_dir or DEFAULT_DBT_PROFILE_PATH
 
     def _get_target_profile(self, profile_dict: Dict[str, Any]) -> Dict[str, Union[str, int]]:
         if self._target_name:
@@ -185,49 +183,46 @@ class DbtProfile(BaseYamlConfig):
             self.profiles_dir
         )  # this will raise so no need to check exists further
         _profile_dict = open_yaml(self.profiles_dir / "profiles.yml")
-        _profile_dict = _profile_dict.get(self._profile_name, _profile_dict.get(self._profile_name))
-        if _profile_dict:
-
-            # read target name from args or try to get it from the dbt_profile `target:` field.
-            _target_profile = self._get_target_profile(profile_dict=_profile_dict)
-
-            if _target_profile:
-                _profile_type = _target_profile.get("type")
-                # call the right pydantic validator depending on the db type as dbt is not
-                # consistent with it's profiles and it's hell to have all the validation in one
-                # pydantic model.
-                if _profile_type == "snowflake":
-                    # uses pydantic to validate profile. It will raise and break app if invalid.
-                    _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
-                elif _profile_type == "postgres" or _profile_type == "redshift":
-                    _target_profile = PostgresDbtProfilesModel(**_target_profile)
-                elif _profile_type == "clickhouse":
-                    _target_profile = ClickhouseDbtProfilesModel(**_target_profile)
-
-                # if we don't manage to read the db type for some reason.
-                elif _profile_type is None:
-                    raise ProfileParsingError(
-                        f"Could not read or find a database type for {self._profile_name} in your dbt "
-                        "profiles.yml. Check that this field is not missing."
-                    )
-                else:
-                    raise NotImplementedError(f"{_profile_type} is not implemented yet.")
-                logger.debug(_target_profile)
-                self.profile = _target_profile.dict(exclude_unset=True)
-
-                # override profile info with potential CLI args
-                self._integrate_cli_flags()
-
-            else:
-                raise ProfileParsingError(
-                    f"Could not find an entry for target: '{self._target_name}', "
-                    f"for the '{self._profile_name}' profile in your dbt profiles.yml."
-                )
-
-        else:
+        if not (
+            _profile_dict := _profile_dict.get(
+                self._profile_name, _profile_dict.get(self._profile_name)
+            )
+        ):
             raise ProfileParsingError(
                 f"Could not find an entry for '{self._profile_name}' in your profiles.yml"
             )
+        if not (
+            _target_profile := self._get_target_profile(profile_dict=_profile_dict)
+        ):
+            raise ProfileParsingError(
+                f"Could not find an entry for target: '{self._target_name}', "
+                f"for the '{self._profile_name}' profile in your dbt profiles.yml."
+            )
+
+        _profile_type = _target_profile.get("type")
+                # call the right pydantic validator depending on the db type as dbt is not
+                # consistent with it's profiles and it's hell to have all the validation in one
+                # pydantic model.
+        if _profile_type == "snowflake":
+            # uses pydantic to validate profile. It will raise and break app if invalid.
+            _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
+        elif _profile_type in ["postgres", "redshift"]:
+            _target_profile = PostgresDbtProfilesModel(**_target_profile)
+        elif _profile_type == "clickhouse":
+            _target_profile = ClickhouseDbtProfilesModel(**_target_profile)
+
+        elif _profile_type is None:
+            raise ProfileParsingError(
+                f"Could not read or find a database type for {self._profile_name} in your dbt "
+                "profiles.yml. Check that this field is not missing."
+            )
+        else:
+            raise NotImplementedError(f"{_profile_type} is not implemented yet.")
+        logger.debug(_target_profile)
+        self.profile = _target_profile.dict(exclude_unset=True)
+
+        # override profile info with potential CLI args
+        self._integrate_cli_flags()
 
     def _integrate_cli_flags(self) -> None:
         for flag_override_dict in self.CLI_OVERRIDE_FLAGS:

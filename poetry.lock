@@ -686,7 +686,7 @@ dev = ["pre-commit", "tox", "pytest-asyncio"]
 
 [[package]]
 name = "pytest-sugar"
-version = "0.9.4"
+version = "0.9.5"
 description = "pytest-sugar is a plugin for pytest that changes the default look and feel of pytest (e.g. progressbar, show tests that fail instantly)."
 category = "dev"
 optional = false
@@ -1084,7 +1084,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<4.0"
-content-hash = "59bafa55de8dab57e385a5ccf7ceb2908823e39c70729aad94c4fc5b196b92e8"
+content-hash = "7a4ed4d46270ed25446adc35c03cd5c01e762815b6bb013b7cb98755de86fc93"
 
 [metadata.files]
 asciinema = [
@@ -1724,7 +1724,8 @@ pytest-mock = [
     {file = "pytest_mock-3.6.1-py3-none-any.whl", hash = "sha256:30c2f2cc9759e76eee674b81ea28c9f0b94f8f0445a1b87762cadf774f0df7e3"},
 ]
 pytest-sugar = [
-    {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
+    {file = "pytest-sugar-0.9.5.tar.gz", hash = "sha256:eea78b6f15b635277d3d90280cd386d8feea1cab0f9be75947a626e8b02b477d"},
+    {file = "pytest_sugar-0.9.5-py2.py3-none-any.whl", hash = "sha256:3da42de32ce4e1e95b448d61c92804433f5d4058c0a765096991c2e93d5a289f"},
 ]
 pytz = [
     {file = "pytz-2022.1-py2.py3-none-any.whl", hash = "sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c"},

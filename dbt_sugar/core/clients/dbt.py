@@ -29,6 +29,17 @@ class PostgresDbtProfilesModel(BaseModel):
     port: int
 
 
+class ClickhouseDbtProfilesModel(BaseModel):
+    """Clickhouse Dbt credentials validation model."""
+
+    type: str
+    user: str
+    password: str
+    target_schema: str = Field(..., alias="schema")
+    host: str
+    port: int
+
+
 class SnowflakeDbtProfilesModel(BaseModel):
     """Snowflake Dbt credentials validation model."""
 
@@ -188,8 +199,10 @@ class DbtProfile(BaseYamlConfig):
                 if _profile_type == "snowflake":
                     # uses pydantic to validate profile. It will raise and break app if invalid.
                     _target_profile = SnowflakeDbtProfilesModel(**_target_profile)
-                elif _profile_type == "postgres" or "redshift":
+                elif _profile_type == "postgres" or _profile_type == "redshift":
                     _target_profile = PostgresDbtProfilesModel(**_target_profile)
+                elif _profile_type == "clickhouse":
+                    _target_profile = ClickhouseDbtProfilesModel(**_target_profile)
 
                 # if we don't manage to read the db type for some reason.
                 elif _profile_type is None:

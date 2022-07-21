@@ -1,6 +1,6 @@
 [[package]]
 name = "asciinema"
-version = "2.1.0"
+version = "2.2.0"
 description = "Terminal session recorder"
 category = "dev"
 optional = false
@@ -1020,12 +1020,12 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<4.0"
-content-hash = "1c4cb5b261f406648e578b6443bba426a8b8a0d403a0e567c312d16fcc01195d"
+content-hash = "6cd810a4232a5fb2581ea11ed3692b0de05ef1a291105671d3d1b29e12f350d6"
 
 [metadata.files]
 asciinema = [
-    {file = "asciinema-2.1.0-py3-none-any.whl", hash = "sha256:00afd5ba5b07197ec5454c70fa2a5d064ee27736654cd5cbe816dfc87576366f"},
-    {file = "asciinema-2.1.0.tar.gz", hash = "sha256:7bdb358c1f6d61b07169c5476b2f9607ce66da12e78e4c17b7c898d72402cddc"},
+    {file = "asciinema-2.2.0-py3-none-any.whl", hash = "sha256:6d601b48d76976869b5d1ffab98dff40cf3b2facea2b64a6f69db80df4fb0f69"},
+    {file = "asciinema-2.2.0.tar.gz", hash = "sha256:5ec5c4e5d3174bb7c559e45db4680eb8fa6c40c058fa5e5005ee96a1d99737b4"},
 ]
 asn1crypto = [
     {file = "asn1crypto-1.4.0-py2.py3-none-any.whl", hash = "sha256:4bcdf33c861c7d40bdcd74d8e4dd7661aac320fcdf40b9a3f95b4ee12fde2fa8"},

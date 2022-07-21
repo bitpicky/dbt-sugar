@@ -212,21 +212,17 @@ class BaseTask(abc.ABC):
                 for column in model.get("columns", []):
                     column_name = column["name"]
                     if column_name in dict_column_description_to_update:
-                        if description := dict_column_description_to_update[
-                            column_name
-                        ].get("description"):
+                        if description := dict_column_description_to_update[column_name].get(
+                            "description"
+                        ):
                             column["description"] = description
 
-                        if tests := dict_column_description_to_update[
-                            column_name
-                        ].get("tests"):
+                        if tests := dict_column_description_to_update[column_name].get("tests"):
                             column["tests"] = self.combine_two_list_without_duplicates(
                                 column.get("tests", []), tests
                             )
 
-                        if tags := dict_column_description_to_update[
-                            column_name
-                        ].get("tags"):
+                        if tags := dict_column_description_to_update[column_name].get("tags"):
                             column["tags"] = self.combine_two_list_without_duplicates(
                                 column.get("tags", []), tags
                             )
@@ -254,9 +250,9 @@ class BaseTask(abc.ABC):
             for column in model.get("columns", []):
                 column_name = column["name"]
                 if column_name in dict_column_description_to_update:
-                    if new_description := dict_column_description_to_update[
-                        column_name
-                    ].get("description"):
+                    if new_description := dict_column_description_to_update[column_name].get(
+                        "description"
+                    ):
                         column["description"] = new_description
         save_yaml(
             path_file,

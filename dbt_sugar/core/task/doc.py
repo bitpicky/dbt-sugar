@@ -182,9 +182,7 @@ class DocumentationTask(BaseTask):
             Optional[str]: name of the primary key column. None if no primary key is specified in the config block.
         """
         sql_content = self.read_file(sql_file_path)
-        if unique_key := re.search(
-            r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content
-        ):
+        if unique_key := re.search(r"unique_key[^\S]*=[^\S]*\'([a-z_]+)\'", sql_content):
             return unique_key[1]
         return None
 

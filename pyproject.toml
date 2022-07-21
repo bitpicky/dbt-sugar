@@ -42,7 +42,7 @@ logredactor = "^0.0.1"
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"
 pytest-cov = "^2.12.1"
-mypy = "^0.930"
+mypy = "^0.971"
 towncrier = "^21.3.0"
 pytest-mock = "^3.6.1"
 pytest-sugar = "^0.9.4"

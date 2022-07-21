@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from dbt_sugar.core.clients.dbt import DbtProfile
 from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
+from dbt_sugar.core.connectors.clickhouse_connector import ClickhouseConnector
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
 from dbt_sugar.core.connectors.redshift_connector import RedshiftConnector
 from dbt_sugar.core.connectors.snowflake_connector import SnowflakeConnector
@@ -24,6 +25,7 @@ DB_CONNECTORS = {
     "postgres": PostgresConnector,
     "snowflake": SnowflakeConnector,
     "redshift": RedshiftConnector,
+    "clickhouse": ClickhouseConnector,
 }
 
 
@@ -49,7 +51,9 @@ class BaseTask(abc.ABC):
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
 
-    def get_connector(self) -> Union[PostgresConnector, SnowflakeConnector, RedshiftConnector]:
+    def get_connector(
+        self,
+    ) -> Union[ClickhouseConnector, PostgresConnector, SnowflakeConnector, RedshiftConnector]:
         dbt_credentials = self._dbt_profile.profile
         connector = DB_CONNECTORS.get(dbt_credentials.get("type", ""))
         if not connector:

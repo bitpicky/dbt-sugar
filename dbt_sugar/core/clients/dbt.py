@@ -191,18 +191,16 @@ class DbtProfile(BaseYamlConfig):
             raise ProfileParsingError(
                 f"Could not find an entry for '{self._profile_name}' in your profiles.yml"
             )
-        if not (
-            _target_profile := self._get_target_profile(profile_dict=_profile_dict)
-        ):
+        if not (_target_profile := self._get_target_profile(profile_dict=_profile_dict)):
             raise ProfileParsingError(
                 f"Could not find an entry for target: '{self._target_name}', "
                 f"for the '{self._profile_name}' profile in your dbt profiles.yml."
             )
 
         _profile_type = _target_profile.get("type")
-                # call the right pydantic validator depending on the db type as dbt is not
-                # consistent with it's profiles and it's hell to have all the validation in one
-                # pydantic model.
+        # call the right pydantic validator depending on the db type as dbt is not
+        # consistent with it's profiles and it's hell to have all the validation in one
+        # pydantic model.
         if _profile_type == "snowflake":
             # uses pydantic to validate profile. It will raise and break app if invalid.
             _target_profile = SnowflakeDbtProfilesModel(**_target_profile)

@@ -620,7 +620,7 @@ testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtuale
 
 [[package]]
 name = "pytest-datafiles"
-version = "2.0"
+version = "2.0.1"
 description = "py.test plugin to create a 'tmpdir' containing predefined files/directories."
 category = "dev"
 optional = false
@@ -1548,8 +1548,8 @@ pytest-cov = [
     {file = "pytest_cov-2.12.1-py2.py3-none-any.whl", hash = "sha256:261bb9e47e65bd099c89c3edf92972865210c36813f80ede5277dceb77a4a62a"},
 ]
 pytest-datafiles = [
-    {file = "pytest-datafiles-2.0.tar.gz", hash = "sha256:143329cbb1dbbb07af24f88fa4668e2f59ce233696cf12c49fd1c98d1756dbf9"},
-    {file = "pytest_datafiles-2.0-py2.py3-none-any.whl", hash = "sha256:e349b6ad7bcca111f3677b7201d3ca81f93b5e09dcfae8ee2be2c3cae9f55bc7"},
+    {file = "pytest-datafiles-2.0.1.tar.gz", hash = "sha256:6f6558d2a6e7cbde714f62411ce84e5c02ccd195bd7a50263bfdd888be4a1544"},
+    {file = "pytest_datafiles-2.0.1-py2.py3-none-any.whl", hash = "sha256:c64ec8ffffbdedaaceed82de65a1eaf68b3a5b02a5ff1c159dbf891dfe2817f8"},
 ]
 pytest-dictsdiff = [
     {file = "pytest-dictsdiff-0.5.8.tar.gz", hash = "sha256:3fca5c706232ab723ab2a06b41c195a6abf1f0df56fb3bf67d6bc83a305dd659"},

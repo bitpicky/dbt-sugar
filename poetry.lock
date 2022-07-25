@@ -145,7 +145,7 @@ zstd = ["zstd", "clickhouse-cityhash (>=1.0.2.1)"]
 
 [[package]]
 name = "clickhouse-sqlalchemy"
-version = "0.2.0"
+version = "0.2.1"
 description = "Simple ClickHouse SQLAlchemy Dialect"
 category = "main"
 optional = false
@@ -1085,7 +1085,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.3,<4.0"
-content-hash = "6435afc16d7f4779d4ca5b9d05c94662c91dde34888aad8d64ad3e506e9272ae"
+content-hash = "66fe25694f24352b5e942bf98736bc5058bb9fe982dec95f09779ec757130300"
 
 [metadata.files]
 asciinema = [
@@ -1275,7 +1275,7 @@ clickhouse-driver = [
     {file = "clickhouse_driver-0.2.4-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:821c7efff84fda8b68680140e07241991ab27296dc62213eb788efef4470fdd5"},
 ]
 clickhouse-sqlalchemy = [
-    {file = "clickhouse-sqlalchemy-0.2.0.tar.gz", hash = "sha256:9c0e4409c1f480a245759706d29771144aed172d796122d98a802c313db99c63"},
+    {file = "clickhouse-sqlalchemy-0.2.1.tar.gz", hash = "sha256:a4dbc9f017144a2d7b298f8f73953f2142b69578a4df3ee668c38c8fe80138d4"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},

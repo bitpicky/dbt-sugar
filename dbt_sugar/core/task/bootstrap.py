@@ -26,6 +26,7 @@ class DbtModelsDict:
 
     model_name: str
     model_path: Path
+    model_custom_schema_suffix: str
     model_columns: Sequence[str]
 
 
@@ -53,6 +54,8 @@ class BootstrapTask(DocumentationTask):
         self.dbt_models_dict: Dict[str, Union[Path, List[str]]] = {}
         self._dbt_profile = dbt_profile
         self.schema = self._dbt_profile.profile.get("target_schema", "")
+        if not isinstance(dbt_path, Path):
+            dbt_path = Path(dbt_path)
 
         self.dbt_models_data: List[DbtModelsDict] = []
 
@@ -67,6 +70,9 @@ class BootstrapTask(DocumentationTask):
                             model_name=f.replace(".sql", ""),
                             model_path=Path(root, f),
                             model_columns=[],
+                            model_custom_schema_suffix=self.get_appropriate_schema_suffix(
+                                Path(root, f)
+                            ),
                         )
                         for f in sorted(files)
                         if f.lower().endswith(".sql")
@@ -82,7 +88,7 @@ class BootstrapTask(DocumentationTask):
             model_descriptor_content = {}
             model_info.model_columns = connector.get_columns_from_table(
                 model_info.model_name,
-                self.schema,
+                f"{self.schema}{model_info.model_custom_schema_suffix}",
                 use_describe=self._sugar_config.dbt_project_info.get(
                     "use_describe_snowflake", False
                 ),

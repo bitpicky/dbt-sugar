@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from dbt_sugar.core.clients.dbt import DbtProfile
-from dbt_sugar.core.clients.yaml_helpers import open_yaml, save_yaml
+from dbt_sugar.core.clients.yaml_helpers import open_yaml, parse_custom_schemas, save_yaml
 from dbt_sugar.core.config.config import DbtSugarConfig
 from dbt_sugar.core.connectors.clickhouse_connector import ClickhouseConnector
 from dbt_sugar.core.connectors.postgres_connector import PostgresConnector
@@ -50,6 +50,9 @@ class BaseTask(abc.ABC):
         self.dbt_definitions: Dict[str, str] = {}
         self.dbt_tests: Dict[str, List[Dict[str, Any]]] = {}
         self.build_descriptions_dictionary()
+        if not isinstance(dbt_path, Path):
+            dbt_path = Path(dbt_path)
+        self.custom_schemas = parse_custom_schemas(dbt_path, "dbt_project.yml")
 
     def get_connector(
         self,
@@ -73,6 +76,22 @@ class BaseTask(abc.ABC):
 
         else:
             return DEFAULT_EXCLUDED_FOLDERS_PATTERN
+
+    def get_appropriate_schema_suffix(self, model_path) -> str:
+        """Searches the custom schema attached to the model in DBT project definition.
+
+        Args:
+            model_path (str): path of the DBT model.
+
+        Returns:
+            str: Custom schema suffix to append to the main target schema of the project.
+        """
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+        for config_path, schema_suffix in self.custom_schemas.items():
+            if config_path in model_path:
+                return f"_{schema_suffix}"
+        return ""
 
     def get_column_description_from_dbt_definitions(self, column_name: str) -> str:
         """Searches for the description of a column in all the descriptions in DBT.
@@ -306,7 +325,8 @@ class BaseTask(abc.ABC):
             return [
                 model_dict
                 for model_dict in models
-                if model_dict["name"] not in self._sugar_config.dbt_project_info["excluded_models"]
+                if model_dict["name"]
+                not in self._sugar_config.dbt_project_info.get("excluded_models", [])
             ]
 
         return None
@@ -447,7 +467,7 @@ class BaseTask(abc.ABC):
                         return (schema_file_path, schema_file_exists, is_already_documented)
         return None, False, False
 
-    def is_exluded_model(self, model_name: str) -> bool:
+    def is_excluded_model(self, model_name: str) -> bool:
         if model_name in self._sugar_config.dbt_project_info.get("excluded_models", []):
             raise ValueError(
                 f"You decided to exclude '{model_name}' from dbt-sugar's scope. "

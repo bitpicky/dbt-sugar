@@ -29,9 +29,11 @@ def __init_descriptions(datafiles):
     )
     profile.read_profile()
 
-    audit_task = AuditTask(flag_parser, FIXTURE_DIR, sugar_config=sugar_config, dbt_profile=profile)
+    dbt_project_path = Path(FIXTURE_DIR).joinpath("test_dbt_project/dbt_sugar_test")
+    audit_task = AuditTask(
+        flag_parser, dbt_project_path, sugar_config=sugar_config, dbt_profile=profile
+    )
     audit_task.dbt_definitions = {"columnA": "descriptionA", "columnB": "descriptionB"}
-    audit_task.repository_path = Path("tests/test_dbt_project/").resolve()
     return audit_task
 
 
@@ -47,6 +49,21 @@ def test_is_excluded_model(datafiles, model_name, is_exluded_model):
     audit_task = __init_descriptions(datafiles)
     if is_exluded_model:
         with pytest.raises(ValueError):
-            audit_task.is_exluded_model(model_name)
+            audit_task.is_excluded_model(model_name)
     else:
-        audit_task.is_exluded_model(model_name)
+        audit_task.is_excluded_model(model_name)
+
+
+@pytest.mark.parametrize(
+    "model_path, schema_suffix",
+    [
+        pytest.param("models/example/any_model", "", id="model is in base schema"),
+        pytest.param(
+            "models/example/custom/any_other_model", "_custom", id="model is in custom schema"
+        ),
+    ],
+)
+@pytest.mark.datafiles(FIXTURE_DIR)
+def test_get_appropriate_schema_suffix(datafiles, model_path, schema_suffix):
+    audit_task = __init_descriptions(datafiles)
+    assert audit_task.get_appropriate_schema_suffix(model_path) == schema_suffix

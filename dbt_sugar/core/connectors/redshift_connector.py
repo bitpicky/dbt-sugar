@@ -3,6 +3,7 @@ Redshift connector module.
 
 Extends BaseConnector.
 """
+
 from typing import Dict
 
 import sqlalchemy

@@ -3,6 +3,7 @@ Module base connector.
 
 Only use this class implemented by a child connector.
 """
+
 from abc import ABC
 from typing import Dict, Sequence
 

@@ -1,4 +1,5 @@
 """Document Task module."""
+
 import copy
 import re
 import subprocess
@@ -219,9 +220,9 @@ class DocumentationTask(BaseTask):
                 self.column_update_payload[primary_key_column] = {"tests": PRIMARY_KEYS_TESTS}
             else:
                 tests = self.column_update_payload[primary_key_column].get("tests", [])
-                self.column_update_payload[primary_key_column][
-                    "tests"
-                ] = self.combine_two_list_without_duplicates(PRIMARY_KEYS_TESTS, tests)
+                self.column_update_payload[primary_key_column]["tests"] = (
+                    self.combine_two_list_without_duplicates(PRIMARY_KEYS_TESTS, tests)
+                )
 
     def orchestrate_model_documentation(
         self, schema: str, model_name: str, columns_sql: List[str]

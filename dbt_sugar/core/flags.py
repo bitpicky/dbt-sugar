@@ -1,4 +1,5 @@
 """Flags module containing the FlagParser "Factory"."""
+
 import sys
 from argparse import ArgumentParser
 from pathlib import Path

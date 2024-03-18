@@ -3,6 +3,7 @@ Module Clickhouse connector.
 
 Module dependent of the base connector.
 """
+
 from typing import Dict
 
 import sqlalchemy

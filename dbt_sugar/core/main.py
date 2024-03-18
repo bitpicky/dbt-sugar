@@ -1,4 +1,5 @@
 """Main module for dbt-sugar. Sets up CLI arguments and sets up task handlers."""
+
 import argparse
 import sys
 from typing import List

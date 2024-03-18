@@ -3,6 +3,7 @@ Module Snowflake connector.
 
 Module dependent of the base connector.
 """
+
 from typing import Dict, Sequence
 
 import sqlalchemy

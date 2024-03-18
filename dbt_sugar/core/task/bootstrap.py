@@ -1,6 +1,5 @@
 """Bootstrap module. Generates placeholders for all models in a dbt project."""
 
-
 import functools
 import operator
 import os

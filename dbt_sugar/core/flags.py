@@ -40,6 +40,9 @@ class FlagParser:
 
         self.task = self.args.command
 
+        if self.task is None:
+            self.cli_parser.error("a command is required: {doc, audit, bootstrap}")
+
         # base flags that need to be set no matter what
         if self.args:
             self.log_level = self.args.log_level

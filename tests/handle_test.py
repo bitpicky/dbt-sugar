@@ -5,6 +5,18 @@ import pytest
 TEST_PROFILES_DIR = Path(__file__).resolve().parent
 
 
+def test_handle_without_command_exits_with_usage_error(capsys, monkeypatch):
+    import sys
+
+    from dbt_sugar.core.main import handle, parser
+
+    monkeypatch.setattr(sys, "argv", ["dbt-sugar"])
+    with pytest.raises(SystemExit) as exc_info:
+        handle(parser)
+    assert exc_info.value.code == 2
+    assert "a command is required" in capsys.readouterr().err
+
+
 @pytest.mark.parametrize(
     "cli_args",
     [
